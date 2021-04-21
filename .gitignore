@@ -1,0 +1,20 @@
+# Ignore all 
+* 
+
+# Unignore all with extensions *.c *.h *.txt y con Makefile 
+!*.c 
+!*.h 
+!Makefile 
+!*.txt
+!*.cpp
+!*.hpp
+!*README*
+!*make*
+!*suite*
+!*.asm
+!*.s
+!*.inc
+# Unignore all dirs
+!*/
+# Unignore .gitignore
+!.gitignore
