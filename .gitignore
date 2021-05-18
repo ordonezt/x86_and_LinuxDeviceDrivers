@@ -14,6 +14,8 @@
 !*.asm
 !*.s
 !*.inc
+# Unignore bochs config files
+!*bochsrc
 # Unignore all dirs
 !*/
 # Unignore .gitignore

@@ -4,16 +4,21 @@
 **->Legajo:** 159.565-9  
 
 ## TP 1
-- [ ] TP01.01  
+- [X] TP01.01
+
+- [X] TP01.02  
  **Comentarios:**
-	- Esto es un comentario
-	- Esto es otro <code>comentario</code>
-- [ ] TP01.02  
+	- Me quedo pendiente hacer el retorno del memcpy, aunque no tiene mucho sentido en el ejemplo
+	
+- [X] TP01.03  
  **Comentarios:**
-- [ ] TP01.03  
- **Comentarios:**
+	- Tengo el siguiente warning que no pude arreglar
+		```
+		nasm -Wall -felf32 -lmibios.lst src/mibios.asm -o mibios.elf
+		src/mibios.asm:57: warning: 8- or 16-bit relocations in ELF is a GNU extension [-w+gnu-elf-extensions]
+		```
  
-## TP Integrador
+<!-- ## TP Integrador
 - [ ] Servidor  
  **Comentarios:**
 	- Esto es un comentario
@@ -25,4 +30,4 @@
 - [ ] Driver  
  **Comentarios:**
 	- Esto es un comentario
-	- Esto es otro <code>comentario</code>
+	- Esto es otro <code>comentario</code> -->
