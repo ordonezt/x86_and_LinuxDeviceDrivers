@@ -30,9 +30,9 @@ init32:
     mov fs, ax
 
 ;Inicializo la pila
-    mov ax, SS_SELECTOR
+    mov ax, SS_SEL
     mov ss, ax
-    ;mov esp, __STACK_START     ;No hacer esto si tenes un segmento para el stack
+    mov esp, __STACK_START     ;No hacer esto si tenes un segmento para el stack
 
 ;Copio las rutinas a RAM
     push ebp
