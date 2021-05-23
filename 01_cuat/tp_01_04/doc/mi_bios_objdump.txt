@@ -1,0 +1,133 @@
+
+./bin/mi_bios.elf:     formato del fichero elf32-i386
+./bin/mi_bios.elf
+arquitectura: i386, opciones 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+dirección de inicio 0xfffffff0
+
+Encabezado del Programa:
+    LOAD off    0x00001000 vaddr 0xffff0000 paddr 0xffff0000 align 2**12
+         filesz 0x00000061 memsz 0x00000061 flags r--
+    LOAD off    0x00002000 vaddr 0xffff3000 paddr 0xffff3000 align 2**12
+         filesz 0x00000040 memsz 0x00000040 flags r-x
+    LOAD off    0x00002d00 vaddr 0xfffffd00 paddr 0xfffffd00 align 2**12
+         filesz 0x00000300 memsz 0x00000300 flags rw-
+   STACK off    0x00000000 vaddr 0x00000000 paddr 0x00000000 align 2**4
+         filesz 0x00000000 memsz 0x00000000 flags rwx
+
+Secciones:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .rutinas_rom  00000040  ffff3000  ffff3000  00002000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .init_rom     00000061  ffff0000  ffff0000  00001000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  2 .tablas_sistema 00000026  fffffd00  fffffd00  00002d00  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  3 .reset        00000004  fffffff0  fffffff0  00002ff0  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  4 .fill_rom     0000000c  fffffff4  fffffff4  00002ff4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  5 .comment      0000002a  00000000  00000000  00003000  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+ffff3000 l    d  .rutinas_rom	00000000 .rutinas_rom
+ffff0000 l    d  .init_rom	00000000 .init_rom
+fffffd00 l    d  .tablas_sistema	00000000 .tablas_sistema
+fffffff0 l    d  .reset	00000000 .reset
+fffffff4 l    d  .fill_rom	00000000 .fill_rom
+00000000 l    d  .comment	00000000 .comment
+00000000 l    df *ABS*	00000000 rutinas.c
+00000000 l    df *ABS*	00000000 src/init16.asm
+ffff001d l       .init_rom	00000000 end_init16
+00000000 l    df *ABS*	00000000 src/init32.asm
+ffff0061 l       .init_rom	00000000 end_init32
+00000000 l    df *ABS*	00000000 src/sys_tables.asm
+fffffd00 l       .tablas_sistema	00000000 GDT
+00000000 l       *ABS*	00000000 SELECTOR_NULO
+00000008 l       *ABS*	00000000 CS_SELECTOR
+00000010 l       *ABS*	00000000 DS_SELECTOR
+00000020 l       *ABS*	00000000 GDT_LARGO
+00000000 l    df *ABS*	00000000 src/reset.asm
+fffffff4 l       .reset	00000000 end_reset
+00000010 g       *ABS*	00000000 ES_SEL
+fffffff0 g       *ABS*	00000000 __RESET_LMA
+ffff3000 g       *ABS*	00000000 __RUTINAS_ROM_VMA
+ffff0000 g       *ABS*	00000000 __ROM_VMA
+00000010 g       *ABS*	00000000 DS_SEL
+fffffff0 g       .reset	00000000 reset
+00000018 g       *ABS*	00000000 SS_SELECTOR
+00000018 g       *ABS*	00000000 SS_SEL
+fffffd20 g       .tablas_sistema	00000000 _gdtr
+ffff0000 g       *ABS*	00000000 __ROM_LMA
+ffff0000 g       .init_rom	00000000 init16
+00000040 g       *ABS*	00000000 __rutinas_size
+ffff3000 g       *ABS*	00000000 __RUTINAS_LMA
+00202000 g       *ABS*	00000000 __KERNEL_VMA
+ffff3000 g       *ABS*	00000000 __RUTINAS_ROM_LMA
+ffff3000 g     F .rutinas_rom	00000040 __mi_memcpy
+ffff001d g       .init_rom	00000000 init32
+00000010 g       *ABS*	00000000 GS_SEL
+000003ff g       *ABS*	00000000 __STACK_SIZE
+00010000 g       *ABS*	00000000 __RUTINAS_VMA
+fffffff0 g       *ABS*	00000000 __RESET_VMA
+00000008 g       *ABS*	00000000 CS_SEL
+2fff8000 g       *ABS*	00000000 __STACK_START
+00060000 g       *ABS*	00000000 __EH_FRAME
+00050000 g       *ABS*	00000000 __DATA_NO_INIT
+fffffd00 g       *ABS*	00000000 __TABLAS_SISTEMA_VMA
+00000010 g       *ABS*	00000000 FS_SEL
+ffff2000 g       *ABS*	00000000 __KERNEL_LMA
+2fff8fff g       *ABS*	00000000 __STACK_END
+fffffd00 g       *ABS*	00000000 __TABLAS_SISTEMA_LMA
+
+
+Contenido de la sección .rutinas_rom:
+ ffff3000 f30f1efb 5589e583 ec10c645 ff00837d  ....U......E...}
+ ffff3010 10007426 eb1a836d 10018b55 088d4204  ..t&...m...U..B.
+ ffff3020 8945088b 450c8d48 04894d0c 8b128910  .E..E..H..M.....
+ ffff3030 837d1000 75e0c645 ff010fb6 45ffc9c3  .}..u..E....E...
+Contenido de la sección .init_rom:
+ ffff0000 b800f08e d80f0116 20fd87db 0f01e083  ........ .......
+ ffff0010 c8010f01 f066ea1d 00ffff08 0066b810  .....f.......f..
+ ffff0020 008ed866 b810008e c066b810 008ee866  ...f.....f.....f
+ ffff0030 b810008e e06687db 66b81800 8ed0bcff  .....f..f.......
+ ffff0040 8fff2f89 e55589e5 68400000 00680000  ../..U..h@...h..
+ ffff0050 01006800 30ffffe8 a42f0000 c96687db  ..h.0..../...f..
+ ffff0060 f4                                   .               
+Contenido de la sección .tablas_sistema:
+ fffffd00 00000000 00000000 ffff0000 0099cf00  ................
+ fffffd10 ffff0000 0093cf00 ff0fff8f ff97402f  ..............@/
+ fffffd20 1f0000fd 0f00                        ......          
+Contenido de la sección .reset:
+ fffffff0 fae90c00                             ....            
+Contenido de la sección .fill_rom:
+ fffffff4 90909090 90909090 90909090           ............    
+Contenido de la sección .comment:
+ 0000 4743433a 20285562 756e7475 20392e33  GCC: (Ubuntu 9.3
+ 0010 2e302d31 37756275 6e747531 7e32302e  .0-17ubuntu1~20.
+ 0020 30342920 392e332e 3000               04) 9.3.0.      
+
+Desensamblado de la sección .rutinas_rom:
+ffff3000 <__mi_memcpy> endbr32 
+ffff3004 <__mi_memcpy+0x4> push   %ebp
+ffff3005 <__mi_memcpy+0x5> mov    %esp,%ebp
+ffff3007 <__mi_memcpy+0x7> sub    $0x10,%esp
+ffff300a <__mi_memcpy+0xa> movb   $0x0,-0x1(%ebp)
+ffff300e <__mi_memcpy+0xe> cmpl   $0x0,0x10(%ebp)
+ffff3012 <__mi_memcpy+0x12> je     ffff303a <__mi_memcpy+0x3a>
+ffff3014 <__mi_memcpy+0x14> jmp    ffff3030 <__mi_memcpy+0x30>
+ffff3016 <__mi_memcpy+0x16> subl   $0x1,0x10(%ebp)
+ffff301a <__mi_memcpy+0x1a> mov    0x8(%ebp),%edx
+ffff301d <__mi_memcpy+0x1d> lea    0x4(%edx),%eax
+ffff3020 <__mi_memcpy+0x20> mov    %eax,0x8(%ebp)
+ffff3023 <__mi_memcpy+0x23> mov    0xc(%ebp),%eax
+ffff3026 <__mi_memcpy+0x26> lea    0x4(%eax),%ecx
+ffff3029 <__mi_memcpy+0x29> mov    %ecx,0xc(%ebp)
+ffff302c <__mi_memcpy+0x2c> mov    (%edx),%edx
+ffff302e <__mi_memcpy+0x2e> mov    %edx,(%eax)
+ffff3030 <__mi_memcpy+0x30> cmpl   $0x0,0x10(%ebp)
+ffff3034 <__mi_memcpy+0x34> jne    ffff3016 <__mi_memcpy+0x16>
+ffff3036 <__mi_memcpy+0x36> movb   $0x1,-0x1(%ebp)
+ffff303a <__mi_memcpy+0x3a> movzbl -0x1(%ebp),%eax
+ffff303e <__mi_memcpy+0x3e> leave  
+ffff303f <__mi_memcpy+0x3f> ret    
