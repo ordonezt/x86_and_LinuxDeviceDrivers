@@ -1,0 +1,115 @@
+Encabezado ELF:
+  Mágico:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Clase:                             ELF32
+  Datos:                             complemento a 2, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  Versión ABI:                       0
+  Tipo:                              EXEC (Fichero ejecutable)
+  Máquina:                           Intel 80386
+  Versión:                           0x1
+  Dirección del punto de entrada:               0xfffffff0
+  Inicio de encabezados de programa:          52 (bytes en el fichero)
+  Inicio de encabezados de sección:          13712 (bytes en el fichero)
+  Opciones:                          0x0
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         4
+  Size of section headers:           40 (bytes)
+  Number of section headers:         10
+  Section header string table index: 9
+
+Encabezados de Sección:
+  [Nr] Nombre            Tipo            Direc    Desp   Tam    ES Opt En Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .rutinas_rom      PROGBITS        ffff3000 002000 000040 00  AX  0   0  1
+  [ 2] .init_rom         PROGBITS        ffff0000 001000 000061 00   A  0   0  1
+  [ 3] .tablas_sistema   PROGBITS        fffffd00 002d00 000026 00   A  0   0  1
+  [ 4] .reset            PROGBITS        fffffff0 002ff0 000004 00   A  0   0  1
+  [ 5] .fill_rom         PROGBITS        fffffff4 002ff4 00000c 00  WA  0   0  1
+  [ 6] .comment          PROGBITS        00000000 003000 00002a 01  MS  0   0  1
+  [ 7] .symtab           SYMTAB          00000000 00302c 000320 10      8  20  4
+  [ 8] .strtab           STRTAB          00000000 00334c 0001e6 00      0   0  1
+  [ 9] .shstrtab         STRTAB          00000000 003532 00005c 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  p (processor specific)
+
+No hay grupos de sección en este fichero.
+
+Encabezados de Programa:
+  Tipo           Desplaz  DirVirt    DirFísica  TamFich TamMem  Opt Alin
+  LOAD           0x001000 0xffff0000 0xffff0000 0x00061 0x00061 R   0x1000
+  LOAD           0x002000 0xffff3000 0xffff3000 0x00040 0x00040 R E 0x1000
+  LOAD           0x002d00 0xfffffd00 0xfffffd00 0x00300 0x00300 RW  0x1000
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x10
+
+ mapeo de Sección a Segmento:
+  Segmento Secciones...
+   00     .init_rom 
+   01     .rutinas_rom 
+   02     .tablas_sistema .reset .fill_rom 
+   03     
+
+No hay sección dinámica en este fichero.
+
+No hay reubicaciones en este fichero.
+
+The decoding of unwind sections for machine type Intel 80386 is not currently supported.
+
+Symbol table '.symtab' contains 50 entries:
+   Num:    Valor  Tam  Tipo    Unión  Vis      Nombre Ind
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: ffff3000     0 SECTION LOCAL  DEFAULT    1 
+     2: ffff0000     0 SECTION LOCAL  DEFAULT    2 
+     3: fffffd00     0 SECTION LOCAL  DEFAULT    3 
+     4: fffffff0     0 SECTION LOCAL  DEFAULT    4 
+     5: fffffff4     0 SECTION LOCAL  DEFAULT    5 
+     6: 00000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 00000000     0 FILE    LOCAL  DEFAULT  ABS rutinas.c
+     8: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/init16.asm
+     9: ffff001d     0 NOTYPE  LOCAL  DEFAULT    2 end_init16
+    10: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/init32.asm
+    11: ffff0061     0 NOTYPE  LOCAL  DEFAULT    2 end_init32
+    12: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/sys_tables.asm
+    13: fffffd00     0 NOTYPE  LOCAL  DEFAULT    3 GDT
+    14: 00000000     0 NOTYPE  LOCAL  DEFAULT  ABS SELECTOR_NULO
+    15: 00000008     0 NOTYPE  LOCAL  DEFAULT  ABS CS_SELECTOR
+    16: 00000010     0 NOTYPE  LOCAL  DEFAULT  ABS DS_SELECTOR
+    17: 00000020     0 NOTYPE  LOCAL  DEFAULT  ABS GDT_LARGO
+    18: 00000000     0 FILE    LOCAL  DEFAULT  ABS src/reset.asm
+    19: fffffff4     0 NOTYPE  LOCAL  DEFAULT    4 end_reset
+    20: 00000010     0 NOTYPE  GLOBAL DEFAULT  ABS ES_SEL
+    21: fffffff0     0 NOTYPE  GLOBAL DEFAULT  ABS __RESET_LMA
+    22: ffff3000     0 NOTYPE  GLOBAL DEFAULT  ABS __RUTINAS_ROM_VMA
+    23: ffff0000     0 NOTYPE  GLOBAL DEFAULT  ABS __ROM_VMA
+    24: 00000010     0 NOTYPE  GLOBAL DEFAULT  ABS DS_SEL
+    25: fffffff0     0 NOTYPE  GLOBAL DEFAULT    4 reset
+    26: 00000018     0 NOTYPE  GLOBAL DEFAULT  ABS SS_SELECTOR
+    27: 00000018     0 NOTYPE  GLOBAL DEFAULT  ABS SS_SEL
+    28: fffffd20     0 NOTYPE  GLOBAL DEFAULT    3 _gdtr
+    29: ffff0000     0 NOTYPE  GLOBAL DEFAULT  ABS __ROM_LMA
+    30: ffff0000     0 NOTYPE  GLOBAL DEFAULT    2 init16
+    31: 00000040     0 NOTYPE  GLOBAL DEFAULT  ABS __rutinas_size
+    32: ffff3000     0 NOTYPE  GLOBAL DEFAULT  ABS __RUTINAS_LMA
+    33: 00202000     0 NOTYPE  GLOBAL DEFAULT  ABS __KERNEL_VMA
+    34: ffff3000     0 NOTYPE  GLOBAL DEFAULT  ABS __RUTINAS_ROM_LMA
+    35: ffff3000    64 FUNC    GLOBAL DEFAULT    1 __mi_memcpy
+    36: ffff001d     0 NOTYPE  GLOBAL DEFAULT    2 init32
+    37: 00000010     0 NOTYPE  GLOBAL DEFAULT  ABS GS_SEL
+    38: 000003ff     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_SIZE
+    39: 00010000     0 NOTYPE  GLOBAL DEFAULT  ABS __RUTINAS_VMA
+    40: fffffff0     0 NOTYPE  GLOBAL DEFAULT  ABS __RESET_VMA
+    41: 00000008     0 NOTYPE  GLOBAL DEFAULT  ABS CS_SEL
+    42: 2fff8000     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_START
+    43: 00060000     0 NOTYPE  GLOBAL DEFAULT  ABS __EH_FRAME
+    44: 00050000     0 NOTYPE  GLOBAL DEFAULT  ABS __DATA_NO_INIT
+    45: fffffd00     0 NOTYPE  GLOBAL DEFAULT  ABS __TABLAS_SISTEMA_VMA
+    46: 00000010     0 NOTYPE  GLOBAL DEFAULT  ABS FS_SEL
+    47: ffff2000     0 NOTYPE  GLOBAL DEFAULT  ABS __KERNEL_LMA
+    48: 2fff8fff     0 NOTYPE  GLOBAL DEFAULT  ABS __STACK_END
+    49: fffffd00     0 NOTYPE  GLOBAL DEFAULT  ABS __TABLAS_SISTEMA_LMA
+
+No se encontró información de versión en este fichero.
