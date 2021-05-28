@@ -1,5 +1,9 @@
 #include "../inc/interrupciones.h"
 #include "../inc/pic.h"
+#include "../inc/teclado.h"
+#include "../inc/ring_buffer.h"
+
+extern ring_buffer_t ring_buffer;
 
 /* Lo ideal seria hacer handlers de assembler que llamen handlers de c, por ejemplo
 
@@ -166,27 +170,27 @@ __attribute__(( section(".interrupciones"), interrupt)) void PIC0_IRQHandler(cua
 //Teclado
 __attribute__(( section(".interrupciones"), interrupt)) void PIC1_IRQHandler(cuadro_interrupcion_t *cuadro)
 {
-    // static uint8_t tecla;
-    // // static uint8_t indice_digito;
-    // // static uint8_t cadena[16];
+    uint8_t tecla = teclado_get_tecla();
 
-    asm("xchg %bx, %bx");
+    if(tecla_es_make_code(tecla))
+    {
+        tecla = tecla2caracter(tecla);
+
+        if(tecla == '\n' || ring_buffer_esta_lleno(&ring_buffer))
+        {
+            insertar_en_tabla_digitos(ring_buffer.buffer, ring_buffer_get_ocupado(&ring_buffer));
+            ring_buffer_vaciar(&ring_buffer);
+        }
+        else if(caracter_es_numero(tecla))
+        {
+            //asm("xchg %bx, %bx");
+            ring_buffer_insertar(&ring_buffer, tecla);
+        }
+    }
+ 
+    //asm("mov $0x21, %dl");
+    //asm("hlt");
     pic_limpiar_interrupcion();
-
-    // tecla = teclado_get_tecla();
-
-    // // if(tecla_es_break_code(tecla))
-    // // {
-    // //     if(tecla_es_enter(tecla) || (buffer_circular_cant_ocupados() == 16))
-    // //     {
-
-    // //     }
-    // //     else
-    // //         cadena[indice_digito++] = tecla;
-    // // }
-    asm("mov $0x21, %dl");
-    // asm("inc %dl");
-    // asm("hlt");
 }
 
 __attribute__(( section(".interrupciones"), interrupt)) void PIC2_IRQHandler(cuadro_interrupcion_t *cuadro)
