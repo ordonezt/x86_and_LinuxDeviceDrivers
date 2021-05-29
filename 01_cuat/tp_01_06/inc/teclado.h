@@ -3,12 +3,16 @@
 
 #include "../inc/my_types.h"
 
-#define LONGITUD_BUFFER_TECLAS  6//16
+#define LONGITUD_BUFFER_TECLAS  17
 #define LONGITUD_TABLA_DIGITOS  6//16
 
 typedef struct{
     uint32_t indice;
-    uint64_t datos[LONGITUD_TABLA_DIGITOS] __attribute__ ((aligned (16)));
+    struct{
+        uint32_t bajo;
+        uint32_t alto;
+    }datos [LONGITUD_TABLA_DIGITOS] __attribute__ ((aligned (8)));
+    //uint64_t datos[LONGITUD_TABLA_DIGITOS];// __attribute__ ((aligned (16)));
 }tabla_digitos_t;
 
 uint8_t teclado_get_tecla(void);

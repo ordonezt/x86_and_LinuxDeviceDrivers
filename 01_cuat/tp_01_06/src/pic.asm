@@ -5,10 +5,12 @@
 ;				y de 0x28 a 0x2F respectivamente.
 ;				
 ;------------------------------------------------------------------------------------------------------------
-global init_pic, pic_deshabilitar_todo, pic_limpiar_interrupcion
+global init_pic, pic_deshabilitar_todo, pic_limpiar_interrupcion, pic_limpiar_interrupciones
 
 FIN_INTERRUPCION_NO_ESPECIFICO  EQU   0x20
 DIRECCION_OCW2                  EQU   0x20
+PIC_PUERTO_MASCARAS             EQU   0x21
+
 
 section .rutinas
 
@@ -64,7 +66,7 @@ pic_deshabilitar_todo:
   popad
   ret
 
-pic_limpiar_interrupcion:
+pic_limpiar_interrupciones:
 
   pushad
   
@@ -74,4 +76,25 @@ pic_limpiar_interrupcion:
   out DIRECCION_OCW2 , al
 
   popad
+  ret
+
+pic_limpiar_interrupcion:
+  push ebp
+  mov ebp, esp
+
+  pushad
+  mov eax, [ebp + 4*2]
+  and eax, 0x07
+  or eax, 0x60
+  out DIRECCION_OCW2, al
+
+  popad
+  ret
+
+pic_leer_mascaras:
+  push edx
+  xor eax, eax
+  mov edx, PIC_PUERTO_MASCARAS
+  in  al, dx
+  pop edx
   ret

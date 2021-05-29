@@ -2,6 +2,7 @@
 #include "../inc/pic.h"
 #include "../inc/teclado.h"
 #include "../inc/ring_buffer.h"
+#include "../inc/systick.h"
 
 extern ring_buffer_t ring_buffer;
 
@@ -162,9 +163,11 @@ __attribute__(( section(".interrupciones"), interrupt)) void Control_Protection_
 
 __attribute__(( section(".interrupciones"), interrupt)) void PIC0_IRQHandler(cuadro_interrupcion_t *cuadro)
 {
-    asm("xchg %bx, %bx");
-    asm("mov $0x20, %dl");
-    asm("hlt");
+    //asm("xchg %bx, %bx");
+    systick_incrementar_tick();
+    // asm("mov $0x20, %dl");
+    // asm("hlt");
+    pic_limpiar_interrupciones();
 }
 
 //Teclado
@@ -190,7 +193,7 @@ __attribute__(( section(".interrupciones"), interrupt)) void PIC1_IRQHandler(cua
  
     //asm("mov $0x21, %dl");
     //asm("hlt");
-    pic_limpiar_interrupcion();
+    pic_limpiar_interrupciones();
 }
 
 __attribute__(( section(".interrupciones"), interrupt)) void PIC2_IRQHandler(cuadro_interrupcion_t *cuadro)
