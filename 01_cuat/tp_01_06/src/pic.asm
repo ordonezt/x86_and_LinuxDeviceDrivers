@@ -83,12 +83,14 @@ pic_limpiar_interrupcion:
   mov ebp, esp
 
   pushad
+  xor eax, eax
   mov eax, [ebp + 4*2]
   and eax, 0x07
   or eax, 0x60
   out DIRECCION_OCW2, al
 
   popad
+  pop ebp
   ret
 
 pic_leer_mascaras:

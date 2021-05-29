@@ -12,7 +12,6 @@ typedef struct{
         uint32_t bajo;
         uint32_t alto;
     }datos [LONGITUD_TABLA_DIGITOS] __attribute__ ((aligned (8)));
-    //uint64_t datos[LONGITUD_TABLA_DIGITOS];// __attribute__ ((aligned (16)));
 }tabla_digitos_t;
 
 uint8_t teclado_get_tecla(void);

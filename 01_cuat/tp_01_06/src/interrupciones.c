@@ -167,7 +167,7 @@ __attribute__(( section(".interrupciones"), interrupt)) void PIC0_IRQHandler(cua
     systick_incrementar_tick();
     // asm("mov $0x20, %dl");
     // asm("hlt");
-    pic_limpiar_interrupciones();
+    pic_limpiar_interrupcion(INTERRUPCION_SYSTICK);
 }
 
 //Teclado
@@ -193,7 +193,7 @@ __attribute__(( section(".interrupciones"), interrupt)) void PIC1_IRQHandler(cua
  
     //asm("mov $0x21, %dl");
     //asm("hlt");
-    pic_limpiar_interrupciones();
+    pic_limpiar_interrupcion(INTERRUPCION_TECLADO);
 }
 
 __attribute__(( section(".interrupciones"), interrupt)) void PIC2_IRQHandler(cuadro_interrupcion_t *cuadro)
