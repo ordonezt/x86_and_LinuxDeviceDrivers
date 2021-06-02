@@ -24,6 +24,12 @@
 - [ ] TP01.05  
  **Comentarios:**
 	- Casi listo, solo falta el teclado que lo voy a hacer mas adelante
+
+- [X] TP01.06  
+
+- [X] TP01.07  
+ **Comentarios:**
+	- Falta arreglar bug de posiciones de pantalla
 <!-- ## TP Integrador
 - [ ] Servidor  
  **Comentarios:**
