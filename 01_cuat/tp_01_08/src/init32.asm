@@ -9,7 +9,7 @@ section .rom_init
 %include "inc/tablas_sistema.asm" 
 
 extern DS_SEL_16
-extern __STACK_START
+extern __KERNEL_PILA_INICIO
 extern __rutinas_size, __kernel_size, __interrupciones_size, __tarea_1_size
 extern __RUTINAS_VMA, __KERNEL_VMA, __INTERRUPCIONES_VMA, __TAREA_1_VMA
 extern __RUTINAS_LMA, __KERNEL_LMA, __INTERRUPCIONES_LMA, __TAREA_1_LMA
@@ -30,7 +30,7 @@ init32:
 ;Inicializo la pila
     mov ax, DS_SEL_16
     mov ss, ax
-    mov esp, __STACK_START     ;No hacer esto si tenes un segmento para el stack
+    mov esp, __KERNEL_PILA_INICIO     ;No hacer esto si tenes un segmento para el stack
 
 ;Copio las rutinas a RAM
     push ebp
