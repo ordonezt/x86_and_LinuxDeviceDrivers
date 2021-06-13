@@ -30,6 +30,12 @@
 - [X] TP01.07  
  **Comentarios:**
 	- Falta arreglar bug de posiciones de pantalla
+
+- [X] TP01.08  
+
+- [ ] TP01.09  
+ **Comentarios:**
+	- En proceso...
 <!-- ## TP Integrador
 - [ ] Servidor  
  **Comentarios:**

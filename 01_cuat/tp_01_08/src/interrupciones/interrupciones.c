@@ -1,9 +1,9 @@
-#include "../inc/interrupciones.h"
-#include "../inc/pic.h"
-#include "../inc/teclado.h"
-#include "../inc/ring_buffer.h"
-#include "../inc/systick.h"
-#include "../inc/pantalla.h"
+#include "../../inc/interrupciones.h"
+#include "../../inc/pic.h"
+#include "../../inc/teclado.h"
+#include "../../inc/ring_buffer.h"
+#include "../../inc/systick.h"
+#include "../../inc/pantalla.h"
 
 extern ring_buffer_t ring_buffer;
 

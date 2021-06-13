@@ -1,8 +1,8 @@
-#include "../inc/teclado.h"
-#include "../inc/systick.h"
-#include "../inc/main.h"
-#include "../inc/rutinas.h"
-#include "../inc/tarea_1.h"
+#include "../../inc/teclado.h"
+#include "../../inc/systick.h"
+#include "../../inc/main.h"
+#include "../../inc/rutinas.h"
+#include "../../inc/tarea_1.h"
 
 __attribute__(( section(".kernel")))
 int main(void)

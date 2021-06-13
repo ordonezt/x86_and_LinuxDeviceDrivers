@@ -1,4 +1,4 @@
-#include "../inc/interrupciones.h"
+#include "../../inc/interrupciones.h"
 
 #define LIMITE_MAXIMO   0xFFFFFFFF
 //extern uint32_t __CS_BASE, __CS_LIMITE, __DS_BASE, __DS_LIMITE, __SS_BASE, __SS_LIMITE;

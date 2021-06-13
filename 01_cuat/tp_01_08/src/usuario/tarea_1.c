@@ -1,5 +1,5 @@
-#include "../inc/teclado.h"
-#include "../inc/pantalla.h"
+#include "../../inc/teclado.h"
+#include "../../inc/pantalla.h"
 
 __attribute__(( section(".tarea_1")))
 void tarea_1(void)

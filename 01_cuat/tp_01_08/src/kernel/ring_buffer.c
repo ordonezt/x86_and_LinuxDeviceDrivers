@@ -1,4 +1,4 @@
-#include "../inc/ring_buffer.h"
+#include "../../inc/ring_buffer.h"
 
 __attribute__(( section(".rutinas")))
 uint8_t ring_buffer_insertar(ring_buffer_t *ring_buffer, uint8_t dato)

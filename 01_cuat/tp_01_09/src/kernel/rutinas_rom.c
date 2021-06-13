@@ -1,4 +1,4 @@
-#include "../inc/rutinas.h"
+#include "../../inc/rutinas.h"
 
 __attribute__(( section(".rutinas_rom"))) byte __mi_memcpy_rom(dword* src,dword *dst,dword length)
 {

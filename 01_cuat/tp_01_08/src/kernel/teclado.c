@@ -1,7 +1,7 @@
-#include "../inc/teclado.h"
-#include "../inc/io.h"
-#include "../inc/pic.h"
-#include "../inc/ring_buffer.h"
+#include "../../inc/teclado.h"
+#include "../../inc/io.h"
+#include "../../inc/pic.h"
+#include "../../inc/ring_buffer.h"
 
 #define TECLADO_PUERTO     (0x60)
 

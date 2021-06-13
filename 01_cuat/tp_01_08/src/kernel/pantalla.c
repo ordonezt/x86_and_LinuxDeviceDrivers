@@ -1,4 +1,4 @@
-#include "../inc/pantalla.h"
+#include "../../inc/pantalla.h"
 
 // caracter_video_t buffer_video[VIDEO_FILAS][VIDEO_COLUMNAS] __attribute__ ((section (".buffer_pantalla")));
 const uint8_t hex2ascii_LUT[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};

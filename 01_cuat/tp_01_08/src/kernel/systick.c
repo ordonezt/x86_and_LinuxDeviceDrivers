@@ -1,6 +1,6 @@
-#include "../inc/pic.h"
-#include "../inc/systick.h"
-#include "../inc/io.h"
+#include "../../inc/pic.h"
+#include "../../inc/systick.h"
+#include "../../inc/io.h"
 
 uint32_t tick __attribute__ ((section (".datos")));
 
