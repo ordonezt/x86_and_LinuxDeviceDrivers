@@ -3,6 +3,7 @@
 #include "../inc/teclado.h"
 #include "../inc/ring_buffer.h"
 #include "../inc/systick.h"
+#include "../inc/pantalla.h"
 
 extern ring_buffer_t ring_buffer;
 
@@ -112,8 +113,69 @@ __attribute__(( section(".interrupciones"), interrupt)) void General_Protection_
     asm("hlt");
 }
 
+uint32_t get_cr2(void);
 __attribute__(( section(".interrupciones"), interrupt)) void Page_Fault_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_error)
 {
+    uint8_t *str_presente, *str_rw, *str_us;
+    uint8_t str_error[29 + 9 + 27] = {0};
+    uint8_t columna = 0;
+ MAGIC_BREAKPOINT
+    codigo_error = get_cr2();
+    if(codigo_error & 0b100)
+        // str_us = "Proceso usuario trato de ";
+        {
+            my_printf("Proceso usuario trato de ", 0, 0);
+            columna += 25;
+        }
+        //strcat(str_error, "Proceso usuario trato de ");
+    else
+        // str_us = "Proceso supervisor trato de ";
+        //strcat(str_error, "Proceso supervisor trato de ");
+        {
+            my_printf("Proceso supervisor trato de ", 0, 0);
+            columna += 29;
+        }
+
+    if(codigo_error & 0b010)
+        // str_rw = "escribir ";
+        //strcat(str_error, "escribir");
+        {
+            my_printf("escribir ", 0, columna);
+            columna += 9;
+        }
+    else
+        // str_rw = "leer";
+        //strcat(str_error, "leer");
+        {
+            my_printf("leer ", 0, columna);
+            columna += 5;
+        }
+
+    if(codigo_error & 0b001)
+        // str_presente = "una pagina no presente";
+        //strcat(str_error, "una pagina no presente");
+        {
+            my_printf("y causo error de proteccion", 0, columna);
+            columna += 27;
+        }
+    else
+        // str_presente = "y causo error de proteccion";
+        //strcat(str_error, "y causo error de proteccion");
+        {
+            my_printf("una pagina no presente", 0, columna);
+            columna += 22;
+        }
+
+    //my_printf(str_error, 0, 0);
+
+    // switch(codigo_error)
+    // {
+    //     case 0:
+    //     printf("Proceso supervisor trato de leer pagina no presente");
+    //     break;
+
+    //     case 1:
+    // }
     asm("xchg %bx, %bx");
     asm("mov $0xE, %dl");
     asm("hlt");

@@ -36,3 +36,8 @@ puerto_io_escribir:
     pop ebp
 
     ret                 ;Chao
+
+global get_cr2
+get_cr2:
+    mov eax, cr2
+    ret

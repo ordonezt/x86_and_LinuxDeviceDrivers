@@ -1040,7 +1040,6 @@ void paginacion_inicializar(void)
     //Inicializo las PTs
     PTs_inicializar(PT);
 
-    MAGIC_BREAKPOINT
     //Activo la paginacion
     asm("mov %cr0, %eax");
     asm("or  $0x80000000, %eax");

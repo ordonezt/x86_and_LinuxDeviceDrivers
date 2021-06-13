@@ -9,7 +9,8 @@
 #define FORMATO_CARACTER_NORMAL     false, color_negro, false, color_blanco
 #define FORMATO_CARACTER_BORRADO    false, color_negro, false, color_negro
 
-#define BUFFER_VIDEO ((caracter_video_t *)0x000B8000)
+extern uint8_t __VIDEO_VMA[];
+#define BUFFER_VIDEO ((caracter_video_t *)__VIDEO_VMA)
 
 typedef struct{
     uint8_t ascii;

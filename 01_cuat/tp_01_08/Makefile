@@ -10,7 +10,7 @@ SUPPATH = ./sup/
 AC = nasm
 CC = gcc
 AFLAGS = -f elf32
-CFLAGS = -c -m32 -fno-stack-protector -fno-asynchronous-unwind-tables -Wall -fno-PIC 
+CFLAGS = -c -m32 -fno-stack-protector -fno-asynchronous-unwind-tables -Wall -fno-PIC
 IFLAGS = -mgeneral-regs-only #Flags para compilar los handler de interrupciones en C
 LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
 
