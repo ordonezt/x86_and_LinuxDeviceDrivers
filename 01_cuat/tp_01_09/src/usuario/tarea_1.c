@@ -8,7 +8,7 @@ void tarea_1(void)
     // {
     //asm("xchg %bx,%bx");
     uint64_t aux;
-    static uint8_t fila=10, columna=10;
+    //static uint8_t fila=10, columna=10; //Por que cuando se los paso a la funcion van como 0? PELIGROSOoOO. PREGUNTAR
     uint8_t cadena[11];
 
     aux = promedio_tabla_digitos();
