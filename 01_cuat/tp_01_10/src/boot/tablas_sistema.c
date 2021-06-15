@@ -773,21 +773,29 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
                             1);                     //Presente
     }
     
-    //Tablas de paginacion
-    aux = ((uint32_t)__TABLAS_PAGINACION_VMA_LINEAL >> 12) & 0x3FF;
-    aux2 = ((uint32_t)__TABLAS_PAGINACION_VMA_LINEAL >> 22) & 0x3FF;
-    PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
-                        aux,                    //Indice
-                        __TABLAS_PAGINACION_VMA_FISICA,//Puntero a pagina
-                        1,                      //Global
-                        0,                      //PAT no
-                        0,                      //D no
-                        0,                      //A si
-                        0,                      //PCD no
-                        0,                      //PWT no
-                        0,                      //Supervisor
-                        0,                      //Lectura
-                        1);                     //Presente
+    /**
+     * Tablas de paginacion... si, es horrible esto, pero es un identity mapping de todo un
+     * bloque de tablas de pagina para que cuando se quieran cargar dinamicamente no explote en un
+     * proceso recursivo
+     * */    
+    for(direccion_fisica = (uint32_t)__TABLAS_PAGINACION_VMA_FISICA; direccion_fisica < (uint32_t)__RUTINAS_VMA_FISICA; direccion_fisica += 0x1000)
+    {
+        direccion_lineal = direccion_fisica;
+        aux = (direccion_lineal >> 12) & 0x3FF;
+        aux2 = (direccion_lineal >> 22) & 0x3FF;
+        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+                            aux,                    //Indice
+                            (uint8_t*)direccion_fisica,//Puntero a pagina
+                            1,                      //Global
+                            0,                      //PAT no
+                            0,                      //D no
+                            0,                      //A si
+                            0,                      //PCD no
+                            0,                      //PWT no
+                            0,                      //Supervisor
+                            1,                      //Escritura
+                            1);                     //Presente
+    }
 
     
     //Rutinas
@@ -1116,7 +1124,7 @@ void agregar_pagina_dinamicamente(uint8_t *direccion_lineal)
 
     //Agrego la tabla de paginas
     aux1 = (uint32_t)direccion_lineal >> (10+12);
-    MAGIC_BREAKPOINT
+    
     DTP_agregar_tabla(  DTP, 
                         aux1,  //Indice
                         &PT[aux1], //Direccion de la tabla

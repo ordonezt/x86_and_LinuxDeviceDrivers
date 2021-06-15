@@ -120,15 +120,14 @@ __attribute__(( section(".interrupciones"), interrupt)) void Page_Fault_Handler(
 {
     uint8_t *direccion = get_cr2();
     
-    MAGIC_BREAKPOINT
     
     if((codigo_error & 0b001) == 0)
         agregar_pagina_dinamicamente(direccion);
 
 
-    asm("xchg %bx, %bx");
-    asm("mov $0xE, %dl");
-    asm("hlt");
+    // asm("xchg %bx, %bx");
+    // asm("mov $0xE, %dl");
+    // asm("hlt");
 }
 
 __attribute__(( section(".interrupciones"), interrupt)) void MF_Handler(cuadro_interrupcion_t *cuadro)
