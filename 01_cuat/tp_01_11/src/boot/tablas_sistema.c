@@ -94,6 +94,7 @@ extern uint8_t __PAGINACION_DINAMICA_BASE_FISICA[];
 extern uint8_t __TABLAS_SISTEMA_VMA_LINEAL[];
 extern uint8_t __tablas_sistema_size[];
 extern uint8_t __TABLAS_PAGINACION_VMA_LINEAL[];
+extern uint8_t __tablas_paginacion_size[];
 extern uint8_t __RUTINAS_VMA_LINEAL[];
 extern uint8_t __rutinas_size[];
 extern uint8_t __VIDEO_VMA_LINEAL[];
@@ -150,6 +151,18 @@ extern registro_descriptor_segmento_t* _gdtr;
 extern descriptor_segmento_t *gdt_nulo, *cs_gdt, *ds_gdt;//, *ss_gdt;
 extern int *ss_gdt;
 //#define ss_gdt  ((uint32_t *)0xFFFFF500)
+directorio_tabla_paginas_t  DTP_kernel __attribute__ ((section (".tablas_paginacion"))), 
+                            DTP_tarea1 __attribute__ ((section (".tablas_paginacion"))), 
+                            DTP_tarea2 __attribute__ ((section (".tablas_paginacion"))), 
+                            DTP_tarea3 __attribute__ ((section (".tablas_paginacion"))), 
+                            DTP_tarea4 __attribute__ ((section (".tablas_paginacion")));
+
+tabla_paginas_t TP0 __attribute__ ((section (".tablas_paginacion"))), 
+                TP1 __attribute__ ((section (".tablas_paginacion"))),
+                TP2 __attribute__ ((section (".tablas_paginacion"))), 
+                TP3 __attribute__ ((section (".tablas_paginacion"))),
+                TP4 __attribute__ ((section (".tablas_paginacion"))),
+                TP5 __attribute__ ((section (".tablas_paginacion")));
 
 __attribute__(( section(".rutinas"))) void cargar_descriptor_segmento(   descriptor_segmento_t *descriptor,
                                                                             uint32_t base, uint32_t limite, uint8_t granularidad,
@@ -634,11 +647,14 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
 {
     uint32_t auxiliar;
     
+    //Borrar
+    direccion_DTP = &DTP_kernel;
+
     //La primer tabla de paginas cubre desde 0x0000_0000 hasta 0x003F_FFFF
     auxiliar = (uint32_t)__TABLAS_SISTEMA_VMA_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP0,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -652,7 +668,7 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     auxiliar = (uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP1,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -666,7 +682,7 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     auxiliar = (uint32_t)__VIDEO_VMA_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP2,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -680,7 +696,7 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     auxiliar = (uint32_t)__DATOS_VMA_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP3,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -694,7 +710,7 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     auxiliar = (uint32_t)__KERNEL_PILA_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP4,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -709,7 +725,7 @@ void DTP_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     auxiliar = (uint32_t)__ROM_VMA_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
-                        &PT[auxiliar], //Direccion de la tabla
+                        &TP5,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -759,7 +775,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TABLAS_SISTEMA_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP0,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -773,17 +789,17 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
                             1);                     //Presente
     }
     
-    /**
-     * Tablas de paginacion... si, es horrible esto, pero es un identity mapping de todo un
-     * bloque de tablas de pagina para que cuando se quieran cargar dinamicamente no explote en un
-     * proceso recursivo
-     * */    
-    for(direccion_fisica = (uint32_t)__TABLAS_PAGINACION_VMA_FISICA; direccion_fisica < (uint32_t)__RUTINAS_VMA_FISICA; direccion_fisica += 0x1000)
+    //Tablas de paginacion
+    cant_pag = (uint32_t)__tablas_paginacion_size / 0x1000 + (((uint32_t)__tablas_paginacion_size % 0x1000) != 0);
+    if(cant_pag == 0)
+        cant_pag = 1;
+    for(i = 0; i < cant_pag; i++)
     {
-        direccion_lineal = direccion_fisica;
+        direccion_lineal = (uint32_t)__TABLAS_PAGINACION_VMA_LINEAL + i * 0x1000;
+        direccion_fisica = (uint32_t)__TABLAS_PAGINACION_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP0,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,//Puntero a pagina
                             1,                      //Global
@@ -797,7 +813,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
                             1);                     //Presente
     }
 
-    
+
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
     if(cant_pag == 0)
@@ -808,7 +824,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__RUTINAS_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP0,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -832,7 +848,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__VIDEO_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP2,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -856,7 +872,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__INTERRUPCIONES_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP0,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -880,7 +896,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TABLA_DIGITOS_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -904,7 +920,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__DATOS_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -928,7 +944,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__KERNEL_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -952,7 +968,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TAREA_1_TEXT_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -976,7 +992,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TAREA_1_BSS_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -1000,7 +1016,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TAREA_1_DATA_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -1024,7 +1040,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__TAREA_1_RODATA_VMA_FISICA + i * 0x1000;
         aux = (direccion_lineal >> 12) & 0x3FF;
         aux2 = (direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP3,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -1041,7 +1057,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
     //Pila del kernel
     aux = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 12) & 0x3FF;
     aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
-    PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+    PT_agregar_pagina(  &TP4,    //Direccion de las tablas
                         aux,                    //Indice
                         __KERNEL_PILA_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
@@ -1057,7 +1073,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
     //Pila de tarea 1
     aux = ((uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> 12) & 0x3FF;
     aux2 = ((uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> 22) & 0x3FF;
-    PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+    PT_agregar_pagina(  &TP1,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_1_PILA_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
@@ -1077,7 +1093,7 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
         direccion_fisica = (uint32_t)__ROM_VMA_FISICA + i * 0x1000;
         aux = ((uint32_t)direccion_lineal >> 12) & 0x3FF;
         aux2 = ((uint32_t)direccion_lineal >> 22) & 0x3FF;
-        PT_agregar_pagina(  direccion_PT + aux2,    //Direccion de las tablas
+        PT_agregar_pagina(  &TP5,    //Direccion de las tablas
                             aux,                    //Indice
                             (uint8_t*)direccion_fisica,    //Puntero a pagina
                             1,                      //Global
@@ -1095,12 +1111,13 @@ void PTs_inicializar(tabla_paginas_t *direccion_PT)
 __attribute__(( section(".rutinas")))
 void paginacion_inicializar(void)
 {
+    MAGIC_BREAKPOINT
     //Inicializo CR3
-    cr3_set(DTP, 1, 1);
+    cr3_set(&DTP_kernel, 1, 1);
 
     //Inicializar tablas DTP y PT
     //Inicializo la DTP
-    DTP_inicializar(DTP);
+    DTP_inicializar(&DTP_kernel);
 
     //Inicializo las PTs
     PTs_inicializar(PT);
@@ -1109,7 +1126,8 @@ void paginacion_inicializar(void)
     asm("mov %cr0, %eax");
     asm("or  $0x80000000, %eax");
     asm("mov %eax, %cr0");
-
+    
+    MAGIC_BREAKPOINT
 }
 
 uint32_t numero_pagina_dinamica __attribute__ ((section (".datos")));
