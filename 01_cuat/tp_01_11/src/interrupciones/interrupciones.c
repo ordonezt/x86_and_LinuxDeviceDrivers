@@ -120,9 +120,8 @@ __attribute__(( section(".interrupciones"), interrupt)) void Page_Fault_Handler(
 {
     uint8_t *direccion = get_cr2();
     
-    
-    if((codigo_error & 0b001) == 0)
-        agregar_pagina_dinamicamente(direccion);
+    // if((codigo_error & 0b001) == 0)
+    //     agregar_pagina_dinamicamente(direccion);
 
 
     // asm("xchg %bx, %bx");

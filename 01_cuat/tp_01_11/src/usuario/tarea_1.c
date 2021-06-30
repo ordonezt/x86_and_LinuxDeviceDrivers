@@ -14,9 +14,9 @@ void tarea_1(void)
     uint8_t cadena_direccion[21], cadena_contenido[11];
 
     direccion = promedio_tabla_digitos();
-    if(direccion < DIRECCION_RAM_MAX)
-    {
-        contenido = *((uint32_t*)((uint32_t)direccion));
+    // if(direccion < DIRECCION_RAM_MAX)
+    // {
+        contenido = direccion;//*((uint32_t*)((uint32_t)direccion));
         hex64_2_str(direccion, cadena_direccion);
         hex32_2_str(contenido, cadena_contenido);
         
@@ -25,7 +25,7 @@ void tarea_1(void)
 
         my_printf((uint8_t*)"Contenido: ", 10, 0);
         my_printf(cadena_contenido, 10, strlen((uint8_t*)"Contenido: "));
-    }
+    // }
 
     // columna += strlen(cadena) + 2;
     // fila++;
