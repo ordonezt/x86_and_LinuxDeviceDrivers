@@ -160,6 +160,17 @@ uint64_t promedio_tabla_digitos(void)
 }
 
 __attribute__(( section(".rutinas")))
+uint64_t suma_tabla_digitos(void)
+{
+    uint64_t aux=0;
+
+    if(tabla_digitos.indice != 0)
+        sumatoria_n_64((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1, &aux);
+
+    return aux;
+}
+
+__attribute__(( section(".rutinas")))
 void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resultado)
 {
     uint32_t i;

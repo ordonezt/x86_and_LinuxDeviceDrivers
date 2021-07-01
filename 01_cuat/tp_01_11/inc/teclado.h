@@ -28,6 +28,7 @@ uint8_t tecla2caracter(uint8_t tecla);
 bool caracter_es_numero(uint8_t caracter);
 void insertar_en_tabla_digitos(uint8_t buffer[], uint32_t longitud);
 uint64_t promedio_tabla_digitos(void);
+uint64_t suma_tabla_digitos(void);
 void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resultado);
 uint32_t division_64(uint64_t dividendo, uint32_t divisor, uint64_t *resultado);
 #endif /*__TECLADO_H*/

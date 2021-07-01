@@ -23,9 +23,11 @@ void tarea_1(void)
         my_printf((uint8_t*)"Direccion: ", 0, 0);
         my_printf(cadena_direccion, 0, strlen((uint8_t*)"Direccion: "));
 
-        my_printf((uint8_t*)"Contenido: ", 10, 0);
-        my_printf(cadena_contenido, 10, strlen((uint8_t*)"Contenido: "));
+        my_printf((uint8_t*)"Contenido: ", 2, 0);
+        my_printf(cadena_contenido, 2, strlen((uint8_t*)"Contenido: "));
     // }
+
+    //ir_a_dormir();
 
     // columna += strlen(cadena) + 2;
     // fila++;

@@ -253,42 +253,47 @@ MEMORY
 /***********************************************/
 SECTIONS
 {
-        /* Mapeo de las tablas de sistema en RAM */
+        /***************** Mapeo de las tablas de sistema en RAM *****************/
         .tablas_sistema __TABLAS_SISTEMA_VMA_LINEAL : AT (__TABLAS_SISTEMA_LMA) {
                 *(.tablas_sistema);
         } > ram
         __tablas_sistema_size = SIZEOF(.tablas_sistema);
 
-        /* Mapeo de las tablas de paginacion en RAM */
+
+        /***************** Mapeo de las tablas de paginacion en RAM *****************/
         __TABLAS_PAGINACION_LMA = LOADADDR(.tablas_sistema) + SIZEOF(.tablas_sistema);
         .tablas_paginacion __TABLAS_PAGINACION_VMA_LINEAL : AT (__TABLAS_PAGINACION_LMA) {
                 *(.tablas_paginacion);
         } > ram
         __tablas_paginacion_size = SIZEOF(.tablas_paginacion);
 
+
+        /***************** Mapeo de las interrupciones y teclado en RAM *****************/
         __INTERRUPCIONES_LMA = LOADADDR(.tablas_paginacion) + SIZEOF(.tablas_paginacion);
-        /* Mapeo de las interrupciones y teclado en RAM */
         .interrupciones __INTERRUPCIONES_VMA_LINEAL : AT (__INTERRUPCIONES_LMA) {
                 *(.interrupciones);
         } > ram
         __interrupciones_size = SIZEOF(.interrupciones);
 
+
+        /***************** Mapeo de las rutinas en RAM *****************/
         __RUTINAS_LMA = LOADADDR(.interrupciones) + SIZEOF(.interrupciones);
-        /* Mapeo de las rutinas en RAM */
         .rutinas_ram __RUTINAS_VMA_LINEAL : AT (__RUTINAS_LMA) {
                 *(.rutinas);
         } > ram
         __rutinas_size = SIZEOF(.rutinas_ram);
 
+        
+        /***************** Mapeo de los datos en RAM *****************/
         __TABLA_DIGITOS_LMA = LOADADDR(.rutinas_ram) + SIZEOF(.rutinas_ram);
-        /* Mapeo de los datos en RAM */
         .tabla_digitos __TABLA_DIGITOS_VMA_LINEAL : AT (__TABLA_DIGITOS_LMA) {
                 *(.tabla_digitos);
         } > ram
         __tabla_digitos_size = SIZEOF(.tabla_digitos);
 
+        
+        /***************** Mapeo de los datos en RAM *****************/
         __DATOS_LMA = LOADADDR(.tabla_digitos) + SIZEOF(.tabla_digitos);
-        /* Mapeo de los datos en RAM */
         .datos __DATOS_VMA_LINEAL : AT (__DATOS_LMA) {
                 *(.datos);
                 /* *(.data);
@@ -303,42 +308,45 @@ SECTIONS
         } > ram
         __datos_size = SIZEOF(.datos);
 
+        
+        /***************** Mapeo del video en RAM *****************/
         __VIDEO_LMA = LOADADDR(.datos) + SIZEOF(.datos);
-        /* Mapeo del video en RAM */
         .video __VIDEO_VMA_LINEAL : AT (__VIDEO_LMA) {
                 *(.video);
         } > ram
         __video_size = SIZEOF(.video);
 
+        
+        /***************** Mapeo del kernel en RAM*****************/
         __KERNEL_LMA = LOADADDR(.video) + SIZEOF(.video);
-        /* Mapeo del kernel en RAM*/
         .kernel __KERNEL_VMA_LINEAL : AT (__KERNEL_LMA) {
                 *(.kernel);
         } > ram
         __kernel_size = SIZEOF(.kernel);
 
-        /** TAREA 1**/
+        
+        /****************** TAREA 1******************/
+        /****************** TEXT TAREA 1******************/
         __TAREA_1_TEXT_LMA = LOADADDR(.kernel) + SIZEOF(.kernel);
         __TAREA_1_LMA = __TAREA_1_TEXT_LMA;
-        /* Mapeo de la tarea 1 en RAM*/
         .tarea_1_text __TAREA_1_TEXT_VMA_LINEAL : AT (__TAREA_1_TEXT_LMA) {
                 *(.tarea_1);
                 ./bin/tarea_1.elf(.note*);
         } > ram
         __tarea_1_text_size = SIZEOF(.tarea_1_text);
-
+        /****************** DATA TAREA 1******************/
         __TAREA_1_DATA_LMA = LOADADDR(.tarea_1_text) + SIZEOF(.tarea_1_text);
         .tarea_1_data __TAREA_1_DATA_VMA_LINEAL : AT (__TAREA_1_DATA_LMA) {
                 ./bin/tarea_1.elf(.data*);
         } > ram
         __tarea_1_data_size = SIZEOF(.tarea_1_data);
-
+        /****************** RODATA TAREA 1******************/
         __TAREA_1_RODATA_LMA = LOADADDR(.tarea_1_data) + SIZEOF(.tarea_1_data);
         .tarea_1_rodata __TAREA_1_RODATA_VMA_LINEAL : AT (__TAREA_1_RODATA_LMA) {
                 ./bin/tarea_1.elf(.rodata*);
         } > ram
         __tarea_1_rodata_size = SIZEOF(.tarea_1_rodata);
-
+        /****************** BSS TAREA 1******************/
         __TAREA_1_BSS_LMA = LOADADDR(.tarea_1_rodata) + SIZEOF(.tarea_1_rodata);
         .tarea_1_bss __TAREA_1_BSS_VMA_LINEAL : AT (__TAREA_1_BSS_LMA) {
                 ./bin/tarea_1.elf(.bss*);
@@ -347,8 +355,102 @@ SECTIONS
 
         __tarea_1_size = SIZEOF(.tarea_1_text) + SIZEOF(.tarea_1_data) + SIZEOF(.tarea_1_rodata) + SIZEOF(.tarea_1_bss);
 
-        /* Mapeo de la ROM */
-        __ROM_INIT_LMA = LOADADDR(.tarea_1_bss) + SIZEOF(.tarea_1_bss);
+
+        /****************** TAREA 2******************/
+        /****************** TEXT TAREA 2******************/
+        __TAREA_2_TEXT_LMA = LOADADDR(.tarea_1_bss) + SIZEOF(.tarea_1_bss);
+        __TAREA_2_LMA = __TAREA_2_TEXT_LMA;
+        .tarea_2_text __TAREA_2_TEXT_VMA_LINEAL : AT (__TAREA_2_TEXT_LMA) {
+                *(.tarea_2);
+                ./bin/tarea_2.elf(.note*);
+        } > ram
+        __tarea_2_text_size = SIZEOF(.tarea_2_text);
+        /****************** DATA TAREA 2******************/
+        __TAREA_2_DATA_LMA = LOADADDR(.tarea_2_text) + SIZEOF(.tarea_2_text);
+        .tarea_2_data __TAREA_2_DATA_VMA_LINEAL : AT (__TAREA_2_DATA_LMA) {
+                ./bin/tarea_2.elf(.data*);
+        } > ram
+        __tarea_2_data_size = SIZEOF(.tarea_2_data);
+        /****************** RODATA TAREA 2******************/
+        __TAREA_2_RODATA_LMA = LOADADDR(.tarea_2_data) + SIZEOF(.tarea_2_data);
+        .tarea_2_rodata __TAREA_2_RODATA_VMA_LINEAL : AT (__TAREA_2_RODATA_LMA) {
+                ./bin/tarea_2.elf(.rodata*);
+        } > ram
+        __tarea_2_rodata_size = SIZEOF(.tarea_2_rodata);
+        /****************** BSS TAREA 2******************/
+        __TAREA_2_BSS_LMA = LOADADDR(.tarea_2_rodata) + SIZEOF(.tarea_2_rodata);
+        .tarea_2_bss __TAREA_2_BSS_VMA_LINEAL : AT (__TAREA_2_BSS_LMA) {
+                ./bin/tarea_2.elf(.bss*);
+        } > ram
+        __tarea_2_bss_size = SIZEOF(.tarea_2_bss);
+
+        __tarea_2_size = SIZEOF(.tarea_2_text) + SIZEOF(.tarea_2_data) + SIZEOF(.tarea_2_rodata) + SIZEOF(.tarea_2_bss);
+
+
+        /****************** TAREA 3******************/
+        /****************** TEXT TAREA 3******************/
+        __TAREA_3_TEXT_LMA = LOADADDR(.tarea_2_bss) + SIZEOF(.tarea_2_bss);
+        __TAREA_3_LMA = __TAREA_3_TEXT_LMA;
+        .tarea_3_text __TAREA_3_TEXT_VMA_LINEAL : AT (__TAREA_3_TEXT_LMA) {
+                *(.tarea_3);
+                ./bin/tarea_3.elf(.note*);
+        } > ram
+        __tarea_3_text_size = SIZEOF(.tarea_3_text);
+        /****************** DATA TAREA 3******************/
+        __TAREA_3_DATA_LMA = LOADADDR(.tarea_3_text) + SIZEOF(.tarea_3_text);
+        .tarea_3_data __TAREA_3_DATA_VMA_LINEAL : AT (__TAREA_3_DATA_LMA) {
+                ./bin/tarea_3.elf(.data*);
+        } > ram
+        __tarea_3_data_size = SIZEOF(.tarea_3_data);
+        /****************** RODATA TAREA 3******************/
+        __TAREA_3_RODATA_LMA = LOADADDR(.tarea_3_data) + SIZEOF(.tarea_3_data);
+        .tarea_3_rodata __TAREA_3_RODATA_VMA_LINEAL : AT (__TAREA_3_RODATA_LMA) {
+                ./bin/tarea_3.elf(.rodata*);
+        } > ram
+        __tarea_3_rodata_size = SIZEOF(.tarea_3_rodata);
+        /****************** BSS TAREA 3******************/
+        __TAREA_3_BSS_LMA = LOADADDR(.tarea_3_rodata) + SIZEOF(.tarea_3_rodata);
+        .tarea_3_bss __TAREA_3_BSS_VMA_LINEAL : AT (__TAREA_3_BSS_LMA) {
+                ./bin/tarea_3.elf(.bss*);
+        } > ram
+        __tarea_3_bss_size = SIZEOF(.tarea_3_bss);
+
+        __tarea_3_size = SIZEOF(.tarea_3_text) + SIZEOF(.tarea_3_data) + SIZEOF(.tarea_3_rodata) + SIZEOF(.tarea_3_bss);
+
+
+        /****************** TAREA 4******************/
+        /****************** TEXT TAREA 4******************/
+        __TAREA_4_TEXT_LMA = LOADADDR(.tarea_3_bss) + SIZEOF(.tarea_3_bss);
+        __TAREA_4_LMA = __TAREA_4_TEXT_LMA;
+        .tarea_4_text __TAREA_4_TEXT_VMA_LINEAL : AT (__TAREA_4_TEXT_LMA) {
+                *(.tarea_4);
+                ./bin/tarea_4.elf(.note*);
+        } > ram
+        __tarea_4_text_size = SIZEOF(.tarea_4_text);
+        /****************** DATA TAREA 4******************/
+        __TAREA_4_DATA_LMA = LOADADDR(.tarea_4_text) + SIZEOF(.tarea_4_text);
+        .tarea_4_data __TAREA_4_DATA_VMA_LINEAL : AT (__TAREA_4_DATA_LMA) {
+                ./bin/tarea_4.elf(.data*);
+        } > ram
+        __tarea_4_data_size = SIZEOF(.tarea_4_data);
+        /****************** RODATA TAREA 4******************/
+        __TAREA_4_RODATA_LMA = LOADADDR(.tarea_4_data) + SIZEOF(.tarea_4_data);
+        .tarea_4_rodata __TAREA_4_RODATA_VMA_LINEAL : AT (__TAREA_4_RODATA_LMA) {
+                ./bin/tarea_4.elf(.rodata*);
+        } > ram
+        __tarea_4_rodata_size = SIZEOF(.tarea_4_rodata);
+        /****************** BSS TAREA 4******************/
+        __TAREA_4_BSS_LMA = LOADADDR(.tarea_4_rodata) + SIZEOF(.tarea_4_rodata);
+        .tarea_4_bss __TAREA_4_BSS_VMA_LINEAL : AT (__TAREA_4_BSS_LMA) {
+                ./bin/tarea_4.elf(.bss*);
+        } > ram
+        __tarea_4_bss_size = SIZEOF(.tarea_4_bss);
+
+        __tarea_4_size = SIZEOF(.tarea_4_text) + SIZEOF(.tarea_4_data) + SIZEOF(.tarea_4_rodata) + SIZEOF(.tarea_4_bss);
+
+        
+        /***************** Mapeo de la ROM *****************/
+        __ROM_INIT_LMA = LOADADDR(.tarea_4_bss) + SIZEOF(.tarea_4_bss);
         __ROM_INIT_VMA = __ROM_INIT_LMA;
         .init_rom __ROM_INIT_VMA : AT (__ROM_INIT_LMA) {
                 *(.rom_init);
@@ -357,38 +459,43 @@ SECTIONS
         } > rom
         __init_rom_size = SIZEOF(.init_rom);
 
+        
+        /***************** Mapeo de las funciones auxiliares en ROM *****************/
         __RUTINAS_ROM_LMA = LOADADDR(.init_rom) + SIZEOF(.init_rom);
         __RUTINAS_ROM_VMA = __RUTINAS_ROM_LMA;
-        /* Mapeo de las funciones auxiliares en ROM */
         .rutinas_rom __RUTINAS_ROM_VMA : AT (__RUTINAS_ROM_LMA) {
                 *(.rutinas_rom);
                 *(.note.gnu.property);
         } > rom
         __rutinas_rom_size = SIZEOF(.rutinas_rom);
 
+        
+        /***************** Mapeo de las tablas del sistema de modo real *****************/
         __TABLAS_SISTEMA_16_LMA = LOADADDR(.rutinas_rom) + SIZEOF(.rutinas_rom);
         __TABLAS_SISTEMA_16_VMA = __TABLAS_SISTEMA_16_LMA;
-        /* Mapeo de las tablas del sistema de modo real*/
         .tablas_sistema_16 __TABLAS_SISTEMA_16_VMA : AT (__TABLAS_SISTEMA_16_LMA) {
                 *(.tablas_sistema_16);
         } > rom
         __tablas_sistema_16_size = SIZEOF(.tablas_sistema_16);
 
+        
+        /***************** Mapeo de las rom de video *****************/
         __VIDEO_ROM_LMA = LOADADDR(.tablas_sistema_16) + SIZEOF(.tablas_sistema_16);
         __VIDEO_ROM_VMA = __VIDEO_ROM_LMA;
-        /* Mapeo de las tablas del sistema de modo real*/
         .video_rom __VIDEO_ROM_VMA : AT (__VIDEO_ROM_LMA) {
                 *(.video_rom);
         } > rom
         __video_rom_size = SIZEOF(.video_rom);
 
-        /* Mapeo del reset */
+        
+        /***************** Mapeo del reset *****************/
         .reset __RESET_VMA_LINEAL : AT (__RESET_LMA) {
                 *(.reset_vector);
         } > rom
         __reset_size = SIZEOF(.reset);
 
-        /* Relleno de la ROM */
+        
+        /***************** Relleno de la ROM *****************/
         .fill_rom : {
                 FILL(0x90);
                 . = ORIGIN(rom) + LENGTH(rom)-1;

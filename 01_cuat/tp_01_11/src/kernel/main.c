@@ -3,6 +3,9 @@
 #include "../../inc/main.h"
 #include "../../inc/rutinas.h"
 #include "../../inc/tarea_1.h"
+#include "../../inc/tarea_2.h"
+#include "../../inc/tarea_3.h"
+#include "../../inc/tarea_4.h"
 
 __attribute__(( section(".kernel")))
 int main(void)
@@ -21,7 +24,13 @@ int main(void)
         if((tick % PERIODO_TAREA_1) == 0)
             tarea_1();
 
-        ir_a_dormir();
+        if((tick % PERIODO_TAREA_2) == 0)
+            tarea_2();
+
+        if((tick % PERIODO_TAREA_3) == 0)
+            tarea_3();
+
+        tarea_4();
     }
 }
 

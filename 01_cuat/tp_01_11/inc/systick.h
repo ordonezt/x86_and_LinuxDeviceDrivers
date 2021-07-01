@@ -12,7 +12,10 @@
 #define COUNT_20ms      (2 * COUNT_10ms)
 #define COUNT_30ms      (3 * COUNT_10ms)
 
-#define COUNT_500ms     (50 * COUNT_10ms)
+
+#define COUNT_100ms     (10 * COUNT_10ms)
+#define COUNT_200ms     (2 * COUNT_100ms)
+#define COUNT_500ms     (5 * COUNT_100ms)
 
 void systick_inicializar(void);
 void systick_incrementar_tick(void);

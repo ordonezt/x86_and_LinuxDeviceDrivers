@@ -10,9 +10,21 @@ section .rom_init
 
 extern DS_SEL_16
 extern __KERNEL_PILA_INICIO_FISICA
-extern __rutinas_size, __kernel_size, __interrupciones_size, __tarea_1_text_size, __tarea_1_data_size, __tarea_1_rodata_size
-extern __RUTINAS_VMA_FISICA, __KERNEL_VMA_FISICA, __INTERRUPCIONES_VMA_FISICA, __TAREA_1_TEXT_VMA_FISICA, __TAREA_1_DATA_VMA_FISICA, __TAREA_1_RODATA_VMA_FISICA
-extern __RUTINAS_LMA, __KERNEL_LMA, __INTERRUPCIONES_LMA, __TAREA_1_TEXT_LMA, __TAREA_1_DATA_LMA, __TAREA_1_RODATA_LMA
+
+extern __rutinas_size, __kernel_size, __interrupciones_size
+extern __tarea_1_text_size, __tarea_1_data_size, __tarea_1_rodata_size, __tarea_2_text_size, __tarea_2_data_size, __tarea_2_rodata_size
+extern __tarea_3_text_size, __tarea_3_data_size, __tarea_3_rodata_size, __tarea_4_text_size, __tarea_4_data_size, __tarea_4_rodata_size
+
+extern __RUTINAS_VMA_FISICA, __KERNEL_VMA_FISICA, __INTERRUPCIONES_VMA_FISICA
+
+extern __TAREA_1_TEXT_VMA_FISICA, __TAREA_1_DATA_VMA_FISICA, __TAREA_1_RODATA_VMA_FISICA, __TAREA_2_TEXT_VMA_FISICA, __TAREA_2_DATA_VMA_FISICA, __TAREA_2_RODATA_VMA_FISICA
+extern __TAREA_3_TEXT_VMA_FISICA, __TAREA_3_DATA_VMA_FISICA, __TAREA_3_RODATA_VMA_FISICA, __TAREA_4_TEXT_VMA_FISICA, __TAREA_4_DATA_VMA_FISICA, __TAREA_4_RODATA_VMA_FISICA
+
+extern __RUTINAS_LMA, __KERNEL_LMA, __INTERRUPCIONES_LMA
+
+extern __TAREA_1_TEXT_LMA, __TAREA_1_DATA_LMA, __TAREA_1_RODATA_LMA, __TAREA_2_TEXT_LMA, __TAREA_2_DATA_LMA, __TAREA_2_RODATA_LMA
+extern __TAREA_3_TEXT_LMA, __TAREA_3_DATA_LMA, __TAREA_3_RODATA_LMA, __TAREA_4_TEXT_LMA, __TAREA_4_DATA_LMA, __TAREA_4_RODATA_LMA
+
 extern __mi_memcpy_rom, __mi_memcpy, cargar_gdt, cargar_idt, init_pic, pic_deshabilitar_todo, paginacion_inicializar
 extern kernel_init
 extern _gdtr_32, GDT_32, _idtr_32, IDT_32
@@ -96,7 +108,6 @@ init32:
     push __TAREA_1_TEXT_LMA
     call __mi_memcpy
     leave
-
 ;Copio los datos globales volatiles de la tarea 1 a RAM
     push ebp
     mov ebp,esp
@@ -105,13 +116,88 @@ init32:
     push __TAREA_1_DATA_LMA
     call __mi_memcpy
     leave
-
 ;Copio los datos constantes de la tarea 1 a RAM
     push ebp
     mov ebp,esp
     push __tarea_1_rodata_size
     push __TAREA_1_RODATA_VMA_FISICA
     push __TAREA_1_RODATA_LMA
+    call __mi_memcpy
+    leave
+
+
+;Copio el codigo de la tarea 2 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_2_text_size
+    push __TAREA_2_TEXT_VMA_FISICA
+    push __TAREA_2_TEXT_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos globales volatiles de la tarea 2 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_2_data_size
+    push __TAREA_2_DATA_VMA_FISICA
+    push __TAREA_2_DATA_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos constantes de la tarea 2 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_2_rodata_size
+    push __TAREA_2_RODATA_VMA_FISICA
+    push __TAREA_2_RODATA_LMA
+    call __mi_memcpy
+    leave
+
+;Copio el codigo de la tarea 3 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_3_text_size
+    push __TAREA_3_TEXT_VMA_FISICA
+    push __TAREA_3_TEXT_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos globales volatiles de la tarea 3 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_3_data_size
+    push __TAREA_3_DATA_VMA_FISICA
+    push __TAREA_3_DATA_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos constantes de la tarea 3 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_3_rodata_size
+    push __TAREA_3_RODATA_VMA_FISICA
+    push __TAREA_3_RODATA_LMA
+    call __mi_memcpy
+    leave
+
+;Copio el codigo de la tarea 4 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_4_text_size
+    push __TAREA_4_TEXT_VMA_FISICA
+    push __TAREA_4_TEXT_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos globales volatiles de la tarea 4 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_4_data_size
+    push __TAREA_4_DATA_VMA_FISICA
+    push __TAREA_4_DATA_LMA
+    call __mi_memcpy
+    leave
+;Copio los datos constantes de la tarea 4 a RAM
+    push ebp
+    mov ebp,esp
+    push __tarea_4_rodata_size
+    push __TAREA_4_RODATA_VMA_FISICA
+    push __TAREA_4_RODATA_LMA
     call __mi_memcpy
     leave
 
