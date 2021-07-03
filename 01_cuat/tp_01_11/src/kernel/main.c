@@ -36,6 +36,6 @@ int main(void)
 
 __attribute__(( section(".kernel")))
 void ir_a_dormir(void)
-{
+{//MAGIC_BREAKPOINT
     asm("hlt");
 }

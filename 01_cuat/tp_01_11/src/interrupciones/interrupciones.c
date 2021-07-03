@@ -171,8 +171,11 @@ __attribute__(( section(".interrupciones"), interrupt)) void Control_Protection_
     asm("hlt");
 }
 
-__attribute__(( section(".interrupciones"), interrupt)) void PIC0_IRQHandler(cuadro_interrupcion_t *cuadro)
+//Este handler es invocado por un wrapper de asm, porque el bendito gcc me pone codigo en el handler de C sin que yo pueda meter mano
+//Y como tengo que guardar el contexto me hace pelota todo
+__attribute__(( section(".interrupciones"))) void PIC0_IRQHandler_c(cuadro_interrupcion_t *cuadro)
 {
+    //MAGIC_BREAKPOINT
     //asm("xchg %bx, %bx");
     systick_incrementar_tick();
     // asm("mov $0x20, %dl");
