@@ -5,6 +5,7 @@
 #include "../../inc/systick.h"
 #include "../../inc/pantalla.h"
 #include "../../inc/tablas_sistema.h"
+#include "../../inc/main.h"
 
 extern ring_buffer_t ring_buffer;
 
@@ -118,7 +119,7 @@ uint8_t* get_cr2(void);
 
 __attribute__(( section(".interrupciones"), interrupt)) void Page_Fault_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_error)
 {
-    uint8_t *direccion = get_cr2();
+    //uint8_t *direccion = get_cr2();
     
     // if((codigo_error & 0b001) == 0)
     //     agregar_pagina_dinamicamente(direccion);
@@ -173,14 +174,62 @@ __attribute__(( section(".interrupciones"), interrupt)) void Control_Protection_
 
 //Este handler es invocado por un wrapper de asm, porque el bendito gcc me pone codigo en el handler de C sin que yo pueda meter mano
 //Y como tengo que guardar el contexto me hace pelota todo
-__attribute__(( section(".interrupciones"))) void PIC0_IRQHandler_c(cuadro_interrupcion_t *cuadro)
+__attribute__(( section(".interrupciones"))) void PIC0_IRQHandler_c(contexto_tarea_t contexto_tarea_anterior)
 {
     //MAGIC_BREAKPOINT
     //asm("xchg %bx, %bx");
+    //     uint8_t aux[9];
+
+    //TODO Limpiar y pushear
+    
+    // hex32_2_str(contexto_tarea_anterior.EFLAGS, aux);
+    // my_printf("EFL: ", 11, 0);
+    // my_printf(aux, 11, 5);
+    // hex32_2_str(contexto_tarea_anterior.CS, aux);
+    // my_printf("CS : ", 12, 0);
+    // my_printf(aux, 12, 5);
+    // hex32_2_str(contexto_tarea_anterior.EIP, aux);
+    // my_printf("EIP: ", 13, 0);
+    // my_printf(aux, 13, 5);
+    // hex32_2_str(contexto_tarea_anterior.EAX, aux);
+    // my_printf("EAX: ", 14, 0);
+    // my_printf(aux, 14, 5);
+    // hex32_2_str(contexto_tarea_anterior.ECX, aux);
+    // my_printf("ECX: ", 15, 0);
+    // my_printf(aux, 15, 5);
+    // hex32_2_str(contexto_tarea_anterior.EDX, aux);
+    // my_printf("EDX: ", 16, 0);
+    // my_printf(aux, 16, 5);
+    // hex32_2_str(contexto_tarea_anterior.EBX, aux);
+    // my_printf("EBX: ", 17, 0);
+    // my_printf(aux, 17, 5);
+    // hex32_2_str(contexto_tarea_anterior.ESP, aux);
+    // my_printf("ESP: ", 18, 0);
+    // my_printf(aux, 18, 5);
+    // hex32_2_str(contexto_tarea_anterior.EBP, aux);
+    // my_printf("EBP: ", 19, 0);
+    // my_printf(aux, 19, 5);
+    // hex32_2_str(contexto_tarea_anterior.ESI, aux);
+    // my_printf("ESI: ", 20, 0);
+    // my_printf(aux, 20, 5);
+    // hex32_2_str(contexto_tarea_anterior.EDI, aux);
+    // my_printf("EDI: ", 21, 0);
+    // my_printf(aux, 21, 5);
+    // hex32_2_str(contexto_tarea_anterior.CR3, aux);
+    // my_printf("CR3: ", 22, 0);
+    // my_printf(aux, 22, 5);
+    // hex32_2_str(contexto_tarea_anterior.SS, aux);
+    // my_printf("SS : ", 23, 0);
+    // my_printf(aux, 23, 5);
+    // hex32_2_str(contexto_tarea_anterior.ES, aux);
+    // my_printf("ES : ", 24, 0);
+    // my_printf(aux, 24, 5);
+
     systick_incrementar_tick();
+    pic_limpiar_interrupcion(INTERRUPCION_SYSTICK);
+    scheduler(contexto_tarea_anterior);
     // asm("mov $0x20, %dl");
     // asm("hlt");
-    pic_limpiar_interrupcion(INTERRUPCION_SYSTICK);
 }
 
 //Teclado

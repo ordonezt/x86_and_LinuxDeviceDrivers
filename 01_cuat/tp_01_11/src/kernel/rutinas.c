@@ -2,8 +2,11 @@
 
 
 __attribute__(( section(".rutinas")))
-byte __mi_memcpy(dword* src,dword *dst,dword length)
+uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
 {
+    uint8_t *dst = (uint8_t*)destino;
+    uint8_t *src = (uint8_t*)origen;
+    
     byte status = ERROR_DEFECTO;
     if(length>0)
     {

@@ -321,6 +321,8 @@ SECTIONS
         __KERNEL_LMA = LOADADDR(.video) + SIZEOF(.video);
         .kernel __KERNEL_VMA_LINEAL : AT (__KERNEL_LMA) {
                 *(.kernel);
+                ./bin/main.elf(.data*);
+                ./bin/main.elf(.bss*);
         } > ram
         __kernel_size = SIZEOF(.kernel);
 

@@ -50,10 +50,8 @@ int16_t fila_columna2indice(uint8_t fila, uint8_t columna)
 {
     if((fila < VIDEO_FILAS) && (columna < VIDEO_COLUMNAS))
         return columna + fila * VIDEO_COLUMNAS;
-    else{
-        MAGIC_BREAKPOINT
+    else
         return -1;
-        }
 }
 
 __attribute__(( section(".rutinas")))
