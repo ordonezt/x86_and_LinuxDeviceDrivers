@@ -227,6 +227,7 @@ __attribute__(( section(".interrupciones"))) void PIC0_IRQHandler_c(contexto_tar
 
     systick_incrementar_tick();
     pic_limpiar_interrupcion(INTERRUPCION_SYSTICK);
+    // MAGIC_BREAKPOINT
     scheduler(contexto_tarea_anterior);
     // asm("mov $0x20, %dl");
     // asm("hlt");

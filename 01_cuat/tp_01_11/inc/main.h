@@ -51,6 +51,8 @@ typedef struct{
 
 void scheduler(contexto_tarea_t contexto_tarea_anterior);
 void ir_a_dormir(void);
-void cambiar_contexto(contexto_tarea_t tarea_futura);
+void cambiar_contexto(contexto_tarea_t *tarea_futura);
+void paginacion_encender(void);
+void paginacion_apagar(void);
 
 #endif /*__MAIN_H*/

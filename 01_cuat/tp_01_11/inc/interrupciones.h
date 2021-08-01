@@ -53,4 +53,6 @@ void PIC13_IRQHandler(cuadro_interrupcion_t *cuadro);
 void PIC14_IRQHandler(cuadro_interrupcion_t *cuadro);
 void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro);
 
+void habilitar_interrupciones(void);
+void deshabilitar_interrupciones(void);
 #endif /*__INTERRUPCIONES_H*/

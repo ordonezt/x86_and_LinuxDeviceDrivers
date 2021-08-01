@@ -196,6 +196,19 @@ extern uint8_t __TAREA_4_BSS_VMA_FISICA[];
 extern uint8_t __TAREA_4_DATA_VMA_FISICA[];
 extern uint8_t __TAREA_4_RODATA_VMA_FISICA[];
 
+extern uint8_t __TAREA_1_PILA_INICIO_LINEAL[];
+extern uint8_t __TAREA_2_PILA_INICIO_LINEAL[];
+extern uint8_t __TAREA_3_PILA_INICIO_LINEAL[];
+extern uint8_t __TAREA_4_PILA_INICIO_LINEAL[];
+
+extern uint8_t __TAREA_1_PILA_INICIO_FISICA[];
+extern uint8_t __TAREA_2_PILA_INICIO_FISICA[];
+extern uint8_t __TAREA_3_PILA_INICIO_FISICA[];
+extern uint8_t __TAREA_4_PILA_INICIO_FISICA[];
+
+#define CS_SELECTOR 0b0000000000001000
+#define DS_SELECTOR 0b0000000000010000
+
 #define DTP     ((directorio_tabla_paginas_t *) __TABLAS_PAGINACION_VMA_LINEAL)
 #define PT      ((tabla_paginas_t *) &DTP[1])
 
@@ -217,15 +230,17 @@ extern int *ss_gdt;
 //                             DTP_tarea3 __attribute__ ((section (".tablas_paginacion"))), 
 //                             DTP_tarea4 __attribute__ ((section (".tablas_paginacion")));
 
-#define TP0         (tabla_paginas_t*)&DTP[5]
-#define TP1         (tabla_paginas_t*)&DTP[6]
-#define TP2         (tabla_paginas_t*)&DTP[7]
-#define TP3         (tabla_paginas_t*)&DTP[8]
-#define TP4         (tabla_paginas_t*)&DTP[9]
-#define TP5         (tabla_paginas_t*)&DTP[10]
-#define TP_tarea_2  (tabla_paginas_t*)&DTP[11]
-#define TP_tarea_3  (tabla_paginas_t*)&DTP[12]
-#define TP_tarea_4  (tabla_paginas_t*)&DTP[13]
+#define TP0_kernel         (tabla_paginas_t*)&DTP[5]
+#define TP1_kernel         (tabla_paginas_t*)&DTP[6]
+#define TP2_kernel         (tabla_paginas_t*)&DTP[7]
+#define TP3_kernel         (tabla_paginas_t*)&DTP[8]
+#define TP4_kernel         (tabla_paginas_t*)&DTP[9]
+
+#define TP0_tarea1         (tabla_paginas_t*)&DTP[10]
+#define TP1_tarea1         (tabla_paginas_t*)&DTP[11]
+#define TP2_tarea1         (tabla_paginas_t*)&DTP[12]
+#define TP3_tarea1         (tabla_paginas_t*)&DTP[13]
+#define TP4_tarea1         (tabla_paginas_t*)&DTP[14]
 
 // tabla_paginas_t TP0 __attribute__ ((section (".tablas_paginacion"))), 
 //                 TP1 __attribute__ ((section (".tablas_paginacion"))),

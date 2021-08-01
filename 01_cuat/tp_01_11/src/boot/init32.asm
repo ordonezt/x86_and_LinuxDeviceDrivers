@@ -29,6 +29,8 @@ extern __mi_memcpy_rom, __mi_memcpy, cargar_gdt, cargar_idt, init_pic, pic_desha
 extern kernel_init
 extern _gdtr_32, GDT_32, _idtr_32, IDT_32
 
+extern tareas_inicializar, __TAREA_1_PILA_INICIO_FISICA, tarea_1
+
 global init32
 init32:
 
@@ -205,11 +207,33 @@ init32:
     call init_pic
     call pic_deshabilitar_todo
 
+    ;call tareas_inicializar
+    call inicializar_pila_tarea1
+
     call paginacion_inicializar
 
-;Habilito las interrupciones
-    sti
+; ;Habilito las interrupciones
+;     sti
 
     ;Salto al kernel
     jmp CS_SEL_32 : kernel_init
 end_init32:
+
+inicializar_pila_tarea1:
+    pushad
+    
+    ;cargo EFLAGS en el stack
+    mov edi,__TAREA_1_PILA_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
+    mov eax,0x202             ;EFLAGS
+    mov [edi],eax
+    ;cargo CS en el stack
+    sub edi,4
+    mov eax,0x8             ;CS
+    mov [edi],eax
+    ;cargo el EIP en el stack
+    sub edi,4
+    mov eax,tarea_1             
+    mov [edi],eax  
+
+    popad
+    ret

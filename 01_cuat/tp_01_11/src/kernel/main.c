@@ -8,6 +8,7 @@
 #include "../../inc/tarea_4.h"
 #include "../../inc/pantalla.h"
 #include "../../inc/tablas_sistema.h"
+#include "../../inc/interrupciones.h"
 
 //Vector donde guardo el contexto de las tareas
 contexto_tarea_t contexto_tareas_tabla[10] = {0}; //Si son mas de 10 tareas modificar
@@ -18,24 +19,26 @@ int main(void)
     uint32_t tick;
 
     //Inicializaciones
+    tareas_inicializar();
     teclado_inicializar();
     systick_inicializar();
+    habilitar_interrupciones();
 
     //Loop
     while(1)
     {
         tick = systick_get_tick();
         
-        if((tick % PERIODO_TAREA_1) == 0)
-            tarea_1();
+        // if((tick % PERIODO_TAREA_1) == 0)
+        //     tarea_1();
 
-        if((tick % PERIODO_TAREA_2) == 0)
-            tarea_2();
+        // if((tick % PERIODO_TAREA_2) == 0)
+        //     tarea_2();
 
-        if((tick % PERIODO_TAREA_3) == 0)
-            tarea_3();
+        // if((tick % PERIODO_TAREA_3) == 0)
+        //     tarea_3();
 
-        tarea_4();
+        // tarea_4();
     }
 }
 
@@ -43,6 +46,31 @@ __attribute__(( section(".kernel")))
 uint8_t get_numero_tarea(contexto_tarea_t contexto)
 {
     return (contexto.CR3 - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
+}
+
+__attribute__(( section(".kernel")))
+void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pila)
+{
+    uint8_t n_tarea = ((uint32_t)dtp - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
+    contexto_tarea_t *contexto = &contexto_tareas_tabla[n_tarea];
+    
+    contexto->CS = CS_SELECTOR;
+    contexto->DS = contexto->ES = contexto->FS = contexto->GS = contexto->SS = DS_SELECTOR;
+    contexto->EBP = (uint32_t)pila;
+    contexto->ESP = contexto->EBP - (3 + 4 * 2);
+    contexto->EIP = (uint32_t)tarea;
+    contexto->CR3 = (uint32_t)dtp;
+    contexto->EFLAGS = 2;
+
+    // *(((uint32_t*)pila_fisica) + 0) = contexto->EFLAGS;
+    // *(((uint32_t*)pila_fisica) - 1) = contexto->CS;
+    // *(((uint32_t*)pila_fisica) - 2) = contexto->EIP;
+}
+
+__attribute__(( section(".kernel")))
+void tareas_inicializar(void)
+{
+    inicializar_contexto(DTP_tarea1, tarea_1, __TAREA_1_PILA_INICIO_LINEAL);
 }
 
 __attribute__(( section(".kernel")))
@@ -71,6 +99,10 @@ __attribute__(( section(".kernel")))
 void scheduler(contexto_tarea_t contexto_tarea_anterior)
 {
     uint8_t aux[11], tarea_anterior;
+    static uint8_t n_tarea_anterior_aux=0;
+
+    n_tarea_anterior_aux++;
+    n_tarea_anterior_aux %= 2;
 
     // //TODO Limpiar y pushear
     // hex32_2_str(contexto_tarea_anterior.EFLAGS, aux);
@@ -116,7 +148,7 @@ void scheduler(contexto_tarea_t contexto_tarea_anterior)
     // my_printf((uint8_t*)"ES : ", 24, 0);
     // my_printf(aux, 24, 5);
 
-
+    //MAGIC_BREAKPOINT
     tarea_anterior = get_numero_tarea(contexto_tarea_anterior);
     hex32_2_str(tarea_anterior, aux);
     my_printf((uint8_t*)"Tarea interrumpida: ", 11, 40);
@@ -174,7 +206,12 @@ void scheduler(contexto_tarea_t contexto_tarea_anterior)
     // guardar_contexto(contexto_tarea_anterior);
     //MAGIC_BREAKPOINT
     // cambiar_contexto(contexto_tareas_tabla[tarea_anterior]);
-    cambiar_contexto(contexto_tareas_tabla[tarea_anterior]);
+    
+
+    //APAGAR PAGINACION EN EL CAMBIO??
+    //EN eL cambio de contexto estoy usando la pila de kernel, que la tarea no tiene paginada
+    // MAGIC_BREAKPOINT
+    cambiar_contexto(&contexto_tareas_tabla[n_tarea_anterior_aux]);
 }
 
 __attribute__(( section(".kernel")))
