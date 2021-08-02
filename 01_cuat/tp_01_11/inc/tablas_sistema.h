@@ -121,6 +121,9 @@ extern uint8_t __TAREA_1_RODATA_VMA_LINEAL[];
 extern uint8_t __tarea_1_rodata_size[];
 extern uint8_t __KERNEL_PILA_FINAL_LINEAL[];
 extern uint8_t __TAREA_1_PILA_FINAL_LINEAL[];
+extern uint8_t __TAREA_2_PILA_FINAL_LINEAL[];
+extern uint8_t __TAREA_3_PILA_FINAL_LINEAL[];
+extern uint8_t __TAREA_4_PILA_FINAL_LINEAL[];
 extern uint8_t __ROM_VMA_LINEAL[];
 extern uint8_t __RUTINAS_ROM_VMA_LINEAL[];
 extern uint8_t __TABLAS_SISTEMA_16_VMA_LINEAL[];
@@ -141,6 +144,9 @@ extern uint8_t __TAREA_1_DATA_VMA_FISICA[];
 extern uint8_t __TAREA_1_RODATA_VMA_FISICA[];
 extern uint8_t __KERNEL_PILA_FINAL_FISICA[];
 extern uint8_t __TAREA_1_PILA_FINAL_FISICA[];
+extern uint8_t __TAREA_2_PILA_FINAL_FISICA[];
+extern uint8_t __TAREA_3_PILA_FINAL_FISICA[];
+extern uint8_t __TAREA_4_PILA_FINAL_FISICA[];
 extern uint8_t __ROM_VMA_FISICA[];
 extern uint8_t __RUTINAS_ROM_VMA_FISICA[];
 extern uint8_t __TABLAS_SISTEMA_16_VMA_FISICA[];
@@ -241,6 +247,27 @@ extern int *ss_gdt;
 #define TP2_tarea1         (tabla_paginas_t*)&DTP[12]
 #define TP3_tarea1         (tabla_paginas_t*)&DTP[13]
 #define TP4_tarea1         (tabla_paginas_t*)&DTP[14]
+
+#define TP0_tarea2         (tabla_paginas_t*)&DTP[15]
+#define TP1_tarea2         (tabla_paginas_t*)&DTP[16]
+#define TP2_tarea2         (tabla_paginas_t*)&DTP[17]
+#define TP3_tarea2         (tabla_paginas_t*)&DTP[18]
+#define TP4_tarea2         (tabla_paginas_t*)&DTP[19]
+#define TP5_tarea2         (tabla_paginas_t*)&DTP[20]
+
+#define TP0_tarea3         (tabla_paginas_t*)&DTP[21]
+#define TP1_tarea3         (tabla_paginas_t*)&DTP[22]
+#define TP2_tarea3         (tabla_paginas_t*)&DTP[23]
+#define TP3_tarea3         (tabla_paginas_t*)&DTP[24]
+#define TP4_tarea3         (tabla_paginas_t*)&DTP[25]
+#define TP5_tarea3         (tabla_paginas_t*)&DTP[26]
+
+#define TP0_tarea4         (tabla_paginas_t*)&DTP[27]
+#define TP1_tarea4         (tabla_paginas_t*)&DTP[28]
+#define TP2_tarea4         (tabla_paginas_t*)&DTP[29]
+#define TP3_tarea4         (tabla_paginas_t*)&DTP[30]
+#define TP4_tarea4         (tabla_paginas_t*)&DTP[31]
+#define TP5_tarea4         (tabla_paginas_t*)&DTP[32]
 
 // tabla_paginas_t TP0 __attribute__ ((section (".tablas_paginacion"))), 
 //                 TP1 __attribute__ ((section (".tablas_paginacion"))),

@@ -8,8 +8,8 @@ void tarea_3(void)
     uint64_t suma;
     uint8_t cadena_suma[21];
 
-    // while(1)
-    // {
+    while(1)
+    {
 
         suma = suma_tabla_digitos();
 
@@ -20,5 +20,5 @@ void tarea_3(void)
 
         //ir_a_dormir();
 
-    // }
+    }
 }

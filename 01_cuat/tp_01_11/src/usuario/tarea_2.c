@@ -8,8 +8,8 @@ void tarea_2(void)
     uint64_t suma;
     uint8_t cadena_suma[21];
 
-    // while(1)
-    // {
+    while(1)
+    {
         suma = suma_tabla_digitos();
 
         hex64_2_str(suma, cadena_suma);
@@ -19,5 +19,5 @@ void tarea_2(void)
 
         //ir_a_dormir();
 
-    // }
+    }
 }
