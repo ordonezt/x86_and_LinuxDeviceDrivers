@@ -39,6 +39,7 @@
  **Comentarios:**
 	- Se hizo identity mapping entre 0x00010000 (<code>__TABLAS_PAGINACION_VMA_FISICA</code>) y 0x00050000 (<code>__RUTINAS_VMA_FISICA</code>) para evitar iteracion infinita en la paginacion dinamica.
 
+- [X] TP01.11  
 <!-- ## TP Integrador
 - [ ] Servidor  
  **Comentarios:**
