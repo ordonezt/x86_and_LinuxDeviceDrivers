@@ -219,6 +219,11 @@ init32:
 
 ; ;Habilito las interrupciones
 ;     sti
+    push eax
+    mov eax, cr0
+    and eax, 0xFFFFFFFB
+    mov cr0, eax
+    pop eax
 
     ;Salto al kernel
     jmp CS_SEL_32 : kernel_init

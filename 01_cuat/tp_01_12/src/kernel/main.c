@@ -10,8 +10,17 @@
 #include "../../inc/tablas_sistema.h"
 #include "../../inc/interrupciones.h"
 
+typedef struct{
+    uint8_t registros[512] __attribute__ ((aligned(16)));
+}contexto_simd_t;
+
+void guardar_registros_simd(contexto_simd_t *contexto);
+void restaurar_registros_simd(contexto_simd_t *contexto);
+
+
 //Vector donde guardo el contexto de las tareas
-contexto_tarea_t contexto_tareas_tabla[10] = {0}; //Si son mas de 10 tareas modificar
+contexto_tarea_t contexto_tareas_tabla[5] = {0}; //Si son mas de 5 tareas modificar
+contexto_simd_t  contexto_simd_tabla[5] = {0};//__attribute__ ((aligned(32))) = {0};
 
 __attribute__(( section(".kernel")))
 int main(void)
@@ -85,6 +94,8 @@ void guardar_contexto(contexto_tarea_t contexto_tarea)
     n_tarea = get_numero_tarea(contexto_tarea);
 
     __mi_memcpy(&contexto_tarea, &contexto_tareas_tabla[n_tarea], sizeof(contexto_tarea));
+    MAGIC_BREAKPOINT
+    guardar_registros_simd(&contexto_simd_tabla[n_tarea]);
 }
 
 __attribute__(( section(".kernel")))

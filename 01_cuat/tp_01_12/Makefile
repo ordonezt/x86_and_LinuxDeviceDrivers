@@ -17,7 +17,7 @@ LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
 #en objs guardo todos mis objetos elf
-OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)sys_tables_16.elf $(BINPATH)sys_tables_32.elf $(BINPATH)init16.elf $(BINPATH)main.elf  $(BINPATH)kernel.elf  $(BINPATH)rutinas.elf $(BINPATH)rutinas_rom.elf $(BINPATH)tablas_sistema.elf $(BINPATH)interrupciones.elf $(BINPATH)pic.elf $(BINPATH)teclado.elf $(BINPATH)io.elf  $(BINPATH)ring_buffer.elf  $(BINPATH)systick.elf  $(BINPATH)pantalla.elf  $(BINPATH)init_screen.elf  $(BINPATH)tarea_1.elf  $(BINPATH)tarea_2.elf  $(BINPATH)tarea_3.elf  $(BINPATH)tarea_4.elf  $(BINPATH)interrupciones_asm.elf $(BINPATH)dsp.elf
+OBJS = $(BINPATH)init32.elf $(BINPATH)reset.elf $(BINPATH)sys_tables_16.elf $(BINPATH)sys_tables_32.elf $(BINPATH)init16.elf $(BINPATH)main.elf  $(BINPATH)kernel.elf  $(BINPATH)rutinas.elf $(BINPATH)rutinas_rom.elf $(BINPATH)tablas_sistema.elf $(BINPATH)interrupciones.elf $(BINPATH)pic.elf $(BINPATH)teclado.elf $(BINPATH)io.elf  $(BINPATH)ring_buffer.elf  $(BINPATH)systick.elf  $(BINPATH)pantalla.elf  $(BINPATH)init_screen.elf  $(BINPATH)tarea_1.elf  $(BINPATH)tarea_2.elf  $(BINPATH)tarea_3.elf  $(BINPATH)tarea_4.elf  $(BINPATH)interrupciones_asm.elf $(BINPATH)simd.elf
 
 SRC_NAME = mi_bios
 
@@ -41,7 +41,7 @@ $(BINPATH)kernel.elf: $(SRCPATH)kernel/kernel.asm
 	mkdir -p bin
 	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
 
-$(BINPATH)dsp.elf: $(SRCPATH)kernel/dsp.asm
+$(BINPATH)simd.elf: $(SRCPATH)kernel/simd.asm
 	@echo Generando $@
 	mkdir -p bin
 	$(AC) $(AFLAGS) $< -o $@ -l $@.lst
