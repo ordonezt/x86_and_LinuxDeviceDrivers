@@ -4,6 +4,9 @@ section .rutinas
 
 global sumatoria_uint16_saturada, sumatoria_uint64_saturada
 global guardar_registros_simd, restaurar_registros_simd
+global habilitar_NM
+
+extern borrar_cr0_ts
 
 ;uint64_t sumatoria_uint16_saturada(uint64_t datos[], uint32_t cantidad);
 sumatoria_uint16_saturada:
@@ -71,4 +74,23 @@ restaurar_registros_simd:
     mov     edi, [esp + 4 * 2]
     fxrstor [edi]
     pop     edi
+    ret
+
+habilitar_NM:
+    push eax
+
+    ;CR0.EM = 0
+    mov eax, cr0
+    and  eax, 0xFFFFFFFB
+    mov cr0, eax
+
+    ;CR0.TS = 0
+    call borrar_cr0_ts
+
+    ;CR4.OSFXSR = 1
+    mov  eax, cr4
+    or   eax, 0x200
+    mov  cr4, eax
+
+    pop eax
     ret

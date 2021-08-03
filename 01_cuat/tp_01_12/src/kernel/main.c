@@ -10,14 +10,6 @@
 #include "../../inc/tablas_sistema.h"
 #include "../../inc/interrupciones.h"
 
-typedef struct{
-    uint8_t registros[512] __attribute__ ((aligned(16)));
-}contexto_simd_t;
-
-void guardar_registros_simd(contexto_simd_t *contexto);
-void restaurar_registros_simd(contexto_simd_t *contexto);
-
-
 //Vector donde guardo el contexto de las tareas
 contexto_tarea_t contexto_tareas_tabla[5] = {0}; //Si son mas de 5 tareas modificar
 contexto_simd_t  contexto_simd_tabla[5] = {0};//__attribute__ ((aligned(32))) = {0};
@@ -58,6 +50,12 @@ uint8_t get_numero_tarea(contexto_tarea_t contexto)
 }
 
 __attribute__(( section(".kernel")))
+uint8_t get_numero_tarea_actual(void)
+{
+    return ((uint32_t)get_cr3() - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
+}
+
+__attribute__(( section(".kernel")))
 void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pila)
 {
     uint8_t n_tarea = ((uint32_t)dtp - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
@@ -94,7 +92,6 @@ void guardar_contexto(contexto_tarea_t contexto_tarea)
     n_tarea = get_numero_tarea(contexto_tarea);
 
     __mi_memcpy(&contexto_tarea, &contexto_tareas_tabla[n_tarea], sizeof(contexto_tarea));
-    MAGIC_BREAKPOINT
     guardar_registros_simd(&contexto_simd_tabla[n_tarea]);
 }
 
@@ -190,6 +187,7 @@ void scheduler(contexto_tarea_t contexto_tarea_anterior)
     // my_printf(aux, 24, 5);    
 
     //MAGIC_BREAKPOINT
+    prender_cr0_ts();
     cambiar_contexto(&contexto_tareas_tabla[tarea_siguiente]);
 }
 

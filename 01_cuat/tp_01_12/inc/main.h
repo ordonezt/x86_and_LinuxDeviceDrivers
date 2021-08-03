@@ -45,10 +45,20 @@ typedef struct{
     uint32_t EFLAGS;
 }contexto_tarea_t;
 
+typedef struct{
+    uint8_t registros[512] __attribute__ ((aligned(16)));
+}contexto_simd_t;
+
 #define PERIODO_TAREA_1     COUNT_500ms
 #define PERIODO_TAREA_2     COUNT_100ms
 #define PERIODO_TAREA_3     COUNT_200ms
 
+void* get_cr3(void);
+void borrar_cr0_ts(void);
+void prender_cr0_ts(void);
+uint8_t get_numero_tarea_actual(void);
+void guardar_registros_simd(contexto_simd_t *contexto);
+void restaurar_registros_simd(contexto_simd_t *contexto);
 void scheduler(contexto_tarea_t contexto_tarea_anterior);
 void ir_a_dormir(void);
 void cambiar_contexto(contexto_tarea_t *tarea_futura);

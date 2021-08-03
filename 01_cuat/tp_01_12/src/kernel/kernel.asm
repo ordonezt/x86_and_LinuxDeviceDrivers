@@ -3,6 +3,7 @@ USE32
 section .kernel
 
 global kernel_init, cambiar_contexto, paginacion_apagar, paginacion_encender
+global get_cr3, borrar_cr0_ts, prender_cr0_ts
 extern main
 
 
@@ -18,6 +19,11 @@ kernel_init:
     hlt
     
 end_kernel:
+
+;void* get_cr3(void);
+get_cr3:
+    mov eax, cr3
+    ret
 
 ;void cambiar_contexto(contexto_tarea_t)
 cambiar_contexto:
@@ -96,3 +102,22 @@ paginacion_encender:
     or  eax, 0x80000000
     mov cr0, eax
     ret
+
+;void borrar_cr0_ts(void);
+borrar_cr0_ts:
+    push eax
+    mov  eax, cr0
+    and  eax, 0xFFFFFFF7
+    mov  cr0, eax
+    pop  eax
+    ret
+
+;void prender_cr0_ts(void);
+prender_cr0_ts:
+    push eax
+    mov  eax, cr0
+    or   eax, 0x8
+    mov  cr0, eax
+    pop  eax
+    ret
+    

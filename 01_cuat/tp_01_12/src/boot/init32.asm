@@ -33,6 +33,8 @@ extern tareas_inicializar
 extern tarea_1, tarea_2, tarea_3, tarea_4
 extern __TAREA_1_PILA_INICIO_FISICA, __TAREA_2_PILA_INICIO_FISICA, __TAREA_3_PILA_INICIO_FISICA, __TAREA_4_PILA_INICIO_FISICA
 
+extern habilitar_NM
+
 global init32
 init32:
 
@@ -219,11 +221,7 @@ init32:
 
 ; ;Habilito las interrupciones
 ;     sti
-    push eax
-    mov eax, cr0
-    and eax, 0xFFFFFFFB
-    mov cr0, eax
-    pop eax
+    call habilitar_NM
 
     ;Salto al kernel
     jmp CS_SEL_32 : kernel_init
