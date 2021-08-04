@@ -58,6 +58,62 @@ __TABLA_DIGITOS_VMA_FISICA     = 0x00210000; /*donde se almacenan los digitos*/
 __TABLA_DIGITOS_VMA_LINEAL     = 0x01210000; /*donde se almacenan los digitos*/
 
 /***********************************************/
+/*Contextos*/
+/***********************************************/
+/*__TAREA_0_CONTEXTO_GENERAL_VMA_FISICA   = 0x00230000; donde se almacenan el contexto general de la tarea 0*/
+/*__TAREA_0_CONTEXTO_SIMD_VMA_FISICA      = 0x00230050; donde se almacenan el contexto simd de la tarea 0*/
+/*__TAREA_0_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01230000; donde se almacenan el contexto general de la tarea 0*/
+/*__TAREA_0_CONTEXTO_SIMD_VMA_LINEAL      = 0x01230050; donde se almacenan el contexto simd de la tarea 0*/
+
+/*__TAREA_1_CONTEXTO_GENERAL_VMA_FISICA   = 0x00350000; donde se almacenan el contexto general de la tarea 1*/
+/*__TAREA_1_CONTEXTO_SIMD_VMA_FISICA      = 0x00350050; donde se almacenan el contexto simd de la tarea 1*/
+/*__TAREA_1_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01350000; donde se almacenan el contexto general de la tarea 1*/
+/*__TAREA_1_CONTEXTO_SIMD_VMA_LINEAL      = 0x01350050; donde se almacenan el contexto simd de la tarea 1*/
+
+/*__TAREA_2_CONTEXTO_GENERAL_VMA_FISICA   = 0x00450000; donde se almacenan el contexto general de la tarea 2*/
+/*__TAREA_2_CONTEXTO_SIMD_VMA_FISICA      = 0x00450050; donde se almacenan el contexto simd de la tarea 2*/
+/*__TAREA_2_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01450000; donde se almacenan el contexto general de la tarea 2*/
+/*__TAREA_2_CONTEXTO_SIMD_VMA_LINEAL      = 0x01450050; donde se almacenan el contexto simd de la tarea 2*/
+
+/*__TAREA_3_CONTEXTO_GENERAL_VMA_FISICA   = 0x00550000; donde se almacenan el contexto general de la tarea 3*/
+/*__TAREA_3_CONTEXTO_SIMD_VMA_FISICA      = 0x00550050; donde se almacenan el contexto simd de la tarea 3*/
+/*__TAREA_3_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01550000; donde se almacenan el contexto general de la tarea 3*/
+/*__TAREA_3_CONTEXTO_SIMD_VMA_LINEAL      = 0x01550050; donde se almacenan el contexto simd de la tarea 3*/
+
+/*__TAREA_4_CONTEXTO_GENERAL_VMA_FISICA   = 0x00650000; donde se almacenan el contexto general de la tarea 4*/
+/*__TAREA_4_CONTEXTO_SIMD_VMA_FISICA      = 0x00650050; donde se almacenan el contexto simd de la tarea 4*/
+/*__TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01650000; donde se almacenan el contexto general de la tarea 4*/
+/*__TAREA_4_CONTEXTO_SIMD_VMA_LINEAL      = 0x01650050; donde se almacenan el contexto simd de la tarea 4*/
+
+
+
+
+__TAREA_0_CONTEXTO_GENERAL_VMA_FISICA   = 0x00800000; /*donde se almacenan el contexto general de la tarea 0*/
+__TAREA_0_CONTEXTO_SIMD_VMA_FISICA      = 0x00800050; /*donde se almacenan el contexto simd de la tarea 0*/
+__TAREA_0_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01800000; /*donde se almacenan el contexto general de la tarea 0*/
+__TAREA_0_CONTEXTO_SIMD_VMA_LINEAL      = 0x01800050; /*donde se almacenan el contexto simd de la tarea 0*/
+
+__TAREA_1_CONTEXTO_GENERAL_VMA_FISICA   = 0x00810000; /*donde se almacenan el contexto general de la tarea 1*/
+__TAREA_1_CONTEXTO_SIMD_VMA_FISICA      = 0x00810050; /*donde se almacenan el contexto simd de la tarea 1*/
+__TAREA_1_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01810000; /*donde se almacenan el contexto general de la tarea 1*/
+__TAREA_1_CONTEXTO_SIMD_VMA_LINEAL      = 0x01810050; /*donde se almacenan el contexto simd de la tarea 1*/
+
+__TAREA_2_CONTEXTO_GENERAL_VMA_FISICA   = 0x00820000; /*donde se almacenan el contexto general de la tarea 2*/
+__TAREA_2_CONTEXTO_SIMD_VMA_FISICA      = 0x00820050; /*donde se almacenan el contexto simd de la tarea 2*/
+__TAREA_2_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01820000; /*donde se almacenan el contexto general de la tarea 2*/
+__TAREA_2_CONTEXTO_SIMD_VMA_LINEAL      = 0x01820050; /*donde se almacenan el contexto simd de la tarea 2*/
+
+__TAREA_3_CONTEXTO_GENERAL_VMA_FISICA   = 0x00830000; /*donde se almacenan el contexto general de la tarea 3*/
+__TAREA_3_CONTEXTO_SIMD_VMA_FISICA      = 0x00830050; /*donde se almacenan el contexto simd de la tarea 3*/
+__TAREA_3_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01830000; /*donde se almacenan el contexto general de la tarea 3*/
+__TAREA_3_CONTEXTO_SIMD_VMA_LINEAL      = 0x01830050; /*donde se almacenan el contexto simd de la tarea 3*/
+
+__TAREA_4_CONTEXTO_GENERAL_VMA_FISICA   = 0x00840000; /*donde se almacenan el contexto general de la tarea 4*/
+__TAREA_4_CONTEXTO_SIMD_VMA_FISICA      = 0x00840050; /*donde se almacenan el contexto simd de la tarea 4*/
+__TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01840000; /*donde se almacenan el contexto general de la tarea 4*/
+__TAREA_4_CONTEXTO_SIMD_VMA_LINEAL      = 0x01840050; /*donde se almacenan el contexto simd de la tarea 4*/
+
+/***********************************************/
 /*Datos*/ 
 /***********************************************/
 __DATOS_VMA_FISICA             = 0x00200000; /*donde guardo datos y variables globales*/

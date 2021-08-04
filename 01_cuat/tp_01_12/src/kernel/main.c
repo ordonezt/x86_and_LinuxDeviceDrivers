@@ -13,6 +13,7 @@
 //Vector donde guardo el contexto de las tareas
 contexto_tarea_t contexto_tareas_tabla[5] = {0}; //Si son mas de 5 tareas modificar
 contexto_simd_t  contexto_simd_tabla[5] = {0};//__attribute__ ((aligned(32))) = {0};
+directorio_tabla_paginas_t* dtp_tareas_tabla[5] = {DTP_kernel, DTP_tarea1, DTP_tarea2, DTP_tarea3, DTP_tarea4};
 
 __attribute__(( section(".kernel")))
 int main(void)
@@ -96,9 +97,9 @@ void guardar_contexto(contexto_tarea_t contexto_tarea)
 }
 
 __attribute__(( section(".kernel")))
-void scheduler(contexto_tarea_t contexto_tarea_anterior)
+void scheduler(contexto_tarea_t contexto_tarea_actual)
 {
-    uint8_t aux[11], tarea_anterior;
+    uint8_t aux[11], tarea_actual;
     static uint8_t tarea_siguiente=0;
     static uint32_t cuenta_tarea_1 = PERIODO_TAREA_1,
                     cuenta_tarea_2 = PERIODO_TAREA_2,
@@ -135,12 +136,12 @@ void scheduler(contexto_tarea_t contexto_tarea_anterior)
     // tarea_siguiente %= 5;
 
     //MAGIC_BREAKPOINT
-    tarea_anterior = get_numero_tarea(contexto_tarea_anterior);
+    tarea_actual = get_numero_tarea(contexto_tarea_actual);
     
-    hex32_2_str(tarea_anterior, aux);
+    hex32_2_str(tarea_actual, aux);
     my_printf((uint8_t*)"Tarea interrumpida: ", 11, 40);
     my_printf(aux, 11, 40 + 21);
-    guardar_contexto(contexto_tarea_anterior);
+    
 
     // //TODO Limpiar y pushear
     // hex32_2_str(contexto_tareas_tabla[tarea_anterior].EFLAGS, aux);
@@ -187,8 +188,12 @@ void scheduler(contexto_tarea_t contexto_tarea_anterior)
     // my_printf(aux, 24, 5);    
 
     //MAGIC_BREAKPOINT
-    prender_cr0_ts();
-    cambiar_contexto(&contexto_tareas_tabla[tarea_siguiente]);
+    if(tarea_actual != tarea_siguiente)
+    {
+        guardar_contexto(contexto_tarea_actual);
+        prender_cr0_ts();
+        cambiar_contexto(&contexto_tareas_tabla[tarea_siguiente]);
+    }
 }
 
 __attribute__(( section(".kernel")))
