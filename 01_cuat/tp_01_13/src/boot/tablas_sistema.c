@@ -37,7 +37,7 @@ void cargar_gdt(descriptor_segmento_t GDT[], registro_descriptor_segmento_t *gdt
     uint16_t limite;
 
     //Al agregar descriptores hay que modificar "CANT_DESC_SEGM" en sys_tables_32.asm, para que la idt no pise la gdt
-    
+
     //Descriptor nulo
     cargar_descriptor_segmento(&GDT[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     //cargar_descriptor_segmento(&GDT[0], 0xFFFFFFFF, 0xFFFFFFFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0, 0, 0, 0, 0, 0);
@@ -562,7 +562,7 @@ void DTP_kernel_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        1,  //Escritura
                         1   //Presente
                         );
 
@@ -619,7 +619,7 @@ void DTP_kernel_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        0,  //R
                         1   //Presente
                         );
     
@@ -1007,7 +1007,7 @@ void DTP_tarea_1_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1021,7 +1021,7 @@ void DTP_tarea_1_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1036,7 +1036,7 @@ void DTP_tarea_1_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        0,  //R
                         1   //Presente
                         );
 
@@ -1276,7 +1276,7 @@ void PTs_tarea_1_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -1300,8 +1300,8 @@ void PTs_tarea_1_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
-                            1,                      //Escritura
+                            3,                      //Usuario
+                            0,                      //Lectura
                             1);                     //Presente
     }
     
@@ -1324,7 +1324,7 @@ void PTs_tarea_1_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             1,                      //Escritura
                             1);                     //Presente
     }
@@ -1348,7 +1348,7 @@ void PTs_tarea_1_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -1365,7 +1365,7 @@ void PTs_tarea_1_inicializar()
                         0,                      //A si
                         0,                      //PCD no
                         0,                      //PWT no
-                        0,                      //Supervisor
+                        3,                      //Usuario
                         1,                      //Escritura
                         1);                     //Presente
     
@@ -1473,7 +1473,7 @@ void DTP_tarea_2_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1487,7 +1487,7 @@ void DTP_tarea_2_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1502,7 +1502,7 @@ void DTP_tarea_2_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        0,  //R
                         1   //Presente
                         );
 
@@ -1742,7 +1742,7 @@ void PTs_tarea_2_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -1766,8 +1766,8 @@ void PTs_tarea_2_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
-                            1,                      //Escritura
+                            3,                      //Usuario
+                            0,                      //Lectura
                             1);                     //Presente
     }
     
@@ -1790,7 +1790,7 @@ void PTs_tarea_2_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             1,                      //Escritura
                             1);                     //Presente
     }
@@ -1814,7 +1814,7 @@ void PTs_tarea_2_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -1831,7 +1831,7 @@ void PTs_tarea_2_inicializar()
                         0,                      //A si
                         0,                      //PCD no
                         0,                      //PWT no
-                        0,                      //Supervisor
+                        3,                      //Usuario
                         1,                      //Escritura
                         1);                     //Presente
 
@@ -1939,7 +1939,7 @@ void DTP_tarea_3_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1953,7 +1953,7 @@ void DTP_tarea_3_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -1968,7 +1968,7 @@ void DTP_tarea_3_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        0,  //R
                         1   //Presente
                         );
 
@@ -2209,7 +2209,7 @@ void PTs_tarea_3_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -2233,8 +2233,8 @@ void PTs_tarea_3_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
-                            1,                      //Escritura
+                            3,                      //Usuario
+                            0,                      //Lectura
                             1);                     //Presente
     }
     
@@ -2257,7 +2257,7 @@ void PTs_tarea_3_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             1,                      //Escritura
                             1);                     //Presente
     }
@@ -2281,7 +2281,7 @@ void PTs_tarea_3_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -2298,7 +2298,7 @@ void PTs_tarea_3_inicializar()
                         0,                      //A si
                         0,                      //PCD no
                         0,                      //PWT no
-                        0,                      //Supervisor
+                        3,                      //Usuario
                         1,                      //Escritura
                         1);                     //Presente
     
@@ -2406,7 +2406,7 @@ void DTP_tarea_4_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -2420,7 +2420,7 @@ void DTP_tarea_4_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //Accedida
                         0,  //PCD NO
                         0,  //PWT NO
-                        0,  //Supervisor
+                        3,  //Usuario
                         1,  //RW
                         1   //Presente
                         );
@@ -2435,7 +2435,7 @@ void DTP_tarea_4_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         0,  //PCD NO
                         0,  //PWT NO
                         0,  //Supervisor
-                        1,  //RW
+                        0,  //R
                         1   //Presente
                         );
 
@@ -2675,7 +2675,7 @@ void PTs_tarea_4_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -2699,8 +2699,8 @@ void PTs_tarea_4_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
-                            1,                      //Escritura
+                            3,                      //Usuario
+                            0,                      //Lectura
                             1);                     //Presente
     }
     
@@ -2723,7 +2723,7 @@ void PTs_tarea_4_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             1,                      //Escritura
                             1);                     //Presente
     }
@@ -2747,7 +2747,7 @@ void PTs_tarea_4_inicializar()
                             0,                      //A si
                             0,                      //PCD no
                             0,                      //PWT no
-                            0,                      //Supervisor
+                            3,                      //Usuario
                             0,                      //Lectura
                             1);                     //Presente
     }
@@ -2764,7 +2764,7 @@ void PTs_tarea_4_inicializar()
                         0,                      //A si
                         0,                      //PCD no
                         0,                      //PWT no
-                        0,                      //Supervisor
+                        3,                      //Usuario
                         1,                      //Escritura
                         1);                     //Presente
     
