@@ -62,8 +62,8 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     uint8_t n_tarea = ((uint32_t)dtp - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
     contexto_tarea_t *contexto = contexto_tareas_tabla[n_tarea];
     
-    contexto->CS = CS_SELECTOR;
-    contexto->DS = contexto->ES = contexto->FS = contexto->GS = contexto->SS = DS_SELECTOR;
+    contexto->CS = CS3_SELECTOR;
+    contexto->DS = contexto->ES = contexto->FS = contexto->GS = contexto->SS = DS3_SELECTOR;
     contexto->EBP = (uint32_t)pila;
     contexto->ESP = contexto->EBP - (3 + 4 * 2);
     contexto->EIP = (uint32_t)tarea;
@@ -99,6 +99,7 @@ void guardar_contexto(contexto_tarea_t contexto_tarea)
 __attribute__(( section(".kernel")))
 void scheduler(contexto_tarea_t contexto_tarea_actual)
 {
+    MAGIC_BREAKPOINT
     uint8_t aux[11], tarea_actual;
     static uint8_t tarea_siguiente=0;
     static uint32_t cuenta_tarea_1 = PERIODO_TAREA_1,

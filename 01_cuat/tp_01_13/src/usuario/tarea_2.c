@@ -10,14 +10,14 @@ void tarea_2(void)
 
     while(1)
     {
-        suma = suma_tabla_digitos_saturada_16();
+        // suma = suma_tabla_digitos_saturada_16();
 
-        hex64_2_str(suma, cadena_suma);
+        // hex64_2_str(suma, cadena_suma);
         
-        my_printf((uint8_t*)"Suma tarea 2: ", 5, 0);
-        my_printf(cadena_suma, 5, strlen((uint8_t*)"Suma tarea 2: "));
+        // my_printf((uint8_t*)"Suma tarea 2: ", 5, 0);
+        // my_printf(cadena_suma, 5, strlen((uint8_t*)"Suma tarea 2: "));
 
-        //ir_a_dormir();
+        // //ir_a_dormir();
 
     }
 }

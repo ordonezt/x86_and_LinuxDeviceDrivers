@@ -13,7 +13,7 @@ __DS_LIMITE EQU     __CS_LIMITE
 __SS_BASE   EQU     __CS_BASE
 __SS_LIMITE EQU     __CS_LIMITE
 
-%define CANT_DESC_SEGM 4
+%define CANT_DESC_SEGM 5 ;Nulo + 2 codigo + 2 datos
 
 section .tablas_sistema
 

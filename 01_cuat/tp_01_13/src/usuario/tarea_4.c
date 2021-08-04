@@ -7,5 +7,5 @@ __attribute__(( section(".tarea_4")))
 void tarea_4(void)
 {
     while(1) 
-        ir_a_dormir();
+        ;//ir_a_dormir();
 }

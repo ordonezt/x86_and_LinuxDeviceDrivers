@@ -11,12 +11,12 @@ void tarea_3(void)
     while(1)
     {
 
-        suma = suma_tabla_digitos_saturada_64();
+        // suma = suma_tabla_digitos_saturada_64();
 
-        hex64_2_str(suma, cadena_suma);
+        // hex64_2_str(suma, cadena_suma);
         
-        my_printf((uint8_t*)"Suma tarea 3: ", 10, 0);
-        my_printf(cadena_suma, 10, strlen((uint8_t*)"Suma tarea 3: "));
+        // my_printf((uint8_t*)"Suma tarea 3: ", 10, 0);
+        // my_printf(cadena_suma, 10, strlen((uint8_t*)"Suma tarea 3: "));
 
         //ir_a_dormir();
 

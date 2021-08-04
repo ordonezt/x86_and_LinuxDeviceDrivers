@@ -36,14 +36,27 @@ void cargar_gdt(descriptor_segmento_t GDT[], registro_descriptor_segmento_t *gdt
 {
     uint16_t limite;
 
+    //Al agregar descriptores hay que modificar "CANT_DESC_SEGM" en sys_tables_32.asm, para que la idt no pise la gdt
+    
     //Descriptor nulo
     cargar_descriptor_segmento(&GDT[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     //cargar_descriptor_segmento(&GDT[0], 0xFFFFFFFF, 0xFFFFFFFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0, 0, 0, 0, 0, 0);
 
-    //Descriptor de codigo
-    cargar_descriptor_segmento(&GDT[1], __CS_BASE, __CS_LIMITE, 1, 1, 0, 0, 1, 00, 1, 1, 0, 0, 1);
+    //Descriptor de codigo de alto privilegio
+    cargar_descriptor_segmento(&GDT[1], __CS_BASE, __CS_LIMITE,
+                                                                 1, //G
+                                                                 1, //D/B
+                                                                 0, //L
+                                                                 0, //AVL
+                                                                 1, //P
+                                                                 00,//DPL
+                                                                 1, //S
+                                                                 1, //B11
+                                                                 0, //ED/C
+                                                                 0, //R
+                                                                 1);//A
 
-    //Descriptor de datos
+    //Descriptor de datos de alto privilegio
     cargar_descriptor_segmento(&GDT[2], __DS_BASE, __DS_LIMITE,
                                                                 1, //G
                                                                 1, //D/B
@@ -57,14 +70,40 @@ void cargar_gdt(descriptor_segmento_t GDT[], registro_descriptor_segmento_t *gdt
                                                                 1, //W/R
                                                                 1);//A
 
-    //Descriptor de pila
-    cargar_descriptor_segmento(&GDT[3], __SS_BASE, __SS_LIMITE, 1, 1, 0, 0, 1, 00, 1, 0, 0, 1, 1);
+    //Descriptor de codigo de bajo privilegio
+    cargar_descriptor_segmento(&GDT[3], __CS_BASE, __CS_LIMITE,
+                                                                 1, //G
+                                                                 1, //D/B
+                                                                 0, //L
+                                                                 0, //AVL
+                                                                 1, //P
+                                                                 3, //DPL
+                                                                 1, //S
+                                                                 1, //B11
+                                                                 0, //ED/C
+                                                                 0, //R
+                                                                 1);//A
 
-    limite =        sizeof(GDT[0])  + 
-                    sizeof(GDT[1])  + 
-                    sizeof(GDT[2])  + 
-                    sizeof(GDT[3]) 
-                    - 1;
+    //Descriptor de datos de bajo privilegio
+    cargar_descriptor_segmento(&GDT[4], __DS_BASE, __DS_LIMITE,
+                                                                1, //G
+                                                                1, //D/B
+                                                                0, //L
+                                                                0, //AVL
+                                                                1, //P
+                                                                3, //DPL
+                                                                1, //S
+                                                                0, //B11
+                                                                0, //ED/C
+                                                                1, //W/R
+                                                                1);//A
+
+    limite =        sizeof(GDT[0]) 
+                +   sizeof(GDT[1]) 
+                +   sizeof(GDT[2]) 
+                +   sizeof(GDT[3]) 
+                +   sizeof(GDT[4]) 
+                -   1;
     
     gdtr->campo_0 = limite;
     gdtr->campo_0 |= ((uint32_t)GDT & 0xFFFF) << 16;

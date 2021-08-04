@@ -12,6 +12,11 @@
 #define __SS_BASE        __CS_BASE
 #define __SS_LIMITE      __CS_LIMITE
 
+#define CS0_SELECTOR 0b0000000000001000
+#define DS0_SELECTOR 0b0000000000010000
+
+#define CS3_SELECTOR 0b0000000000011000
+#define DS3_SELECTOR 0b0000000000100000
 
 typedef enum{
     TIPO_TAREA          = 0b101,
@@ -236,9 +241,6 @@ extern uint8_t __TAREA_4_CONTEXTO_GENERAL_VMA_FISICA[];
 extern uint8_t __TAREA_4_CONTEXTO_SIMD_VMA_FISICA[];
 extern uint8_t __TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL[];
 extern uint8_t __TAREA_4_CONTEXTO_SIMD_VMA_LINEAL[];
-
-#define CS_SELECTOR 0b0000000000001000
-#define DS_SELECTOR 0b0000000000010000
 
 #define DTP     ((directorio_tabla_paginas_t *) __TABLAS_PAGINACION_VMA_LINEAL)
 #define PT      ((tabla_paginas_t *) &DTP[1])
