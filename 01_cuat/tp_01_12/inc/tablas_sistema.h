@@ -299,6 +299,21 @@ extern int *ss_gdt;
 #define TP5_tarea4         (tabla_paginas_t*)&DTP[36]
 #define TP6_tarea4         (tabla_paginas_t*)&DTP[37]
 
+#define contexto_tarea_0        (contexto_tarea_t*)__TAREA_0_CONTEXTO_GENERAL_VMA_LINEAL
+#define contexto_simd_tarea_0   (contexto_simd_t*)__TAREA_0_CONTEXTO_SIMD_VMA_LINEAL
+
+#define contexto_tarea_1        (contexto_tarea_t*)__TAREA_1_CONTEXTO_GENERAL_VMA_LINEAL
+#define contexto_simd_tarea_1   (contexto_simd_t*)__TAREA_1_CONTEXTO_SIMD_VMA_LINEAL
+
+#define contexto_tarea_2        (contexto_tarea_t*)__TAREA_2_CONTEXTO_GENERAL_VMA_LINEAL
+#define contexto_simd_tarea_2   (contexto_simd_t*)__TAREA_2_CONTEXTO_SIMD_VMA_LINEAL
+
+#define contexto_tarea_3        (contexto_tarea_t*)__TAREA_3_CONTEXTO_GENERAL_VMA_LINEAL
+#define contexto_simd_tarea_3   (contexto_simd_t*)__TAREA_3_CONTEXTO_SIMD_VMA_LINEAL
+
+#define contexto_tarea_4        (contexto_tarea_t*)__TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL
+#define contexto_simd_tarea_4   (contexto_simd_t*)__TAREA_4_CONTEXTO_SIMD_VMA_LINEAL
+
 // tabla_paginas_t TP0 __attribute__ ((section (".tablas_paginacion"))), 
 //                 TP1 __attribute__ ((section (".tablas_paginacion"))),
 //                 TP2 __attribute__ ((section (".tablas_paginacion"))), 

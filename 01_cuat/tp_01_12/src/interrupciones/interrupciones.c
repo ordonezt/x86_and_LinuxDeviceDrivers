@@ -8,7 +8,7 @@
 #include "../../inc/main.h"
 
 extern ring_buffer_t ring_buffer;
-extern contexto_simd_t  contexto_simd_tabla[5];
+extern contexto_simd_t*  contexto_simd_tabla[5];
 
 /* Lo ideal seria hacer handlers de assembler que llamen handlers de c, por ejemplo
 
@@ -94,7 +94,7 @@ void NM_Handler(cuadro_interrupcion_t *cuadro)
     //MAGIC_BREAKPOINT
     uint8_t n_tarea = get_numero_tarea_actual();
     borrar_cr0_ts();
-    restaurar_registros_simd(&contexto_simd_tabla[n_tarea]);   
+    restaurar_registros_simd(contexto_simd_tabla[n_tarea]);   
 }
 
 __attribute__(( section(".interrupciones"), interrupt))

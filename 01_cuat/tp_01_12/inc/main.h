@@ -2,6 +2,7 @@
 #define __MAIN_H
 
 #include "../inc/systick.h"
+#include "../inc/tablas_sistema.h"
 
 typedef struct{
     uint32_t EAX;
@@ -46,7 +47,7 @@ typedef struct{
 }contexto_tarea_t;
 
 typedef struct{
-    uint8_t registros[512] __attribute__ ((aligned(16)));
+    uint8_t registros[512];// __attribute__ ((aligned(16)));
 }contexto_simd_t;
 
 #define PERIODO_TAREA_1     COUNT_500ms
@@ -61,8 +62,9 @@ void guardar_registros_simd(contexto_simd_t *contexto);
 void restaurar_registros_simd(contexto_simd_t *contexto);
 void scheduler(contexto_tarea_t contexto_tarea_anterior);
 void ir_a_dormir(void);
-void cambiar_contexto(contexto_tarea_t *tarea_futura);
+void cambiar_contexto(contexto_tarea_t *tarea_futura, directorio_tabla_paginas_t *dtp);
 void paginacion_encender(void);
 void paginacion_apagar(void);
+void tareas_inicializar(void);
 
 #endif /*__MAIN_H*/
