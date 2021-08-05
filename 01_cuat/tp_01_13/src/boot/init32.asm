@@ -31,7 +31,7 @@ extern _gdtr_32, GDT_32, _idtr_32, IDT_32
 
 extern tareas_inicializar
 extern tarea_1, tarea_2, tarea_3, tarea_4
-extern __TAREA_1_PILA_INICIO_FISICA, __TAREA_2_PILA_INICIO_FISICA, __TAREA_3_PILA_INICIO_FISICA, __TAREA_4_PILA_INICIO_FISICA
+extern __TAREA_1_PILA_USUARIO_INICIO_FISICA, __TAREA_2_PILA_USUARIO_INICIO_FISICA, __TAREA_3_PILA_USUARIO_INICIO_FISICA, __TAREA_4_PILA_USUARIO_INICIO_FISICA
 
 extern habilitar_NM
 
@@ -231,7 +231,7 @@ inicializar_pila_tarea1:
     pushad
     
     ;cargo EFLAGS en el stack
-    mov edi,__TAREA_1_PILA_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
+    mov edi,__TAREA_1_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
     mov eax,0x202             ;EFLAGS
     mov [edi],eax
     ;cargo CS en el stack
@@ -250,7 +250,7 @@ inicializar_pila_tarea2:
     pushad
     
     ;cargo EFLAGS en el stack
-    mov edi,__TAREA_2_PILA_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
+    mov edi,__TAREA_2_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
     mov eax,0x202             ;EFLAGS
     mov [edi],eax
     ;cargo CS en el stack
@@ -269,7 +269,7 @@ inicializar_pila_tarea3:
     pushad
     
     ;cargo EFLAGS en el stack
-    mov edi,__TAREA_3_PILA_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
+    mov edi,__TAREA_3_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
     mov eax,0x202             ;EFLAGS
     mov [edi],eax
     ;cargo CS en el stack
@@ -288,7 +288,7 @@ inicializar_pila_tarea4:
     pushad
     
     ;cargo EFLAGS en el stack
-    mov edi,__TAREA_4_PILA_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
+    mov edi,__TAREA_4_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
     mov eax,0x202             ;EFLAGS
     mov [edi],eax
     ;cargo CS en el stack

@@ -637,6 +637,20 @@ void DTP_kernel_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         1,  //RW
                         1   //Presente
                         );
+    
+    // //Va en la DTP de pila de kernel
+    // auxiliar = (uint32_t)__TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL >> (10+12);
+    // DTP_agregar_tabla(  direccion_DTP, 
+    //                     auxiliar,  //Indice
+    //                     TP6_kernel,//&PT[auxiliar], //Direccion de la tabla
+    //                     0,  //Tamaño de 4K
+    //                     0,  //Accedida
+    //                     0,  //PCD NO
+    //                     0,  //PWT NO
+    //                     0,  //Supervisor
+    //                     1,  //RW
+    //                     1   //Presente
+    //                     );
 }
 
 __attribute__(( section(".rutinas")))
@@ -952,6 +966,70 @@ void PTs_kernel_inicializar()
                             0,                      //Lectura
                             1);                     //Presente
     }
+
+    //Pila de tarea 1 nivel 0
+    aux = ((uint32_t)__TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_1_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //Pila de tarea 2 nivel 0
+    aux = ((uint32_t)__TAREA_2_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_2_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //Pila de tarea 1 nivel 0
+    aux = ((uint32_t)__TAREA_3_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_3_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //Pila de tarea 1 nivel 0
+    aux = ((uint32_t)__TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_4_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -1013,7 +1091,7 @@ void DTP_tarea_1_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         );
 
     //La siguiente tabla de paginas cubre desde 0x0040_0000 hasta 0x007F_FFFF
-    auxiliar = (uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> (10+12);
+    auxiliar = (uint32_t)__TAREA_1_PILA_USUARIO_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP3_tarea1,//&PT[auxiliar], //Direccion de la tabla
@@ -1046,6 +1124,19 @@ void DTP_tarea_1_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP5_tarea1,//&PT[auxiliar], //Direccion de la tabla
+                        0,  //Tamaño de 4K
+                        0,  //Accedida
+                        0,  //PCD NO
+                        0,  //PWT NO
+                        0,  //Supervisor
+                        1,  //RW
+                        1   //Presente
+                        );
+    
+    auxiliar = (uint32_t)__TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL >> (10+12);
+    DTP_agregar_tabla(  direccion_DTP, 
+                        auxiliar,  //Indice
+                        TP6_tarea1,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -1354,11 +1445,11 @@ void PTs_tarea_1_inicializar()
     }
     
     //Pila de tarea 1
-    aux = ((uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__TAREA_1_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    aux = ((uint32_t)__TAREA_1_PILA_USUARIO_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__TAREA_1_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP3_tarea1,    //Direccion de las tablas
                         aux,                    //Indice
-                        __TAREA_1_PILA_FINAL_FISICA,   //Puntero a pagina
+                        __TAREA_1_PILA_USUARIO_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -1370,7 +1461,7 @@ void PTs_tarea_1_inicializar()
                         1);                     //Presente
     
     aux = ((uint32_t)__TAREA_1_CONTEXTO_GENERAL_VMA_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP5_tarea1,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_1_CONTEXTO_GENERAL_VMA_FISICA,   //Puntero a pagina
@@ -1404,6 +1495,21 @@ void PTs_tarea_1_inicializar()
                             0,                      //Lectura
                             1);                     //Presente
     }
+
+    //Pila de tarea 1 nivel 0
+    aux = ((uint32_t)__TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP6_tarea1,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_1_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -1479,7 +1585,7 @@ void DTP_tarea_2_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         );
 
     //La siguiente tabla de paginas cubre desde 0x0040_0000 hasta 0x007F_FFFF
-    auxiliar = (uint32_t)__TAREA_2_PILA_FINAL_LINEAL >> (10+12);
+    auxiliar = (uint32_t)__TAREA_2_PILA_USUARIO_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP4_tarea2,//&PT[auxiliar], //Direccion de la tabla
@@ -1512,6 +1618,19 @@ void DTP_tarea_2_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP6_tarea2,//&PT[auxiliar], //Direccion de la tabla
+                        0,  //Tamaño de 4K
+                        0,  //Accedida
+                        0,  //PCD NO
+                        0,  //PWT NO
+                        0,  //Supervisor
+                        1,  //RW
+                        1   //Presente
+                        );
+
+    auxiliar = (uint32_t)__TAREA_2_PILA_SUPERVISOR_FINAL_LINEAL >> (10+12);
+    DTP_agregar_tabla(  direccion_DTP, 
+                        auxiliar,  //Indice
+                        TP7_tarea2,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -1820,11 +1939,11 @@ void PTs_tarea_2_inicializar()
     }
     
     //Pila de tarea 2
-    aux = ((uint32_t)__TAREA_2_PILA_FINAL_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__TAREA_2_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    aux = ((uint32_t)__TAREA_2_PILA_USUARIO_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__TAREA_2_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP4_tarea2,    //Direccion de las tablas
                         aux,                    //Indice
-                        __TAREA_2_PILA_FINAL_FISICA,   //Puntero a pagina
+                        __TAREA_2_PILA_USUARIO_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -1836,7 +1955,7 @@ void PTs_tarea_2_inicializar()
                         1);                     //Presente
 
     aux = ((uint32_t)__TAREA_2_CONTEXTO_GENERAL_VMA_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP6_tarea2,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_2_CONTEXTO_GENERAL_VMA_FISICA,   //Puntero a pagina
@@ -1870,6 +1989,21 @@ void PTs_tarea_2_inicializar()
                             0,                      //Lectura
                             1);                     //Presente
     }
+
+    //Pila de tarea 2 nivel 0
+    aux = ((uint32_t)__TAREA_2_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea2,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_2_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -1945,7 +2079,7 @@ void DTP_tarea_3_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         );
 
     //La siguiente tabla de paginas cubre desde 0x0040_0000 hasta 0x007F_FFFF
-    auxiliar = (uint32_t)__TAREA_3_PILA_FINAL_LINEAL >> (10+12);
+    auxiliar = (uint32_t)__TAREA_3_PILA_USUARIO_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP4_tarea3,//&PT[auxiliar], //Direccion de la tabla
@@ -1979,6 +2113,19 @@ void DTP_tarea_3_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP6_tarea3,//&PT[auxiliar], //Direccion de la tabla
+                        0,  //Tamaño de 4K
+                        0,  //Accedida
+                        0,  //PCD NO
+                        0,  //PWT NO
+                        0,  //Supervisor
+                        1,  //RW
+                        1   //Presente
+                        );
+
+    auxiliar = (uint32_t)__TAREA_3_PILA_SUPERVISOR_FINAL_LINEAL >> (10+12);
+    DTP_agregar_tabla(  direccion_DTP, 
+                        auxiliar,  //Indice
+                        TP7_tarea3,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -2287,11 +2434,11 @@ void PTs_tarea_3_inicializar()
     }
     
     //Pila de tarea 3
-    aux = ((uint32_t)__TAREA_3_PILA_FINAL_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__TAREA_3_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    aux = ((uint32_t)__TAREA_3_PILA_USUARIO_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__TAREA_3_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP4_tarea3,    //Direccion de las tablas
                         aux,                    //Indice
-                        __TAREA_3_PILA_FINAL_FISICA,   //Puntero a pagina
+                        __TAREA_3_PILA_USUARIO_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -2303,7 +2450,7 @@ void PTs_tarea_3_inicializar()
                         1);                     //Presente
     
     aux = ((uint32_t)__TAREA_3_CONTEXTO_GENERAL_VMA_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP6_tarea3,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_3_CONTEXTO_GENERAL_VMA_FISICA,   //Puntero a pagina
@@ -2337,6 +2484,21 @@ void PTs_tarea_3_inicializar()
                             0,                      //Lectura
                             1);                     //Presente
     }
+
+    //Pila de tarea 3 nivel 0
+    aux = ((uint32_t)__TAREA_3_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea3,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_3_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -2412,7 +2574,7 @@ void DTP_tarea_4_inicializar(directorio_tabla_paginas_t *direccion_DTP)
                         );
 
     //La siguiente tabla de paginas cubre desde 0x0040_0000 hasta 0x007F_FFFF
-    auxiliar = (uint32_t)__TAREA_4_PILA_FINAL_LINEAL >> (10+12);
+    auxiliar = (uint32_t)__TAREA_4_PILA_USUARIO_FINAL_LINEAL >> (10+12);
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP4_tarea4,//&PT[auxiliar], //Direccion de la tabla
@@ -2445,6 +2607,19 @@ void DTP_tarea_4_inicializar(directorio_tabla_paginas_t *direccion_DTP)
     DTP_agregar_tabla(  direccion_DTP, 
                         auxiliar,  //Indice
                         TP6_tarea4,//&PT[auxiliar], //Direccion de la tabla
+                        0,  //Tamaño de 4K
+                        0,  //Accedida
+                        0,  //PCD NO
+                        0,  //PWT NO
+                        0,  //Supervisor
+                        1,  //RW
+                        1   //Presente
+                        );
+
+    auxiliar = (uint32_t)__TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL >> (10+12);
+    DTP_agregar_tabla(  direccion_DTP, 
+                        auxiliar,  //Indice
+                        TP7_tarea4,//&PT[auxiliar], //Direccion de la tabla
                         0,  //Tamaño de 4K
                         0,  //Accedida
                         0,  //PCD NO
@@ -2753,11 +2928,11 @@ void PTs_tarea_4_inicializar()
     }
     
     //Pila de tarea 4
-    aux = ((uint32_t)__TAREA_4_PILA_FINAL_LINEAL >> 12) & 0x3FF;
-    //aux2 = ((uint32_t)__TAREA_4_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    aux = ((uint32_t)__TAREA_4_PILA_USUARIO_FINAL_LINEAL >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__TAREA_4_PILA_USUARIO_FINAL_LINEAL >> 22) & 0x3FF;
     PT_agregar_pagina(  TP4_tarea4,    //Direccion de las tablas
                         aux,                    //Indice
-                        __TAREA_4_PILA_FINAL_FISICA,   //Puntero a pagina
+                        __TAREA_4_PILA_USUARIO_FINAL_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -2803,6 +2978,21 @@ void PTs_tarea_4_inicializar()
                             0,                      //Lectura
                             1);                     //Presente
     }
+
+    //Pila de tarea 4 nivel 0
+    aux = ((uint32_t)__TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea4,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TAREA_4_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))

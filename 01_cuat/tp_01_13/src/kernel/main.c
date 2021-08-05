@@ -79,10 +79,10 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
 __attribute__(( section(".kernel")))
 void tareas_inicializar(void)
 {
-    inicializar_contexto(DTP_tarea1, tarea_1, __TAREA_1_PILA_INICIO_LINEAL);
-    inicializar_contexto(DTP_tarea2, tarea_2, __TAREA_2_PILA_INICIO_LINEAL);
-    inicializar_contexto(DTP_tarea3, tarea_3, __TAREA_3_PILA_INICIO_LINEAL);
-    inicializar_contexto(DTP_tarea4, tarea_4, __TAREA_4_PILA_INICIO_LINEAL);
+    inicializar_contexto(DTP_tarea1, tarea_1, __TAREA_1_PILA_SUPERVISOR_INICIO_LINEAL);
+    inicializar_contexto(DTP_tarea2, tarea_2, __TAREA_2_PILA_SUPERVISOR_INICIO_LINEAL);
+    inicializar_contexto(DTP_tarea3, tarea_3, __TAREA_3_PILA_SUPERVISOR_INICIO_LINEAL);
+    inicializar_contexto(DTP_tarea4, tarea_4, __TAREA_4_PILA_SUPERVISOR_INICIO_LINEAL);
 }
 
 __attribute__(( section(".kernel")))

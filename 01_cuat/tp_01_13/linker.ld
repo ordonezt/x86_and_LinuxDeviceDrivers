@@ -60,34 +60,6 @@ __TABLA_DIGITOS_VMA_LINEAL     = 0x01210000; /*donde se almacenan los digitos*/
 /***********************************************/
 /*Contextos*/
 /***********************************************/
-/*__TAREA_0_CONTEXTO_GENERAL_VMA_FISICA   = 0x00230000; donde se almacenan el contexto general de la tarea 0*/
-/*__TAREA_0_CONTEXTO_SIMD_VMA_FISICA      = 0x00230050; donde se almacenan el contexto simd de la tarea 0*/
-/*__TAREA_0_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01230000; donde se almacenan el contexto general de la tarea 0*/
-/*__TAREA_0_CONTEXTO_SIMD_VMA_LINEAL      = 0x01230050; donde se almacenan el contexto simd de la tarea 0*/
-
-/*__TAREA_1_CONTEXTO_GENERAL_VMA_FISICA   = 0x00350000; donde se almacenan el contexto general de la tarea 1*/
-/*__TAREA_1_CONTEXTO_SIMD_VMA_FISICA      = 0x00350050; donde se almacenan el contexto simd de la tarea 1*/
-/*__TAREA_1_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01350000; donde se almacenan el contexto general de la tarea 1*/
-/*__TAREA_1_CONTEXTO_SIMD_VMA_LINEAL      = 0x01350050; donde se almacenan el contexto simd de la tarea 1*/
-
-/*__TAREA_2_CONTEXTO_GENERAL_VMA_FISICA   = 0x00450000; donde se almacenan el contexto general de la tarea 2*/
-/*__TAREA_2_CONTEXTO_SIMD_VMA_FISICA      = 0x00450050; donde se almacenan el contexto simd de la tarea 2*/
-/*__TAREA_2_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01450000; donde se almacenan el contexto general de la tarea 2*/
-/*__TAREA_2_CONTEXTO_SIMD_VMA_LINEAL      = 0x01450050; donde se almacenan el contexto simd de la tarea 2*/
-
-/*__TAREA_3_CONTEXTO_GENERAL_VMA_FISICA   = 0x00550000; donde se almacenan el contexto general de la tarea 3*/
-/*__TAREA_3_CONTEXTO_SIMD_VMA_FISICA      = 0x00550050; donde se almacenan el contexto simd de la tarea 3*/
-/*__TAREA_3_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01550000; donde se almacenan el contexto general de la tarea 3*/
-/*__TAREA_3_CONTEXTO_SIMD_VMA_LINEAL      = 0x01550050; donde se almacenan el contexto simd de la tarea 3*/
-
-/*__TAREA_4_CONTEXTO_GENERAL_VMA_FISICA   = 0x00650000; donde se almacenan el contexto general de la tarea 4*/
-/*__TAREA_4_CONTEXTO_SIMD_VMA_FISICA      = 0x00650050; donde se almacenan el contexto simd de la tarea 4*/
-/*__TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01650000; donde se almacenan el contexto general de la tarea 4*/
-/*__TAREA_4_CONTEXTO_SIMD_VMA_LINEAL      = 0x01650050; donde se almacenan el contexto simd de la tarea 4*/
-
-
-
-
 __TAREA_0_CONTEXTO_GENERAL_VMA_FISICA   = 0x00800000; /*donde se almacenan el contexto general de la tarea 0*/
 __TAREA_0_CONTEXTO_SIMD_VMA_FISICA      = 0x00800050; /*donde se almacenan el contexto simd de la tarea 0*/
 __TAREA_0_CONTEXTO_GENERAL_VMA_LINEAL   = 0x01800000; /*donde se almacenan el contexto general de la tarea 0*/
@@ -228,32 +200,60 @@ __KERNEL_PILA_INICIO_FISICA    = __KERNEL_PILA_FINAL_FISICA + 4K; /*donde se va 
 __KERNEL_PILA_INICIO_LINEAL    = __KERNEL_PILA_FINAL_LINEAL + 4K; /*donde se va crear la pila*/ /*TODO 4K - 1????*/
 
 /*Pila tarea 1*/
-__TAREA_1_PILA_FINAL_FISICA    = 0x1FFFF000;
-__TAREA_1_PILA_FINAL_LINEAL    = 0x0078F000;
+__TAREA_1_PILA_USUARIO_FINAL_FISICA       = 0x1FFFF000;
+__TAREA_1_PILA_USUARIO_FINAL_LINEAL       = 0x0078F000;
 
-__TAREA_1_PILA_INICIO_FISICA   = __TAREA_1_PILA_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
-__TAREA_1_PILA_INICIO_LINEAL   = __TAREA_1_PILA_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_1_PILA_USUARIO_INICIO_FISICA      = __TAREA_1_PILA_USUARIO_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_1_PILA_USUARIO_INICIO_LINEAL      = __TAREA_1_PILA_USUARIO_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+
+
+__TAREA_1_PILA_SUPERVISOR_FINAL_FISICA    = 0x1FFF4000;
+__TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL    = __TAREA_1_PILA_SUPERVISOR_FINAL_FISICA;
+
+__TAREA_1_PILA_SUPERVISOR_INICIO_FISICA   = __TAREA_1_PILA_SUPERVISOR_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_1_PILA_SUPERVISOR_INICIO_LINEAL   = __TAREA_1_PILA_SUPERVISOR_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
 
 /*Pila tarea 2*/
-__TAREA_2_PILA_FINAL_FISICA    = 0x1FFF1000;
-__TAREA_2_PILA_FINAL_LINEAL    = 0x00790000;
+__TAREA_2_PILA_USUARIO_FINAL_FISICA       = 0x1FFF1000;
+__TAREA_2_PILA_USUARIO_FINAL_LINEAL       = 0x00790000;
 
-__TAREA_2_PILA_INICIO_FISICA   = __TAREA_2_PILA_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
-__TAREA_2_PILA_INICIO_LINEAL   = __TAREA_2_PILA_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_2_PILA_USUARIO_INICIO_FISICA      = __TAREA_2_PILA_USUARIO_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_2_PILA_USUARIO_INICIO_LINEAL      = __TAREA_2_PILA_USUARIO_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+
+
+__TAREA_2_PILA_SUPERVISOR_FINAL_FISICA    = 0x1FFF5000;
+__TAREA_2_PILA_SUPERVISOR_FINAL_LINEAL    = __TAREA_2_PILA_SUPERVISOR_FINAL_FISICA;
+
+__TAREA_2_PILA_SUPERVISOR_INICIO_FISICA   = __TAREA_2_PILA_SUPERVISOR_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_2_PILA_SUPERVISOR_INICIO_LINEAL   = __TAREA_2_PILA_SUPERVISOR_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
 
 /*Pila tarea 3*/
-__TAREA_3_PILA_FINAL_FISICA    = 0x1FFF2000;
-__TAREA_3_PILA_FINAL_LINEAL    = 0x00791000;
+__TAREA_3_PILA_USUARIO_FINAL_FISICA       = 0x1FFF2000;
+__TAREA_3_PILA_USUARIO_FINAL_LINEAL       = 0x00791000;
 
-__TAREA_3_PILA_INICIO_FISICA   = __TAREA_3_PILA_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
-__TAREA_3_PILA_INICIO_LINEAL   = __TAREA_3_PILA_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_3_PILA_USUARIO_INICIO_FISICA      = __TAREA_3_PILA_USUARIO_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_3_PILA_USUARIO_INICIO_LINEAL      = __TAREA_3_PILA_USUARIO_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+
+
+__TAREA_3_PILA_SUPERVISOR_FINAL_FISICA    = 0x1FFF6000;
+__TAREA_3_PILA_SUPERVISOR_FINAL_LINEAL    = __TAREA_3_PILA_SUPERVISOR_FINAL_FISICA;
+
+__TAREA_3_PILA_SUPERVISOR_INICIO_FISICA   = __TAREA_3_PILA_SUPERVISOR_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_3_PILA_SUPERVISOR_INICIO_LINEAL   = __TAREA_3_PILA_SUPERVISOR_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
 
 /*Pila tarea 4*/
-__TAREA_4_PILA_FINAL_FISICA    = 0x1FFF3000;
-__TAREA_4_PILA_FINAL_LINEAL    = 0x00792000;
+__TAREA_4_PILA_USUARIO_FINAL_FISICA       = 0x1FFF3000;
+__TAREA_4_PILA_USUARIO_FINAL_LINEAL       = 0x00792000;
 
-__TAREA_4_PILA_INICIO_FISICA   = __TAREA_4_PILA_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
-__TAREA_4_PILA_INICIO_LINEAL   = __TAREA_4_PILA_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_4_PILA_USUARIO_INICIO_FISICA      = __TAREA_4_PILA_USUARIO_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_4_PILA_USUARIO_INICIO_LINEAL      = __TAREA_4_PILA_USUARIO_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
+
+
+__TAREA_4_PILA_SUPERVISOR_FINAL_FISICA    = 0x1FFF7000;
+__TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL    = __TAREA_4_PILA_SUPERVISOR_FINAL_FISICA;
+
+__TAREA_4_PILA_SUPERVISOR_INICIO_FISICA   = __TAREA_4_PILA_SUPERVISOR_FINAL_FISICA + 4K - 1;/*TODO 4K - 1????*/
+__TAREA_4_PILA_SUPERVISOR_INICIO_LINEAL   = __TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
 
 /***********************************************/
 /*Direccion fisica en la que arranco a mapear paginas no presentes*/
