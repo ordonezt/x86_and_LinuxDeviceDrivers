@@ -499,7 +499,16 @@ void cargar_idt(descriptor_segmento_int_t IDT[], registro_descriptor_segmento_t 
                                     0 //DPL
                                     );
 
-    limite = sizeof(IDT[0]) * (47 + 1) - 1;
+    cargar_descriptor_segmento_int( &IDT[0x80], 
+                                    selector,
+                                    (uint32_t)INT80_IRQHandler,
+                                    TIPO_INTERRUPCION, //Tipo
+                                    1, //D
+                                    1, //P
+                                    0 //DPL
+                                    );
+
+    limite = sizeof(IDT[0]) * (0x80 + 1) - 1;
     
     idtr->campo_0 = limite;
     idtr->campo_0 |= ((uint32_t)IDT & 0xFFFF) << 16;

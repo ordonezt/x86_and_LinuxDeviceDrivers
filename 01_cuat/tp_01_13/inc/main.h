@@ -67,4 +67,5 @@ void paginacion_encender(void);
 void paginacion_apagar(void);
 void tareas_inicializar(void);
 void habilitar_TSS(uint32_t selector_TSS);
+uint32_t syscall(uint32_t numero);
 #endif /*__MAIN_H*/

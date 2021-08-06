@@ -1,5 +1,6 @@
 #include "../../inc/rutinas.h"
-
+#include "../../inc/interrupciones.h"
+#include "../../inc/main.h"
 
 __attribute__(( section(".rutinas")))
 uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
@@ -20,3 +21,8 @@ uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
     return (status);
 }
 
+__attribute__(( section(".rutinas")))
+void td3_halt(void)
+{
+    syscall(SYSCALL_HLT);
+}

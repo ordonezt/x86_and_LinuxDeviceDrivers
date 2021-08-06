@@ -1,6 +1,6 @@
 section .interrupciones
-extern PIC0_IRQHandler_c
-global PIC0_IRQHandler, habilitar_interrupciones, deshabilitar_interrupciones
+extern PIC0_IRQHandler_c, INT80_IRQHandler_c
+global PIC0_IRQHandler, habilitar_interrupciones, deshabilitar_interrupciones, INT80_IRQHandler
 
 ;Este handler lo tengo que hacer si o si en asm porque
 ;el bendito gcc me pone codigo en el handler de C sin
@@ -20,6 +20,13 @@ PIC0_IRQHandler:
     call PIC0_IRQHandler_c
     add esp, 6*4
     popad
+    iret
+
+INT80_IRQHandler:
+    xchg bx, bx
+    push eax
+    call INT80_IRQHandler_c
+    pop eax
     iret
 
 habilitar_interrupciones:

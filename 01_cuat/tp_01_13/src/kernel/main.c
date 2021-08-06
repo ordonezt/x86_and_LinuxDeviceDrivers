@@ -95,7 +95,7 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     TSS_basica_t *TSS = TSS_basica_tabla[n_tarea];
 
     //TODO Inicializar el stack aca (a lo mejor apagar paginacion)
-    aux = (uint8_t*)pila_supervisor - 3;
+    aux = (uint32_t*)((uint8_t*)pila_supervisor - 3);
     *(aux--) = DS3_SELECTOR;//SS3
     *(aux--) = (uint32_t)pila_usuario - 3;//ESP3
     *(aux--) = 0x202;//EFLAGS
@@ -104,12 +104,12 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
 
     contexto->DS = contexto->ES = contexto->FS = contexto->GS = contexto->SS = DS3_SELECTOR-3;
     contexto->EBP = (uint32_t)pila_usuario - 3;
-    contexto->ESP = aux;
+    contexto->ESP = (uint32_t)aux;
     contexto->EIP = (uint32_t)tarea;
     contexto->CR3 = (uint32_t)dtp;
 
-    TSS->CR3 = dtp;
-    TSS->ESP_0 = aux;
+    TSS->CR3 = (uint32_t)dtp;
+    TSS->ESP_0 = (uint32_t)aux;
     TSS->SS_0 = DS0_SELECTOR;
     // TSS->
 }
@@ -121,7 +121,7 @@ void tareas_inicializar(void)
     inicializar_contexto(DTP_tarea2, tarea_2, __TAREA_2_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_2_PILA_USUARIO_INICIO_LINEAL);
     inicializar_contexto(DTP_tarea3, tarea_3, __TAREA_3_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_3_PILA_USUARIO_INICIO_LINEAL);
     inicializar_contexto(DTP_tarea4, tarea_4, __TAREA_4_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_4_PILA_USUARIO_INICIO_LINEAL);
-MAGIC_BREAKPOINT
+//MAGIC_BREAKPOINT
     habilitar_TSS(TSS_SELECTOR);
 }
 
@@ -191,7 +191,7 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
             guardar_contexto(contexto_tarea_actual);
             prender_cr0_ts();
         }
-        MAGIC_BREAKPOINT
+        //MAGIC_BREAKPOINT
         cambiar_contexto(contexto_tareas_tabla[tarea_siguiente],
                          dtp_tareas_tabla[tarea_siguiente]);
     }

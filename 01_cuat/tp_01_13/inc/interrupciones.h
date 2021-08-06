@@ -16,6 +16,12 @@ typedef struct{
     uint32_t selector:13 __attribute__((packed));
 }codigo_error_t;
 
+typedef enum{
+    SYSCALL_HLT,
+    SYSCALL_READ,
+    SYSCALL_WRITE
+}syscalls_t;
+
 void Divide_Error_Handler(cuadro_interrupcion_t *cuadro);
 void Debug_Exception_Handler(cuadro_interrupcion_t *cuadro);
 void NMI_Handler(cuadro_interrupcion_t *cuadro);
@@ -52,6 +58,7 @@ void PIC12_IRQHandler(cuadro_interrupcion_t *cuadro);
 void PIC13_IRQHandler(cuadro_interrupcion_t *cuadro);
 void PIC14_IRQHandler(cuadro_interrupcion_t *cuadro);
 void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro);
+void INT80_IRQHandler(cuadro_interrupcion_t *cuadro);
 
 void habilitar_interrupciones(void);
 void deshabilitar_interrupciones(void);

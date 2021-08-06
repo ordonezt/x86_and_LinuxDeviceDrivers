@@ -1,5 +1,6 @@
 #include "../../inc/teclado.h"
 #include "../../inc/pantalla.h"
+#include "../../inc/rutinas.h"
 #include "../../inc/tarea_1.h"
 
 __attribute__(( section(".tarea_1")))
@@ -30,6 +31,8 @@ void tarea_1(void)
 
     //     // contenido = 1/0;
     // // }
+    MAGIC_BREAKPOINT
+        td3_halt();
     }
 
     //ir_a_dormir();

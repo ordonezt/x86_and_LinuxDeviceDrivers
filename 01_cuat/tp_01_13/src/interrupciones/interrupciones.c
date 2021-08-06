@@ -401,3 +401,25 @@ void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro)
     asm("mov $0x2F, %dl");
     asm("hlt");
 }
+
+__attribute__(( section(".interrupciones")))
+void INT80_IRQHandler_c(syscalls_t numero)
+{
+    MAGIC_BREAKPOINT
+    // asm("xchg %bx, %bx");
+    // asm("mov $0x80, %dl");
+    // asm("hlt");
+    switch(numero){
+        case SYSCALL_HLT:
+            ir_a_dormir();
+        break;
+
+        case SYSCALL_READ:
+        break;
+
+        case SYSCALL_WRITE:
+        break;
+        default:
+        break;
+    }
+}

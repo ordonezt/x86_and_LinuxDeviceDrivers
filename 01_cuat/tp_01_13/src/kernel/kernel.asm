@@ -3,7 +3,7 @@ USE32
 section .kernel
 
 global kernel_init, cambiar_contexto, paginacion_apagar, paginacion_encender
-global get_cr3, borrar_cr0_ts, prender_cr0_ts, habilitar_TSS
+global get_cr3, borrar_cr0_ts, prender_cr0_ts, habilitar_TSS, syscall
 
 extern main
 
@@ -100,4 +100,19 @@ habilitar_TSS:
     mov eax, [esp + 8]
     ltr ax
     pop eax
+    ret
+
+;uint32_t syscall(uint32_t numero);
+syscall:
+    push ebp
+    mov ebp, esp
+
+    push eax
+
+    mov eax, [ebp + 8]
+    int 0x80
+
+    pop eax
+    push ebp
+
     ret
