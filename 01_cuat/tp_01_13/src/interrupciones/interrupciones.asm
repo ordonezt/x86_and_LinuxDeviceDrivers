@@ -23,9 +23,12 @@ PIC0_IRQHandler:
     iret
 
 INT80_IRQHandler:
+    push edx
+    push ecx
+    push ebx
     push eax
     call INT80_IRQHandler_c
-    pop eax
+    add esp, 4*4
     iret
 
 habilitar_interrupciones:

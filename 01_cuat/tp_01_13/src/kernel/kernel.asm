@@ -104,17 +104,24 @@ habilitar_TSS:
 
 ;Seccion standard
 section .std
-;uint32_t syscall(uint32_t numero);
+;uint32_t syscall(uint32_t numero, uint32_t arg1, uint32_t arg2, uint32_t arg3);
 syscall:
     push ebp
     mov ebp, esp
 
-    push eax
+    push ebx
+    push ecx
+    push edx
 
     mov eax, [ebp + 8]
+    mov ebx, [ebp + 12]
+    mov ecx, [ebp + 16]
+    mov edx, [ebp + 20]
     int 0x80
 
-    pop eax
-    push ebp
+    pop edx
+    pop ecx
+    pop ebx
+    pop ebp
 
     ret

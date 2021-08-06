@@ -37,9 +37,9 @@ typedef enum{
 }color_caracter_t;
 
 void pantalla_pintar(color_caracter_t color);
-void pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpadear,
+int8_t pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpadear,
                     color_caracter_t color_trasero, bool negrita, color_caracter_t color_frontal);
-void my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna);
+int8_t my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna);
 int16_t fila_columna2indice(uint8_t fila, uint8_t columna);
 void hex32_2_str (uint32_t numero, uint8_t *cadena);
 void hex64_2_str (uint64_t numero, uint8_t *cadena);

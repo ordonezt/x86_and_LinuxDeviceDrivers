@@ -403,11 +403,13 @@ void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro)
 }
 
 __attribute__(( section(".interrupciones")))
-void INT80_IRQHandler_c(syscalls_t numero)
+uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uint32_t arg3)
 {
     // asm("xchg %bx, %bx");
     // asm("mov $0x80, %dl");
     // asm("hlt");
+    uint32_t retorno = 0;
+
     switch(numero){
         case SYSCALL_HLT:
             ir_a_dormir();
@@ -416,9 +418,12 @@ void INT80_IRQHandler_c(syscalls_t numero)
         case SYSCALL_READ:
         break;
 
-        case SYSCALL_WRITE:
+        case SYSCALL_PRINT:
+            retorno = (uint32_t)my_printf((uint8_t*)arg1, (uint8_t)arg2, (uint8_t)arg3);
         break;
         default:
+            retorno = -1;
         break;
     }
+    return retorno;
 }

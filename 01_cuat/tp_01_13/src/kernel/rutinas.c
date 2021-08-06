@@ -2,6 +2,9 @@
 #include "../../inc/interrupciones.h"
 #include "../../inc/main.h"
 
+#define syscall_hlt()           syscall(SYSCALL_HLT, 0, 0, 0)
+#define syscall_print(X, Y, Z)  syscall(SYSCALL_PRINT, (uint32_t)(X), (uint32_t)(Y), (uint32_t)(Z))
+
 __attribute__(( section(".rutinas")))
 uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
 {
@@ -25,5 +28,11 @@ uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
 __attribute__(( section(".std")))
 void td3_halt(void)
 {
-    syscall(SYSCALL_HLT);
+    syscall_hlt();
+}
+
+__attribute__(( section(".std")))
+uint32_t td3_print(uint8_t cadena[], uint8_t fila, uint8_t columna)
+{
+    return syscall_print(cadena, fila, columna);
 }

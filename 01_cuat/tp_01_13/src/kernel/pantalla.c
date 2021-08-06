@@ -13,9 +13,10 @@ void pantalla_pintar(color_caracter_t color)
 }
 
 __attribute__(( section(".rutinas")))
-void pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpadear,
+int8_t pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpadear,
                     color_caracter_t color_trasero, bool negrita, color_caracter_t color_frontal)
 {
+    int8_t retorno = 0;
     int16_t indice = fila_columna2indice(fila, columna);
 
     if(indice != -1)
@@ -26,23 +27,33 @@ void pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpad
         BUFFER_VIDEO[indice].negrita = negrita;
         BUFFER_VIDEO[indice].color_frontal = color_frontal;
     }
+    else
+        retorno = -1;
+    
+    return retorno;
 }
 
 __attribute__(( section(".rutinas")))
-void my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna)
+int8_t my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna)
 {
+    int8_t retorno = 0;
     uint8_t i;
 
     for(i = 0; cadena[i] != 0; i++)
     {
-        pantalla_putc(cadena[i], fila, columna, FORMATO_CARACTER_NORMAL);
-        columna++;
-        if(columna == VIDEO_COLUMNAS)
+        if(pantalla_putc(cadena[i], fila, columna, FORMATO_CARACTER_NORMAL) == 0)
         {
-            columna = 0;
-            fila++;
+            columna++;
+            if(columna == VIDEO_COLUMNAS)
+            {
+                columna = 0;
+                fila++;
+            }
         }
+        else
+            retorno = -1;
     }
+    return retorno;
 }
 
 __attribute__(( section(".rutinas")))

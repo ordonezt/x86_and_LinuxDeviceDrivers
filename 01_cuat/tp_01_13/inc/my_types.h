@@ -16,6 +16,12 @@ typedef enum{
     true
 }bool;
 
+typedef enum{
+    SYSCALL_HLT,
+    SYSCALL_READ,
+    SYSCALL_PRINT
+}syscalls_t;
+
 #define NULL    0
 #define MAGIC_BREAKPOINT    asm("xchg %bx, %bx");
 #endif /*__MY_TYPES_H*/

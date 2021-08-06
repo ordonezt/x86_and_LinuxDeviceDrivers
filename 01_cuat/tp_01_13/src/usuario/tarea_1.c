@@ -31,7 +31,8 @@ void tarea_1(void)
 
     //     // contenido = 1/0;
     // // }
-    MAGIC_BREAKPOINT
+    // MAGIC_BREAKPOINT
+        td3_print((uint8_t*)"Hola Mundo!", 5, 9);
         td3_halt();
     }
 

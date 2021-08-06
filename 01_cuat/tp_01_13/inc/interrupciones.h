@@ -16,12 +16,6 @@ typedef struct{
     uint32_t selector:13 __attribute__((packed));
 }codigo_error_t;
 
-typedef enum{
-    SYSCALL_HLT,
-    SYSCALL_READ,
-    SYSCALL_WRITE
-}syscalls_t;
-
 void Divide_Error_Handler(cuadro_interrupcion_t *cuadro);
 void Debug_Exception_Handler(cuadro_interrupcion_t *cuadro);
 void NMI_Handler(cuadro_interrupcion_t *cuadro);
