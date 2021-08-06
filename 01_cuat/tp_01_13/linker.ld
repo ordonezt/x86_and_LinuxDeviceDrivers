@@ -256,6 +256,15 @@ __TAREA_4_PILA_SUPERVISOR_INICIO_FISICA   = __TAREA_4_PILA_SUPERVISOR_FINAL_FISI
 __TAREA_4_PILA_SUPERVISOR_INICIO_LINEAL   = __TAREA_4_PILA_SUPERVISOR_FINAL_LINEAL + 4K - 1;/*TODO 4K - 1????*/
 
 /***********************************************/
+/*TSS Basicas*/
+/***********************************************/
+__TSS_BASICA_T1_FISICA  = 0x1FFF9000;
+__TSS_BASICA_T2_FISICA  = 0x1FFFA000;
+__TSS_BASICA_T3_FISICA  = 0x1FFFB000;
+__TSS_BASICA_T4_FISICA  = 0x1FFFC000;
+__TSS_BASICA_LINEAL     = 0x1FFFD000;
+
+/***********************************************/
 /*Direccion fisica en la que arranco a mapear paginas no presentes*/
 /***********************************************/
 __PAGINACION_DINAMICA_BASE_FISICA = 0x0A000000;

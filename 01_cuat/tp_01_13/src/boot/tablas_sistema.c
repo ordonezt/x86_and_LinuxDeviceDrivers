@@ -98,11 +98,26 @@ void cargar_gdt(descriptor_segmento_t GDT[], registro_descriptor_segmento_t *gdt
                                                                 1, //W/R
                                                                 1);//A
 
+    //TSS
+    cargar_descriptor_segmento(&GDT[5], (uint32_t)__TSS_BASICA_LINEAL, 0x67,
+                                                                1, //G
+                                                                1, //D/B
+                                                                0, //L
+                                                                0, //AVL
+                                                                1, //P
+                                                                0, //DPL
+                                                                0, //S
+                                                                1, //B11
+                                                                0, //ED/C
+                                                                0, //W/R
+                                                                1);//A
+
     limite =        sizeof(GDT[0]) 
                 +   sizeof(GDT[1]) 
                 +   sizeof(GDT[2]) 
                 +   sizeof(GDT[3]) 
                 +   sizeof(GDT[4]) 
+                +   sizeof(GDT[5]) 
                 -   1;
     
     gdtr->campo_0 = limite;
@@ -1030,6 +1045,70 @@ void PTs_kernel_inicializar()
                         0,                      //Supervisor
                         1,                      //Escritura
                         1);                     //Presente
+
+    //TSS basica tarea 1
+    aux = ((uint32_t)__TSS_BASICA_T1_FISICA >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T1_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //TSS basica tarea 2
+    aux = ((uint32_t)__TSS_BASICA_T2_FISICA >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T2_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //TSS basica tarea 3
+    aux = ((uint32_t)__TSS_BASICA_T3_FISICA >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T3_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //TSS basica tarea 4
+    aux = ((uint32_t)__TSS_BASICA_T4_FISICA >> 12) & 0x3FF;
+    //aux2 = ((uint32_t)__KERNEL_PILA_FINAL_LINEAL >> 22) & 0x3FF;
+    PT_agregar_pagina(  TP3_kernel,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T4_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -1501,6 +1580,21 @@ void PTs_tarea_1_inicializar()
     PT_agregar_pagina(  TP6_tarea1,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_1_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //TSS basica tarea 1
+    aux = ((uint32_t)__TSS_BASICA_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP6_tarea1,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T1_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -1995,6 +2089,21 @@ void PTs_tarea_2_inicializar()
     PT_agregar_pagina(  TP7_tarea2,    //Direccion de las tablas
                         aux,                    //Indice
                         __TAREA_2_PILA_SUPERVISOR_FINAL_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
+
+    //TSS basica tarea 2
+    aux = ((uint32_t)__TSS_BASICA_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea2,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T2_FISICA,   //Puntero a pagina
                         1,                      //Global
                         0,                      //PAT no
                         0,                      //D no
@@ -2499,6 +2608,21 @@ void PTs_tarea_3_inicializar()
                         0,                      //Supervisor
                         1,                      //Escritura
                         1);                     //Presente
+
+    //TSS basica tarea 3
+    aux = ((uint32_t)__TSS_BASICA_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea3,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T3_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -2993,6 +3117,21 @@ void PTs_tarea_4_inicializar()
                         0,                      //Supervisor
                         1,                      //Escritura
                         1);                     //Presente
+
+    //TSS basica tarea 4
+    aux = ((uint32_t)__TSS_BASICA_LINEAL >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP7_tarea4,    //Direccion de las tablas
+                        aux,                    //Indice
+                        __TSS_BASICA_T4_FISICA,   //Puntero a pagina
+                        1,                      //Global
+                        0,                      //PAT no
+                        0,                      //D no
+                        0,                      //A si
+                        0,                      //PCD no
+                        0,                      //PWT no
+                        0,                      //Supervisor
+                        1,                      //Escritura
+                        1);                     //Presente
 }
 
 __attribute__(( section(".rutinas")))
@@ -3015,7 +3154,6 @@ void paginacion_inicializar(void)
     paginar_tarea_3();
     paginar_tarea_4();
     
-    //MAGIC_BREAKPOINT
     //Inicializo CR3
     cr3_set(DTP_kernel, 1, 1);
     // //Activo la paginacion
@@ -3036,6 +3174,7 @@ void paginacion_inicializar(void)
     asm("mov %cr0, %eax");
     asm("or  $0x80000000, %eax");
     asm("mov %eax, %cr0");
+    // MAGIC_BREAKPOINT
 }
 
 uint32_t numero_pagina_dinamica __attribute__ ((section (".datos")));

@@ -16,5 +16,6 @@ typedef enum{
     true
 }bool;
 
+#define NULL    0
 #define MAGIC_BREAKPOINT    asm("xchg %bx, %bx");
 #endif /*__MY_TYPES_H*/

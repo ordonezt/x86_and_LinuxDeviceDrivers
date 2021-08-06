@@ -3,7 +3,8 @@ USE32
 section .kernel
 
 global kernel_init, cambiar_contexto, paginacion_apagar, paginacion_encender
-global get_cr3, borrar_cr0_ts, prender_cr0_ts
+global get_cr3, borrar_cr0_ts, prender_cr0_ts, habilitar_TSS
+
 extern main
 
 
@@ -36,11 +37,7 @@ cambiar_contexto:
     mov eax, [ebp + 4*2]
     mov cr3, eax
 
-    mov es,  [edi + 4*0]
-    mov gs,  [edi + 4*1]
-    mov fs,  [edi + 4*2]
-    mov ds,  [edi + 4*3]
-    mov ss,  [edi + 4*4]
+    ;mov ss,  [edi + 4*4]
     ; mov eax, [edi + 4*5]
     ; mov cr3, eax
     ;mov edi, [edi + 4*7]
@@ -51,7 +48,16 @@ cambiar_contexto:
     mov edx, [edi + 4*11]
     mov ecx, [edi + 4*12]
     mov eax, [edi + 4*13]
+
+    mov es,  [edi + 4*0]
+    mov gs,  [edi + 4*1]
+    mov fs,  [edi + 4*2]
+    ;mov ds,  [edi + 4*3]
+    push eax
+    mov eax, [edi + 4*3]
     mov edi, [edi + 4*6]
+    mov ds, eax
+    pop eax
     ;Hace falta que pushee esto??
     ; push dword [ebp + 4*17] ;eflags
     ; push dword [ebp + 4*16] ;cs
@@ -87,4 +93,11 @@ prender_cr0_ts:
     mov  cr0, eax
     pop  eax
     ret
-    
+
+;void habilitar_TSS(uint32_t selector_TSS);
+habilitar_TSS:
+    push eax
+    mov eax, [esp + 8]
+    ltr ax
+    pop eax
+    ret

@@ -31,7 +31,7 @@ extern _gdtr_32, GDT_32, _idtr_32, IDT_32
 
 extern tareas_inicializar
 extern tarea_1, tarea_2, tarea_3, tarea_4
-extern __TAREA_1_PILA_USUARIO_INICIO_FISICA, __TAREA_2_PILA_USUARIO_INICIO_FISICA, __TAREA_3_PILA_USUARIO_INICIO_FISICA, __TAREA_4_PILA_USUARIO_INICIO_FISICA
+extern __TAREA_1_PILA_USUARIO_INICIO_FISICA, __TAREA_2_PILA_USUARIO_INICIO_FISICA, __TAREA_3_PILA_USUARIO_INICIO_FISICA, __TAREA_4_PILA_USUARIO_INICIO_FISICA, __TAREA_4_PILA_SUPERVISOR_INICIO_FISICA, __TAREA_4_PILA_USUARIO_INICIO_LINEAL
 
 extern habilitar_NM
 
@@ -212,10 +212,10 @@ init32:
     call pic_deshabilitar_todo
 
     ;call tareas_inicializar
-    call inicializar_pila_tarea1
-    call inicializar_pila_tarea2
-    call inicializar_pila_tarea3
-    call inicializar_pila_tarea4
+    ; call inicializar_pila_tarea1
+    ; call inicializar_pila_tarea2
+    ; call inicializar_pila_tarea3
+    ; call inicializar_pila_tarea4
     
     call paginacion_inicializar
 
@@ -288,15 +288,29 @@ inicializar_pila_tarea4:
     pushad
     
     ;cargo EFLAGS en el stack
-    mov edi,__TAREA_4_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
-    mov eax,0x202             ;EFLAGS
+    mov edi,__TAREA_4_PILA_SUPERVISOR_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos), alineada a 4 bytes
+    
+    ;SS usr
+    mov eax, 0b0000000000100011 ;DS3_SELECTOR en tablas_sistema.h
+    mov [edi], eax
+    sub edi, 4
+
+    ;ESP usr
+    mov eax,__TAREA_4_PILA_USUARIO_INICIO_LINEAL - 3
+    mov [edi], eax
+    sub edi, 4
+    
+    ;EFLAGS
+    mov eax,0x202
     mov [edi],eax
+    sub edi,4
+
     ;cargo CS en el stack
-    sub edi,4
-    mov eax,0x8             ;CS
+    mov eax,0b0000000000011011 ;CS3_SELECTOR en tablas_sistema.h
     mov [edi],eax
-    ;cargo el EIP en el stack
     sub edi,4
+
+    ;cargo el EIP en el stack
     mov eax,tarea_4             
     mov [edi],eax  
 

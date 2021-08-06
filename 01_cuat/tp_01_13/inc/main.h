@@ -66,5 +66,5 @@ void cambiar_contexto(contexto_tarea_t *tarea_futura, directorio_tabla_paginas_t
 void paginacion_encender(void);
 void paginacion_apagar(void);
 void tareas_inicializar(void);
-
+void habilitar_TSS(uint32_t selector_TSS);
 #endif /*__MAIN_H*/
