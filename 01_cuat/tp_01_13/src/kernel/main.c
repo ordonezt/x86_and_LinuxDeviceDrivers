@@ -199,6 +199,6 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
 
 __attribute__(( section(".kernel")))
 void ir_a_dormir(void)
-{//MAGIC_BREAKPOINT
+{MAGIC_BREAKPOINT
     asm("hlt");
 }

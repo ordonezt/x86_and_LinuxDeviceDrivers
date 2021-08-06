@@ -11,16 +11,16 @@ section .rom_init
 extern DS_SEL_16
 extern __KERNEL_PILA_INICIO_FISICA
 
-extern __rutinas_size, __kernel_size, __interrupciones_size
+extern __std_size, __rutinas_size, __kernel_size, __interrupciones_size
 extern __tarea_1_text_size, __tarea_1_data_size, __tarea_1_rodata_size, __tarea_2_text_size, __tarea_2_data_size, __tarea_2_rodata_size
 extern __tarea_3_text_size, __tarea_3_data_size, __tarea_3_rodata_size, __tarea_4_text_size, __tarea_4_data_size, __tarea_4_rodata_size
 
-extern __RUTINAS_VMA_FISICA, __KERNEL_VMA_FISICA, __INTERRUPCIONES_VMA_FISICA
+extern __STD_VMA_FISICA, __RUTINAS_VMA_FISICA, __KERNEL_VMA_FISICA, __INTERRUPCIONES_VMA_FISICA
 
 extern __TAREA_1_TEXT_VMA_FISICA, __TAREA_1_DATA_VMA_FISICA, __TAREA_1_RODATA_VMA_FISICA, __TAREA_2_TEXT_VMA_FISICA, __TAREA_2_DATA_VMA_FISICA, __TAREA_2_RODATA_VMA_FISICA
 extern __TAREA_3_TEXT_VMA_FISICA, __TAREA_3_DATA_VMA_FISICA, __TAREA_3_RODATA_VMA_FISICA, __TAREA_4_TEXT_VMA_FISICA, __TAREA_4_DATA_VMA_FISICA, __TAREA_4_RODATA_VMA_FISICA
 
-extern __RUTINAS_LMA, __KERNEL_LMA, __INTERRUPCIONES_LMA
+extern __STD_LMA, __RUTINAS_LMA, __KERNEL_LMA, __INTERRUPCIONES_LMA
 
 extern __TAREA_1_TEXT_LMA, __TAREA_1_DATA_LMA, __TAREA_1_RODATA_LMA, __TAREA_2_TEXT_LMA, __TAREA_2_DATA_LMA, __TAREA_2_RODATA_LMA
 extern __TAREA_3_TEXT_LMA, __TAREA_3_DATA_LMA, __TAREA_3_RODATA_LMA, __TAREA_4_TEXT_LMA, __TAREA_4_DATA_LMA, __TAREA_4_RODATA_LMA
@@ -56,6 +56,15 @@ init32:
     push __rutinas_size
     push __RUTINAS_VMA_FISICA
     push __RUTINAS_LMA
+    call __mi_memcpy_rom
+    leave
+
+;Copio las rutinas std a RAM
+    push ebp
+    mov ebp,esp
+    push __std_size
+    push __STD_VMA_FISICA
+    push __STD_LMA
     call __mi_memcpy_rom
     leave
 

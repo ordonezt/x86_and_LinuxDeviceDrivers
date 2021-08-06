@@ -40,6 +40,12 @@ __RUTINAS_VMA_FISICA           = 0x00050000; /*donde se van a ejecutar las funci
 __RUTINAS_VMA_LINEAL           = 0x00050000; /*donde se van a ejecutar las funciones de uso general*/
 
 /***********************************************/
+/*Rutinas std*/ 
+/***********************************************/
+__STD_VMA_FISICA               = 0x00060000; /*donde se van a ejecutar las funciones de uso general*/
+__STD_VMA_LINEAL               = 0x00060000; /*donde se van a ejecutar las funciones de uso general*/
+
+/***********************************************/
 /*Sección de RAM de video*/
 /***********************************************/
 __VIDEO_VMA_FISICA             = 0x000B8000;
@@ -515,9 +521,15 @@ SECTIONS
 
         __tarea_4_size = SIZEOF(.tarea_4_text) + SIZEOF(.tarea_4_data) + SIZEOF(.tarea_4_rodata) + SIZEOF(.tarea_4_bss);
 
-        
+        /****************** STD ******************/
+        __STD_LMA = LOADADDR(.tarea_4_bss) + SIZEOF(.tarea_4_bss);
+        .std __STD_VMA_LINEAL : AT (__STD_LMA) {
+                *(.std);
+        } > ram
+        __std_size = SIZEOF(.std);
+
         /***************** Mapeo de la ROM *****************/
-        __ROM_INIT_LMA = LOADADDR(.tarea_4_bss) + SIZEOF(.tarea_4_bss);
+        __ROM_INIT_LMA = LOADADDR(.std) + SIZEOF(.std);
         __ROM_INIT_VMA = __ROM_INIT_LMA;
         .init_rom __ROM_INIT_VMA : AT (__ROM_INIT_LMA) {
                 *(.rom_init);

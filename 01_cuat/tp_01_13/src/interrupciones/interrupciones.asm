@@ -23,7 +23,6 @@ PIC0_IRQHandler:
     iret
 
 INT80_IRQHandler:
-    xchg bx, bx
     push eax
     call INT80_IRQHandler_c
     pop eax

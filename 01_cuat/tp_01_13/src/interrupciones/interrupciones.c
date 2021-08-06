@@ -405,7 +405,6 @@ void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro)
 __attribute__(( section(".interrupciones")))
 void INT80_IRQHandler_c(syscalls_t numero)
 {
-    MAGIC_BREAKPOINT
     // asm("xchg %bx, %bx");
     // asm("mov $0x80, %dl");
     // asm("hlt");

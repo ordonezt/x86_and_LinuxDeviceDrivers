@@ -102,6 +102,8 @@ habilitar_TSS:
     pop eax
     ret
 
+;Seccion standard
+section .std
 ;uint32_t syscall(uint32_t numero);
 syscall:
     push ebp
