@@ -133,17 +133,20 @@ void insertar_en_tabla_digitos(uint8_t buffer[], uint32_t longitud)
     //Cada digito es un nibble
     int8_t i, indice_nibble;
     
-    for(i = longitud-1; i >= 0; i--)
+    if(longitud != 0)
     {
-        indice_nibble = (longitud - 1 - i);
-        if(indice_nibble < 8)
-            tabla_digitos.datos[tabla_digitos.indice].bajo |= (buffer[i] - '0') << (indice_nibble * 4);
-        else
-            tabla_digitos.datos[tabla_digitos.indice].alto |= (buffer[i] - '0') << ((indice_nibble - 8) * 4);
-        // asm("xchg %bx,%bx");
-        // tabla_digitos.datos[tabla_digitos.indice] |= (buffer[i] - '0') << ((longitud - 1 - i) * 4);
+        for(i = longitud-1; i >= 0; i--)
+        {
+            indice_nibble = (longitud - 1 - i);
+            if(indice_nibble < 8)
+                tabla_digitos.datos[tabla_digitos.indice].bajo |= (buffer[i] - '0') << (indice_nibble * 4);
+            else
+                tabla_digitos.datos[tabla_digitos.indice].alto |= (buffer[i] - '0') << ((indice_nibble - 8) * 4);
+            // asm("xchg %bx,%bx");
+            // tabla_digitos.datos[tabla_digitos.indice] |= (buffer[i] - '0') << ((longitud - 1 - i) * 4);
+        }
+        tabla_digitos.indice++;
     }
-    tabla_digitos.indice++;
 }
 
 __attribute__(( section(".std")))

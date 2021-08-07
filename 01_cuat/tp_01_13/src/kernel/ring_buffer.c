@@ -33,8 +33,10 @@ uint8_t ring_buffer_pop(ring_buffer_t *ring_buffer, uint8_t *dato)
 __attribute__(( section(".rutinas")))
 uint32_t ring_buffer_get_libre(ring_buffer_t *ring_buffer)
 {
-   if(ring_buffer->cabeza > ring_buffer->cola)
+    if(ring_buffer->cabeza > ring_buffer->cola)
         return ring_buffer->longitud - ring_buffer->cabeza + ring_buffer->cola - 1;
+    else if(ring_buffer->cabeza == ring_buffer->cola)
+        return ring_buffer->longitud-1;
     else
         return ring_buffer->cola - ring_buffer->cabeza -1;
 }
