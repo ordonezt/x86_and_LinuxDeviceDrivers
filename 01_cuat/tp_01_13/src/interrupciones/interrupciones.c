@@ -6,6 +6,7 @@
 #include "../../inc/pantalla.h"
 #include "../../inc/tablas_sistema.h"
 #include "../../inc/main.h"
+#include "../../inc/rutinas.h"
 
 extern ring_buffer_t ring_buffer;
 extern contexto_simd_t*  contexto_simd_tabla[5];
@@ -416,6 +417,7 @@ uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uin
         break;
 
         case SYSCALL_READ:
+            __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
         break;
 
         case SYSCALL_PRINT:

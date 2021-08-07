@@ -1,6 +1,5 @@
 USE32
 
-section .rutinas
 
 global sumatoria_uint16_saturada, sumatoria_uint64_saturada
 global guardar_registros_simd, restaurar_registros_simd
@@ -8,6 +7,7 @@ global habilitar_NM
 
 extern borrar_cr0_ts
 
+section .std
 ;uint64_t sumatoria_uint16_saturada(uint64_t datos[], uint32_t cantidad);
 sumatoria_uint16_saturada:
 ;realiza la suma aritmetica saturada en words
@@ -60,6 +60,7 @@ ciclo_64:
     pop ecx
     ret
 
+section .rutinas
 ;void guardar_registros_simd(contexto_simd_t *contexto);
 guardar_registros_simd:
     push    edi

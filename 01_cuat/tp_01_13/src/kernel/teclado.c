@@ -146,18 +146,23 @@ void insertar_en_tabla_digitos(uint8_t buffer[], uint32_t longitud)
     tabla_digitos.indice++;
 }
 
-__attribute__(( section(".rutinas")))
+__attribute__(( section(".std")))
 uint64_t promedio_tabla_digitos(void)
 {
-    uint64_t aux;
+    uint64_t aux, aux2 = 0;
+    uint32_t cant_datos;
+    td3_read(&tabla_digitos.indice, &cant_datos, sizeof(cant_datos));
 
-    if(tabla_digitos.indice != 0)
+    if(cant_datos != 0)
     {
-        sumatoria_n_64((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1, &aux);
-        division_64(aux, tabla_digitos.indice, &tabla_digitos.promedio);
+        //MAGIC_BREAKPOINT
+        uint64_t datos[cant_datos];
+        td3_read(tabla_digitos.datos, datos, sizeof(datos[0]) * (cant_datos + 1));
+        sumatoria_n_64(datos, cant_datos + 1, &aux);
+        division_64(aux, cant_datos, &aux2);
     }
 
-    return tabla_digitos.promedio;
+    return aux2;
 }
 
 __attribute__(( section(".rutinas")))
@@ -171,30 +176,38 @@ uint64_t suma_tabla_digitos(void)
     return aux;
 }
 
-__attribute__(( section(".rutinas")))
+__attribute__(( section(".std")))
 uint64_t suma_tabla_digitos_saturada_16(void)
 {
     uint64_t aux=0;
+    uint32_t cant_datos;
+    td3_read(&tabla_digitos.indice, &cant_datos, sizeof(cant_datos));
+    uint64_t datos[cant_datos];
+    td3_read(tabla_digitos.datos, datos, sizeof(datos[0]) * (cant_datos + 1));
 
-    if(tabla_digitos.indice != 0)
+    if(cant_datos != 0)
         //sumatoria_n_64((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1, &aux);
-        aux = sumatoria_uint16_saturada((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1);
+        aux = sumatoria_uint16_saturada(datos, cant_datos + 1);
 
     return aux;
 }
 
-__attribute__(( section(".rutinas")))
+__attribute__(( section(".std")))
 uint64_t suma_tabla_digitos_saturada_64(void)
 {
     uint64_t aux=0;
+    uint32_t cant_datos;
+    td3_read(&tabla_digitos.indice, &cant_datos, sizeof(cant_datos));
+    uint64_t datos[cant_datos];
+    td3_read(tabla_digitos.datos, datos, sizeof(datos[0]) * (cant_datos + 1));
 
-    if(tabla_digitos.indice != 0)
+    if(cant_datos != 0)
         //sumatoria_n_64((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1, &aux);
-        aux = sumatoria_uint64_saturada((uint64_t *)tabla_digitos.datos, tabla_digitos.indice + 1);
+        aux = sumatoria_uint64_saturada(datos, cant_datos + 1);
     return aux;
 }
 
-__attribute__(( section(".rutinas")))
+__attribute__(( section(".std")))
 void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resultado)
 {
     uint32_t i;
@@ -204,7 +217,7 @@ void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resulta
         *resultado += vector_datos[i];
 }
 
-__attribute__(( section(".rutinas")))
+__attribute__(( section(".std")))
 uint32_t division_64(uint64_t dividendo, uint32_t divisor, uint64_t *resultado)
 {
     uint64_t acumulador = 0, res = 0;
