@@ -143,15 +143,16 @@ uint8_t* get_cr2(void);
 __attribute__(( section(".interrupciones"), interrupt))
 void Page_Fault_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_error)
 {
-    //uint8_t *direccion = get_cr2();
-    
+    // uint8_t *direccion = get_cr2();
+    // directorio_tabla_paginas_t *cr3 = (directorio_tabla_paginas_t*)((uint32_t)get_cr3() & 0xFFFFF000);
+
     // if((codigo_error & 0b001) == 0)
-    //     agregar_pagina_dinamicamente(direccion);
+    //     agregar_pagina_dinamicamente(cr3, direccion);
 
 
-    // asm("xchg %bx, %bx");
-    // asm("mov $0xE, %dl");
-    // asm("hlt");
+    asm("xchg %bx, %bx");
+    asm("mov $0xE, %dl");
+    asm("hlt");
 }
 
 __attribute__(( section(".interrupciones"), interrupt))
@@ -417,7 +418,28 @@ uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uin
         break;
 
         case SYSCALL_READ:
-            __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
+        //MAGIC_BREAKPOINT
+            if(es_memoria_leible((uint32_t*)arg1, arg3) == false)
+            {
+                retorno = -1;
+                my_printf((uint8_t*)"Lectura de memoria bloqueada", 20, 26);
+            }
+            else if(es_memoria_escribible((uint32_t*)arg2, arg3) == false)
+            {
+                retorno = -1;
+                my_printf((uint8_t*)"Escritura de memoria bloqueada", 21, 26);
+            }
+            else
+                __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
+
+            // if(es_memoria_leible((uint32_t*)arg1, arg3) 
+            // && es_memoria_escribible((uint32_t*)arg2, arg3))
+            //     __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
+            // else
+            // {
+            //     my_printf((uint8_t*)"Acceso a memoria bloqueado", 20, 15);
+            //     retorno = -1;
+            // }
         break;
 
         case SYSCALL_PRINT:

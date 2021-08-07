@@ -380,4 +380,6 @@ extern int *ss_gdt;
 
 void agregar_pagina_dinamicamente(uint8_t *direccion_lineal);
 
+bool es_memoria_escribible(void *memoria, uint32_t cant_bytes);
+bool es_memoria_leible(void *memoria, uint32_t cant_bytes);
 #endif  /*__TABLAS_SISTEMAS_H*/

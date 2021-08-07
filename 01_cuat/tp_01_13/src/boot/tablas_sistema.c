@@ -1,5 +1,7 @@
 #include "../../inc/interrupciones.h"
 #include "../../inc/tablas_sistema.h"
+#include "../../inc/main.h"
+#include "../../inc/pantalla.h"
 
 __attribute__(( section(".rutinas")))
 void cargar_descriptor_segmento(descriptor_segmento_t *descriptor,
@@ -681,7 +683,6 @@ __attribute__(( section(".rutinas")))
 void PTs_kernel_inicializar()
 {
     uint16_t aux;
-    //uint32_t aux2;
     uint8_t i;
     uint32_t direccion_lineal, direccion_fisica, cant_pag;
 
@@ -733,6 +734,20 @@ void PTs_kernel_inicializar()
                             1);                     //Presente
     }
 
+    //Tabla de pagina de pila de kernel
+    aux = ((uint32_t)TP3_kernel >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_kernel,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP3_kernel,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
 
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
@@ -1315,6 +1330,50 @@ void PTs_tarea_1_inicializar()
                             1);                     //Presente
     }
 
+    //Directorio de tabla de pagina tarea 1
+    aux = ((uint32_t)DTP_tarea1 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea1,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)DTP_tarea1,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de usuario de tarea 1
+    aux = ((uint32_t)TP3_tarea1 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea1,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP3_tarea1,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de supervisor de tarea 1
+    aux = ((uint32_t)TP6_tarea1 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea1,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP6_tarea1,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
 
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
@@ -1848,6 +1907,65 @@ void PTs_tarea_2_inicializar()
                             1);                     //Presente
     }
 
+    //Directorio de tabla de pagina tarea 2
+    aux = ((uint32_t)DTP_tarea2 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea2,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)DTP_tarea2,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de usuario de tarea 2
+    aux = ((uint32_t)TP4_tarea2 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea2,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP4_tarea2,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de supervisor de tarea 2
+    aux = ((uint32_t)TP7_tarea2 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea2,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP7_tarea2,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de datos
+    aux = ((uint32_t)TP2_tarea2 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea2,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP2_tarea2,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
 
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
@@ -2382,6 +2500,50 @@ void PTs_tarea_3_inicializar()
                             1);                     //Presente
     }
 
+    //Directorio de tabla de pagina tarea 3
+    aux = ((uint32_t)DTP_tarea3 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea3,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)DTP_tarea3,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de usuario de tarea 3
+    aux = ((uint32_t)TP4_tarea3 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea3,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP4_tarea3,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de supervisor de tarea 3
+    aux = ((uint32_t)TP7_tarea3 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea3,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP7_tarea3,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
 
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
@@ -2915,6 +3077,50 @@ void PTs_tarea_4_inicializar()
                             1);                     //Presente
     }
 
+    //Directorio de tabla de pagina tarea 4
+    aux = ((uint32_t)DTP_tarea4 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea4,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)DTP_tarea4,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de usuario de tarea 4
+    aux = ((uint32_t)TP4_tarea4 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea4,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP4_tarea4,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
+
+    //Tabla de pagina de pila de supervisor de tarea 4
+    aux = ((uint32_t)TP7_tarea4 >> 12) & 0x3FF;
+    PT_agregar_pagina(  TP0_tarea4,   //Direccion de las tablas
+                        aux,          //Indice
+                        (uint8_t*)TP7_tarea4,   //Puntero a pagina
+                        1,            //Global
+                        0,            //PAT no
+                        0,            //D no
+                        0,            //A si
+                        0,            //PCD no
+                        0,            //PWT no
+                        0,            //Supervisor
+                        1,            //Lectura
+                        1);           //Presente
 
     //Rutinas
     cant_pag = (uint32_t)__rutinas_size / 0x1000 + (((uint32_t)__rutinas_size % 0x1000) != 0);
@@ -3346,4 +3552,72 @@ void agregar_pagina_dinamicamente(uint8_t *direccion_lineal)
                         0,                      //Supervisor
                         1,                      //Escritura
                         1);                     //Presente
+}
+
+__attribute__(( section(".rutinas")))
+bool es_memoria_escribible(void *memoria, uint32_t cant_bytes)
+{
+    directorio_tabla_paginas_t *cr3;
+    tabla_paginas_t *pt;
+    descriptor_tabla_pagina dtpe;
+    descriptor_pagina pte;
+    bool condicion_escritura, condicion_privilegio, retorno = true;
+    uint8_t *aux;
+
+    while(cant_bytes--){
+        aux = (uint8_t*)memoria + cant_bytes;
+
+        //Tengo que entrar a su DTPE y PTE y ver sus permisos de escritura/lectura y privilegios
+        cr3 = (directorio_tabla_paginas_t*)((uint32_t)get_cr3() & 0xFFFFF000);
+
+        dtpe = cr3->descriptores_tablas_pagina[((uint32_t)aux >> (12+10)) & 0x3FF];
+
+        pt = (tabla_paginas_t*)(dtpe & 0xFFFFF000);
+
+        pte = pt->descriptores_paginas[((uint32_t)aux >> 12) & 0x3FF];
+
+        //Reviso si la pagina es de escritura o lectura
+        condicion_escritura = (bool)(dtpe & 0x2) && (bool)(pte & 0x2);
+        
+        //Reviso si la pagina es de usuario o supervisor
+        if(cr3 == DTP_kernel)
+            condicion_privilegio = true;
+        else
+            condicion_privilegio = (bool)(dtpe & 0x4) && (bool)(pte & 0x4);
+
+        if((condicion_privilegio && condicion_escritura) != true) 
+            retorno = false;
+    }
+    return retorno;
+}
+
+__attribute__(( section(".rutinas")))
+bool es_memoria_leible(void *memoria, uint32_t cant_bytes)
+{
+    uint32_t tabla_dig_inicio, tabla_dig_fin;
+    uint32_t datos_inicio, datos_fin;
+    uint32_t rom_inicio, rom_fin;
+    uint32_t aux;
+
+    tabla_dig_inicio = (uint32_t)__TABLA_DIGITOS_VMA_LINEAL;
+    tabla_dig_fin = tabla_dig_inicio + 0xFFF;
+
+    datos_inicio = (uint32_t)__DATOS_VMA_LINEAL;
+    datos_fin = datos_inicio + 0xFFF;
+
+    rom_inicio = (uint32_t)__ROM_VMA_LINEAL;
+    rom_fin = rom_inicio + 0xFFFF;
+
+    //Se fija si la memoria a leer esta dentro de la zona de tabla de digitos, datos o rom
+    while(cant_bytes--)
+    {
+        aux = (uint32_t)(memoria + cant_bytes);
+        if( ((aux >= tabla_dig_inicio && aux <= tabla_dig_fin) || 
+            (aux >= datos_inicio && aux <= datos_fin)         ||
+            (aux >= rom_inicio && aux <= rom_fin))
+            != true)
+            return false;
+            
+    }
+    return true;
 }

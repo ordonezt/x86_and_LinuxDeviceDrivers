@@ -94,7 +94,6 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     contexto_tarea_t *contexto = contexto_tareas_tabla[n_tarea];
     TSS_basica_t *TSS = TSS_basica_tabla[n_tarea];
 
-    //TODO Inicializar el stack aca (a lo mejor apagar paginacion)
     aux = (uint32_t*)((uint8_t*)pila_supervisor - 3);
     *(aux--) = DS3_SELECTOR;//SS3
     *(aux--) = (uint32_t)pila_usuario - 3;//ESP3
@@ -111,7 +110,6 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     TSS->CR3 = (uint32_t)dtp;
     TSS->ESP_0 = (uint32_t)aux;
     TSS->SS_0 = DS0_SELECTOR;
-    // TSS->
 }
 
 __attribute__(( section(".kernel")))

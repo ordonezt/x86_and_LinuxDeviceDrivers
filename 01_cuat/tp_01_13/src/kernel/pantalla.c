@@ -70,7 +70,7 @@ __attribute__(( section(".std")))
 void hex32_2_str (uint32_t numero, uint8_t *cadena)
 {
     
-    uint8_t i=0, aux, tabla[16];
+    uint8_t i=0, aux;
 
     cadena[0]='0';
     cadena[1]='x';
@@ -78,72 +78,43 @@ void hex32_2_str (uint32_t numero, uint8_t *cadena)
     //Esta es la forma mas elegante, pero por el tema de protecciones no me deja acceder a la tabla
     // for(i=0;i<8;i++) 
     //     cadena[1 + 8-i] = hex2ascii_LUT[(numero >> (i*4)) & 0xF];
-    //MAGIC_BREAKPOINT
-    td3_read(hex2ascii_LUT, tabla, sizeof(tabla[0])*16);
-    //Esta es la forma mas elegante, pero por el tema de protecciones no me deja acceder a la tabla
-    for(i=0;i<8;i++) 
-        cadena[1 + 8-i] = tabla[(numero >> (i*4)) & 0xF];
     
-    // for(i=0;i<8;i++)
-    // {
-    //     // if(aux == 0x0)
-    //     aux = (numero >> (i*4)) & 0xF;
-    //     switch(aux){
-    //         case 0x0:
-    //         //MAGIC_BREAKPOINT
-    //         cadena[1 + 8-i] = '0';
-    //         break;
-    //         case 0x1:
-    //         cadena[1 + 8-i] = '1';
-    //         break;
-    //         case 0x2:
-    //         cadena[1 + 8-i] = '2';
-    //         break;
-    //         case 0x3:
-    //         cadena[1 + 8-i] = '3';
-    //         break;
-    //         case 0x4:
-    //         cadena[1 + 8-i] = '4';
-    //         break;
-    //         case 0x5:
-    //         cadena[1 + 8-i] = '5';
-    //         break;
-    //         case 0x6:
-    //         cadena[1 + 8-i] = '6';
-    //         break;
-    //         case 0x7:
-    //         cadena[1 + 8-i] = '7';
-    //         break;
-    //         case 0x8:
-    //         cadena[1 + 8-i] = '8';
-    //         break;
-    //         case 0x9:
-    //         cadena[1 + 8-i] = '9';
-    //         break;
-    //         case 0xA:
-    //         cadena[1 + 8-i] = 'A';
-    //         break;
-    //         case 0xB:
-    //         cadena[1 + 8-i] = 'B';
-    //         break;
-    //         case 0xC:
-    //         cadena[1 + 8-i] = 'C';
-    //         break;
-    //         case 0xD:
-    //         cadena[1 + 8-i] = 'D';
-    //         break;
-    //         case 0xE:
-    //         cadena[1 + 8-i] = 'E';
-    //         break;
-    //         case 0xF:
-    //         cadena[1 + 8-i] = 'F';
-    //         break;
-    //         default:
-    //         cadena[1 + 8-i] = 0;
-    //         break;
-    //     }
-    // }
-
+    for(i=0;i<8;i++)
+    {
+        aux = (numero >> (i*4)) & 0xF;
+        if(aux == 0)
+            cadena[1 + 8-i] = '0';
+        else if(aux == 1)
+            cadena[1 + 8-i] = '1';
+        else if(aux == 2)
+            cadena[1 + 8-i] = '2';
+        else if(aux == 3)
+            cadena[1 + 8-i] = '3';
+        else if(aux == 4)
+            cadena[1 + 8-i] = '4';
+        else if(aux == 5)
+            cadena[1 + 8-i] = '5';
+        else if(aux == 6)
+            cadena[1 + 8-i] = '6';
+        else if(aux == 7)
+            cadena[1 + 8-i] = '7';
+        else if(aux == 8)
+            cadena[1 + 8-i] = '8';
+        else if(aux == 9)
+            cadena[1 + 8-i] = '9';
+        else if(aux == 10)
+            cadena[1 + 8-i] = 'A';
+        else if(aux == 11)
+            cadena[1 + 8-i] = 'B';
+        else if(aux == 12)
+            cadena[1 + 8-i] = 'C';
+        else if(aux == 13)
+            cadena[1 + 8-i] = 'D';
+        else if(aux == 14)
+            cadena[1 + 8-i] = 'E';
+        else if(aux == 15)
+            cadena[1 + 8-i] = 'F';
+    }
     cadena[10]=0;
 }
 
