@@ -12,7 +12,6 @@ void tarea_1(void)
     
     while(1)
     {
-        //MAGIC_BREAKPOINT
         direccion = promedio_tabla_digitos();
     // if(direccion < DIRECCION_RAM_MAX)
     // {

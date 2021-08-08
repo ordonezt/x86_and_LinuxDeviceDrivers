@@ -16,7 +16,7 @@ puerto_io_leer:
 
     pop ebp
 
-    ret                 ;Me voy
+    ret
 
 ;uint8_t puerto_io_escribir(uint8_t puerto, uint8_t dato)
 puerto_io_escribir:
@@ -35,7 +35,7 @@ puerto_io_escribir:
 
     pop ebp
 
-    ret                 ;Chao
+    ret
 
 global get_cr2
 get_cr2:

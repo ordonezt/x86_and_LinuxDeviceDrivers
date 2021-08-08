@@ -1,9 +1,9 @@
 #include "../../inc/pantalla.h"
 #include "../../inc/rutinas.h"
 
-// caracter_video_t buffer_video[VIDEO_FILAS][VIDEO_COLUMNAS] __attribute__ ((section (".buffer_pantalla")));
 const uint8_t hex2ascii_LUT[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
+//Pinta toda la pantalla de un color
 __attribute__(( section(".rutinas")))
 void pantalla_pintar(color_caracter_t color)
 {
@@ -13,6 +13,7 @@ void pantalla_pintar(color_caracter_t color)
             pantalla_putc(0, fila, columna, false, color, false, color);
 }
 
+//Escribe un caracter en pantalla
 __attribute__(( section(".rutinas")))
 int8_t pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parpadear,
                     color_caracter_t color_trasero, bool negrita, color_caracter_t color_frontal)
@@ -34,6 +35,7 @@ int8_t pantalla_putc( uint8_t caracter, uint8_t fila, uint8_t columna, bool parp
     return retorno;
 }
 
+//Escribe una cadena de caracteres en pantalla
 __attribute__(( section(".rutinas")))
 int8_t my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna)
 {
@@ -57,6 +59,7 @@ int8_t my_printf(uint8_t cadena[], uint8_t fila, uint8_t columna)
     return retorno;
 }
 
+//Convierte la fila y columnas en indice de memoria de video
 __attribute__(( section(".rutinas")))
 int16_t fila_columna2indice(uint8_t fila, uint8_t columna)
 {
@@ -66,6 +69,7 @@ int16_t fila_columna2indice(uint8_t fila, uint8_t columna)
         return -1;
 }
 
+//Convierte un numero de 32 bits en una cadena de caracteres
 __attribute__(( section(".std")))
 void hex32_2_str (uint32_t numero, uint8_t *cadena)
 {
@@ -118,6 +122,7 @@ void hex32_2_str (uint32_t numero, uint8_t *cadena)
     cadena[10]=0;
 }
 
+//Convierte un numero de 64 bits en una cadena de caracteres
 __attribute__(( section(".std")))
 void hex64_2_str (uint64_t numero, uint8_t *cadena)
 {
@@ -128,6 +133,7 @@ void hex64_2_str (uint64_t numero, uint8_t *cadena)
     cadena[10] = aux;
 }
 
+//Devuelve la longitud de una cadena de caracteres
 __attribute__(( section(".std")))
 uint32_t strlen(uint8_t cadena[])
 {

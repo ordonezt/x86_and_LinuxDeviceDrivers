@@ -48,8 +48,6 @@ directorio_tabla_paginas_t* dtp_tareas_tabla[5] = {DTP_kernel, DTP_tarea1, DTP_t
 __attribute__(( section(".kernel")))
 int main(void)
 {
-    //uint32_t tick;
-
     //Inicializaciones
     tareas_inicializar();
     teclado_inicializar();
@@ -59,33 +57,25 @@ int main(void)
     //Loop
     while(1)
     {
-        // tick = systick_get_tick();
-        
-        // if((tick % PERIODO_TAREA_1) == 0)
-        //     tarea_1();
 
-        // if((tick % PERIODO_TAREA_2) == 0)
-        //     tarea_2();
-
-        // if((tick % PERIODO_TAREA_3) == 0)
-        //     tarea_3();
-
-        // tarea_4();
     }
 }
 
+//Devuelve el numero de tareas segun su contexto
 __attribute__(( section(".kernel")))
 uint8_t get_numero_tarea(contexto_tarea_t contexto)
 {
     return (contexto.CR3 - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
 }
 
+//Devuelve el numero de tarea actual
 __attribute__(( section(".kernel")))
 uint8_t get_numero_tarea_actual(void)
 {
     return ((uint32_t)get_cr3() - (uint32_t)DTP_kernel) / sizeof(directorio_tabla_paginas_t);
 }
 
+//Inicializa el contexto de una tarea
 __attribute__(( section(".kernel")))
 void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pila_supervisor, void *pila_usuario)
 {
@@ -112,6 +102,7 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     TSS->SS_0 = DS0_SELECTOR;
 }
 
+//Inicializa las tareas
 __attribute__(( section(".kernel")))
 void tareas_inicializar(void)
 {
@@ -119,10 +110,11 @@ void tareas_inicializar(void)
     inicializar_contexto(DTP_tarea2, tarea_2, __TAREA_2_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_2_PILA_USUARIO_INICIO_LINEAL);
     inicializar_contexto(DTP_tarea3, tarea_3, __TAREA_3_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_3_PILA_USUARIO_INICIO_LINEAL);
     inicializar_contexto(DTP_tarea4, tarea_4, __TAREA_4_PILA_SUPERVISOR_INICIO_LINEAL, __TAREA_4_PILA_USUARIO_INICIO_LINEAL);
-//MAGIC_BREAKPOINT
+
     habilitar_TSS(TSS_SELECTOR);
 }
 
+//Guarda el contexto de la tarea
 __attribute__(( section(".kernel")))
 void guardar_contexto(contexto_tarea_t contexto_tarea)
 {
@@ -134,10 +126,10 @@ void guardar_contexto(contexto_tarea_t contexto_tarea)
     guardar_registros_simd(contexto_simd_tabla[n_tarea]);
 }
 
+//Realiza el cambio de tareas
 __attribute__(( section(".kernel")))
 void scheduler(contexto_tarea_t contexto_tarea_actual)
 {
-    //MAGIC_BREAKPOINT
     uint8_t aux[11], tarea_actual;
     static uint8_t tarea_siguiente=0;
     static uint32_t cuenta_tarea_1 = PERIODO_TAREA_1,
@@ -146,6 +138,7 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
     static uint32_t tick_anterior;
     uint32_t tick_actual = systick_get_tick();
 
+    //Decrementa las cuentas de las tareas
     if(tick_actual - tick_anterior)
     {
         if(cuenta_tarea_1) cuenta_tarea_1--;
@@ -153,6 +146,7 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
         if(cuenta_tarea_3) cuenta_tarea_3--;
     }
 
+    //Me fijo cual es la proxima tarea
     if(cuenta_tarea_1 == 0)
     {
         tarea_siguiente = 1;
@@ -171,17 +165,17 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
     else
         tarea_siguiente = 4;
 
-    // tarea_siguiente++;
-    // tarea_siguiente %= 5;
-
-    //MAGIC_BREAKPOINT
+    //Me fijo cual es la tarea actual
     tarea_actual = get_numero_tarea(contexto_tarea_actual);
     
     hex32_2_str(tarea_actual, aux);
     my_printf((uint8_t*)"Tarea interrumpida: ", 11, 40);
     my_printf(aux, 11, 40 + 21);  
 
-    //MAGIC_BREAKPOINT
+    /**
+     * Si la tarea siguiente es distinta de la actual hay que guardar el contexto
+     * a menos que sea el kernel y hay que hacer el cambio de contexto
+     * */
     if(tarea_actual != tarea_siguiente)
     {
         if(tarea_actual != 0)
@@ -189,12 +183,12 @@ void scheduler(contexto_tarea_t contexto_tarea_actual)
             guardar_contexto(contexto_tarea_actual);
             prender_cr0_ts();
         }
-        //MAGIC_BREAKPOINT
         cambiar_contexto(contexto_tareas_tabla[tarea_siguiente],
                          dtp_tareas_tabla[tarea_siguiente]);
     }
 }
 
+//Pone el procesador en bajo consumo
 __attribute__(( section(".kernel")))
 void ir_a_dormir(void)
 {

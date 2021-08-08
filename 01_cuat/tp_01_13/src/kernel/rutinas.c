@@ -26,18 +26,22 @@ uint8_t __mi_memcpy(void* origen,void *destino,uint32_t length)
 }
 
 //Seccion standard
+
+//Syscall que haltea el procesador
 __attribute__(( section(".std")))
 void td3_halt(void)
 {
     syscall_hlt();
 }
 
+//Syscall que imprime en pantalla
 __attribute__(( section(".std")))
 uint32_t td3_print(uint8_t cadena[], uint8_t fila, uint8_t columna)
 {
     return syscall_print(cadena, fila, columna);
 }
 
+//Syscall que lee memoria
 __attribute__(( section(".std")))
 uint32_t td3_read(void *origen, void *destino, uint32_t num_bytes)
 {

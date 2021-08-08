@@ -4,6 +4,7 @@
 
 uint32_t tick __attribute__ ((section (".datos")));
 
+//Inicializa el tick del sistema
 __attribute__(( section(".rutinas"))) 
 void systick_inicializar(void)
 {
@@ -16,11 +17,15 @@ void systick_inicializar(void)
     tick = 0;
 }
 
+//Incrementa el valor del tick del sistema
+__attribute__(( section(".rutinas")))
 void systick_incrementar_tick(void)
 {
     tick++;
 }
 
+//Devuelve el valor actual del tick del sistema
+__attribute__(( section(".rutinas")))
 uint32_t systick_get_tick(void)
 {
     return tick;

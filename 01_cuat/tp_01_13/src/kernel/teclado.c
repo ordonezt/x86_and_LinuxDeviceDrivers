@@ -77,12 +77,14 @@ ring_buffer_t ring_buffer __attribute__ ((section (".datos")));
 uint8_t buffer_teclas[LONGITUD_BUFFER_TECLAS] __attribute__ ((section (".datos")));
 tabla_digitos_t tabla_digitos __attribute__ ((section (".tabla_digitos")));
 
+//Devuelve la tecla accionada
 __attribute__(( section(".rutinas"))) 
 uint8_t teclado_get_tecla(void)
 {
     return puerto_io_leer(TECLADO_PUERTO);
 }
 
+//Inicializa el teclado
 __attribute__(( section(".rutinas"))) 
 void teclado_inicializar(void)
 {
@@ -94,24 +96,28 @@ void teclado_inicializar(void)
 
 }
 
+//Se fija si la tecla es de tipo break
 __attribute__(( section(".rutinas"))) 
 bool tecla_es_break_code(uint8_t tecla)
 {
     return tecla & 0x80;
 }
 
+//Se fija si la tecla es de tipo make
 __attribute__(( section(".rutinas"))) 
 bool tecla_es_make_code(uint8_t tecla)
 {
     return !tecla_es_break_code(tecla);
 }
 
+//Se fija si la tecla es un enter
 __attribute__(( section(".rutinas"))) 
 bool tecla_es_enter(uint8_t tecla)
 {
     return tecla & 0x80;
 }
 
+//Convierte el codigo de tecla en caracter ascii
 __attribute__(( section(".rutinas"))) 
 uint8_t tecla2caracter(uint8_t tecla)
 {
@@ -121,12 +127,14 @@ uint8_t tecla2caracter(uint8_t tecla)
         return 0;
 }
 
+//Se fija si el caracter es un numero
 __attribute__(( section(".rutinas"))) 
 bool caracter_es_numero(uint8_t caracter)
 {
     return (caracter >= '0') && (caracter <= '9');
 }
 
+//Inserta un dato de 64 bits en la tabla de digitos
 __attribute__(( section(".rutinas")))
 void insertar_en_tabla_digitos(uint8_t buffer[], uint32_t longitud)
 {
@@ -142,13 +150,12 @@ void insertar_en_tabla_digitos(uint8_t buffer[], uint32_t longitud)
                 tabla_digitos.datos[tabla_digitos.indice].bajo |= (buffer[i] - '0') << (indice_nibble * 4);
             else
                 tabla_digitos.datos[tabla_digitos.indice].alto |= (buffer[i] - '0') << ((indice_nibble - 8) * 4);
-            // asm("xchg %bx,%bx");
-            // tabla_digitos.datos[tabla_digitos.indice] |= (buffer[i] - '0') << ((longitud - 1 - i) * 4);
         }
         tabla_digitos.indice++;
     }
 }
 
+//Realiza el promedio de los valores de la tabla de digitos
 __attribute__(( section(".std")))
 uint64_t promedio_tabla_digitos(void)
 {
@@ -158,7 +165,6 @@ uint64_t promedio_tabla_digitos(void)
 
     if(cant_datos != 0)
     {
-        //MAGIC_BREAKPOINT
         uint64_t datos[cant_datos];
         td3_read(tabla_digitos.datos, datos, sizeof(datos[0]) * (cant_datos + 1));
         sumatoria_n_64(datos, cant_datos + 1, &aux);
@@ -168,6 +174,7 @@ uint64_t promedio_tabla_digitos(void)
     return aux2;
 }
 
+//Realiza la suma de los valores en la tabla de digitos
 __attribute__(( section(".rutinas")))
 uint64_t suma_tabla_digitos(void)
 {
@@ -179,6 +186,7 @@ uint64_t suma_tabla_digitos(void)
     return aux;
 }
 
+//Realiza la suma de los valores en la tabla de digitos saturada a 16 bits usando funcionalidades simd
 __attribute__(( section(".std")))
 uint64_t suma_tabla_digitos_saturada_16(void)
 {
@@ -195,6 +203,7 @@ uint64_t suma_tabla_digitos_saturada_16(void)
     return aux;
 }
 
+//Realiza la suma de los valores en la tabla de digitos usando funcionalidades simd
 __attribute__(( section(".std")))
 uint64_t suma_tabla_digitos_saturada_64(void)
 {
@@ -210,6 +219,7 @@ uint64_t suma_tabla_digitos_saturada_64(void)
     return aux;
 }
 
+//Realiza la suma de los valores de 64 bits de un array
 __attribute__(( section(".std")))
 void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resultado)
 {
@@ -220,6 +230,7 @@ void sumatoria_n_64(uint64_t *vector_datos, uint32_t cantidad, uint64_t *resulta
         *resultado += vector_datos[i];
 }
 
+//Realiza la division de un numero de 64 bits
 __attribute__(( section(".std")))
 uint32_t division_64(uint64_t dividendo, uint32_t divisor, uint64_t *resultado)
 {

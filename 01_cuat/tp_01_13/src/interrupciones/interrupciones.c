@@ -8,6 +8,8 @@
 #include "../../inc/main.h"
 #include "../../inc/rutinas.h"
 
+uint8_t* get_cr2(void);
+
 extern ring_buffer_t ring_buffer;
 extern contexto_simd_t*  contexto_simd_tabla[5];
 
@@ -92,9 +94,14 @@ void NM_Handler(cuadro_interrupcion_t *cuadro)
     // asm("xchg %bx, %bx");
     // asm("mov $0x7, %dl");
     // asm("hlt");
-    //MAGIC_BREAKPOINT
+    
+    //Averiguo el numero de tarea para saber de donde sacar el contexto simd
     uint8_t n_tarea = get_numero_tarea_actual();
+
+    //Limpio el flag de cambio de tarea
     borrar_cr0_ts();
+
+    //Restauro el contexto simd
     restaurar_registros_simd(contexto_simd_tabla[n_tarea]);   
 }
 
@@ -138,16 +145,13 @@ void General_Protection_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_e
     asm("hlt");
 }
 
-uint8_t* get_cr2(void);
-
 __attribute__(( section(".interrupciones"), interrupt))
 void Page_Fault_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_error)
 {
     // uint8_t *direccion = get_cr2();
-    // directorio_tabla_paginas_t *cr3 = (directorio_tabla_paginas_t*)((uint32_t)get_cr3() & 0xFFFFF000);
 
     // if((codigo_error & 0b001) == 0)
-    //     agregar_pagina_dinamicamente(cr3, direccion);
+    //     agregar_pagina_dinamicamente(direccion);
 
 
     asm("xchg %bx, %bx");
@@ -208,61 +212,14 @@ void Control_Protection_Handler(cuadro_interrupcion_t *cuadro, uint32_t codigo_e
 __attribute__(( section(".interrupciones")))
 void PIC0_IRQHandler_c(contexto_tarea_t contexto_tarea_anterior)
 {
-    //MAGIC_BREAKPOINT
-    //asm("xchg %bx, %bx");
-    //     uint8_t aux[9];
-
-    //TODO Limpiar y pushear
-    
-    // hex32_2_str(contexto_tarea_anterior.EFLAGS, aux);
-    // my_printf("EFL: ", 11, 0);
-    // my_printf(aux, 11, 5);
-    // hex32_2_str(contexto_tarea_anterior.CS, aux);
-    // my_printf("CS : ", 12, 0);
-    // my_printf(aux, 12, 5);
-    // hex32_2_str(contexto_tarea_anterior.EIP, aux);
-    // my_printf("EIP: ", 13, 0);
-    // my_printf(aux, 13, 5);
-    // hex32_2_str(contexto_tarea_anterior.EAX, aux);
-    // my_printf("EAX: ", 14, 0);
-    // my_printf(aux, 14, 5);
-    // hex32_2_str(contexto_tarea_anterior.ECX, aux);
-    // my_printf("ECX: ", 15, 0);
-    // my_printf(aux, 15, 5);
-    // hex32_2_str(contexto_tarea_anterior.EDX, aux);
-    // my_printf("EDX: ", 16, 0);
-    // my_printf(aux, 16, 5);
-    // hex32_2_str(contexto_tarea_anterior.EBX, aux);
-    // my_printf("EBX: ", 17, 0);
-    // my_printf(aux, 17, 5);
-    // hex32_2_str(contexto_tarea_anterior.ESP, aux);
-    // my_printf("ESP: ", 18, 0);
-    // my_printf(aux, 18, 5);
-    // hex32_2_str(contexto_tarea_anterior.EBP, aux);
-    // my_printf("EBP: ", 19, 0);
-    // my_printf(aux, 19, 5);
-    // hex32_2_str(contexto_tarea_anterior.ESI, aux);
-    // my_printf("ESI: ", 20, 0);
-    // my_printf(aux, 20, 5);
-    // hex32_2_str(contexto_tarea_anterior.EDI, aux);
-    // my_printf("EDI: ", 21, 0);
-    // my_printf(aux, 21, 5);
-    // hex32_2_str(contexto_tarea_anterior.CR3, aux);
-    // my_printf("CR3: ", 22, 0);
-    // my_printf(aux, 22, 5);
-    // hex32_2_str(contexto_tarea_anterior.SS, aux);
-    // my_printf("SS : ", 23, 0);
-    // my_printf(aux, 23, 5);
-    // hex32_2_str(contexto_tarea_anterior.ES, aux);
-    // my_printf("ES : ", 24, 0);
-    // my_printf(aux, 24, 5);
-
+    //Actualizo el valor del tick
     systick_incrementar_tick();
+
+    //Limpio la interrupcion del pic
     pic_limpiar_interrupcion(INTERRUPCION_SYSTICK);
-    // MAGIC_BREAKPOINT
+
+    //Invoco al scheduler
     scheduler(contexto_tarea_anterior);
-    // asm("mov $0x20, %dl");
-    // asm("hlt");
 }
 
 //Teclado
@@ -271,6 +228,7 @@ void PIC1_IRQHandler(cuadro_interrupcion_t *cuadro)
 {
     uint8_t tecla = teclado_get_tecla();
 
+    //Si es una tecla valida la agrego al buffer circular e inserto el valor en la tabla de digitos si es necesario
     if(tecla_es_make_code(tecla))
     {
         tecla = tecla2caracter(tecla);
@@ -281,14 +239,10 @@ void PIC1_IRQHandler(cuadro_interrupcion_t *cuadro)
             ring_buffer_vaciar(&ring_buffer);
         }
         else if(caracter_es_numero(tecla))
-        {
-            //asm("xchg %bx, %bx");
             ring_buffer_insertar(&ring_buffer, tecla);
-        }
     }
- 
-    //asm("mov $0x21, %dl");
-    //asm("hlt");
+
+    //Limpio la interrupcion del pic
     pic_limpiar_interrupcion(INTERRUPCION_TECLADO);
 }
 
@@ -404,12 +358,11 @@ void PIC15_IRQHandler(cuadro_interrupcion_t *cuadro)
     asm("hlt");
 }
 
+//Este handler es invocado por un wrapper de asm, porque el bendito gcc me pone codigo en el handler de C sin que yo pueda meter mano
+//Y como tengo me llegan parametros por registro me hace pelota todo
 __attribute__(( section(".interrupciones")))
 uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uint32_t arg3)
 {
-    // asm("xchg %bx, %bx");
-    // asm("mov $0x80, %dl");
-    // asm("hlt");
     uint32_t retorno = 0;
 
     switch(numero){
@@ -418,7 +371,7 @@ uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uin
         break;
 
         case SYSCALL_READ:
-        //MAGIC_BREAKPOINT
+            //Verifico si la memoria es apta para lectura y escritura a nivel de usuario
             if(es_memoria_leible((uint32_t*)arg1, arg3) == false)
             {
                 retorno = -1;
@@ -431,20 +384,12 @@ uint32_t INT80_IRQHandler_c(syscalls_t numero, uint32_t arg1, uint32_t arg2, uin
             }
             else
                 __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
-
-            // if(es_memoria_leible((uint32_t*)arg1, arg3) 
-            // && es_memoria_escribible((uint32_t*)arg2, arg3))
-            //     __mi_memcpy((uint32_t*)arg1, (uint32_t*)arg2, arg3);
-            // else
-            // {
-            //     my_printf((uint8_t*)"Acceso a memoria bloqueado", 20, 15);
-            //     retorno = -1;
-            // }
         break;
 
         case SYSCALL_PRINT:
             retorno = (uint32_t)my_printf((uint8_t*)arg1, (uint8_t)arg2, (uint8_t)arg3);
         break;
+        
         default:
             retorno = -1;
         break;

@@ -106,15 +106,6 @@ init32:
     call __mi_memcpy
     leave
 
-; ;Copio la tarea 1 a RAM
-;     push ebp
-;     mov ebp,esp
-;     push __tarea_1_size
-;     push __TAREA_1_VMA_FISICA
-;     push __TAREA_1_LMA
-;     call __mi_memcpy
-;     leave
-
 ;Copio el codigo de la tarea 1 a RAM
     push ebp
     mov ebp,esp
@@ -220,108 +211,12 @@ init32:
     call init_pic
     call pic_deshabilitar_todo
 
-    ;call tareas_inicializar
-    ; call inicializar_pila_tarea1
-    ; call inicializar_pila_tarea2
-    ; call inicializar_pila_tarea3
-    ; call inicializar_pila_tarea4
-    
+;Inicializo el sistema de paginacion
     call paginacion_inicializar
 
-; ;Habilito las interrupciones
-;     sti
+;Habilito la interrupcion NM
     call habilitar_NM
 
     ;Salto al kernel
     jmp CS_SEL_32 : kernel_init
 end_init32:
-
-inicializar_pila_tarea1:
-    pushad
-    
-    ;cargo EFLAGS en el stack
-    mov edi,__TAREA_1_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
-    mov eax,0x202             ;EFLAGS
-    mov [edi],eax
-    ;cargo CS en el stack
-    sub edi,4
-    mov eax,0x8             ;CS
-    mov [edi],eax
-    ;cargo el EIP en el stack
-    sub edi,4
-    mov eax,tarea_1             
-    mov [edi],eax  
-
-    popad
-    ret
-
-inicializar_pila_tarea2:
-    pushad
-    
-    ;cargo EFLAGS en el stack
-    mov edi,__TAREA_2_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
-    mov eax,0x202             ;EFLAGS
-    mov [edi],eax
-    ;cargo CS en el stack
-    sub edi,4
-    mov eax,0x8             ;CS
-    mov [edi],eax
-    ;cargo el EIP en el stack
-    sub edi,4
-    mov eax,tarea_2             
-    mov [edi],eax  
-
-    popad
-    ret
-
-inicializar_pila_tarea3:
-    pushad
-    
-    ;cargo EFLAGS en el stack
-    mov edi,__TAREA_3_PILA_USUARIO_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos)
-    mov eax,0x202             ;EFLAGS
-    mov [edi],eax
-    ;cargo CS en el stack
-    sub edi,4
-    mov eax,0x8             ;CS
-    mov [edi],eax
-    ;cargo el EIP en el stack
-    sub edi,4
-    mov eax,tarea_3             
-    mov [edi],eax  
-
-    popad
-    ret
-
-inicializar_pila_tarea4:
-    pushad
-    
-    ;cargo EFLAGS en el stack
-    mov edi,__TAREA_4_PILA_SUPERVISOR_INICIO_FISICA - 3     ;direccion del stack (dirección física, todavía no paginamos), alineada a 4 bytes
-    
-    ;SS usr
-    mov eax, 0b0000000000100011 ;DS3_SELECTOR en tablas_sistema.h
-    mov [edi], eax
-    sub edi, 4
-
-    ;ESP usr
-    mov eax,__TAREA_4_PILA_USUARIO_INICIO_LINEAL - 3
-    mov [edi], eax
-    sub edi, 4
-    
-    ;EFLAGS
-    mov eax,0x202
-    mov [edi],eax
-    sub edi,4
-
-    ;cargo CS en el stack
-    mov eax,0b0000000000011011 ;CS3_SELECTOR en tablas_sistema.h
-    mov [edi],eax
-    sub edi,4
-
-    ;cargo el EIP en el stack
-    mov eax,tarea_4             
-    mov [edi],eax  
-
-    popad
-    ret

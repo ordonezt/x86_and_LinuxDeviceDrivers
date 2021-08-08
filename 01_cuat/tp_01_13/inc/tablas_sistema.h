@@ -4,7 +4,6 @@
 #include "../inc/my_types.h"
 
 #define LIMITE_MAXIMO   0xFFFFFFFF
-//extern uint32_t __CS_BASE, __CS_LIMITE, __DS_BASE, __DS_LIMITE, __SS_BASE, __SS_LIMITE;
 #define __CS_BASE        0x00000000
 #define __CS_LIMITE      0xFFFFFFFF
 #define __DS_BASE        __CS_BASE
@@ -20,38 +19,11 @@
 
 #define TSS_SELECTOR 0b0000000000101000
 
-// #define CS3_SELECTOR 0b0000000000011000
-// #define DS3_SELECTOR 0b0000000000100000
-
 typedef enum{
     TIPO_TAREA          = 0b101,
     TIPO_INTERRUPCION   = 0b110,
     TIPO_EXCEPCION      = 0b111
 }tipo_excepcion_t;
-
-// typedef struct{
-//     uint16_t limite_0;
-//     uint32_t base_0  :24;
-//     uint32_t A       :1;
-//     union{
-//         uint32_t W   :1;
-//         uint32_t R   :1;
-//     };
-//     union{
-//         uint32_t ED  :1;
-//         uint32_t C   :1;
-//     };
-//     uint32_t bit_11  :1;
-//     uint32_t S       :1;
-//     uint32_t DPL     :2;
-//     uint32_t P       :1;
-//     uint8_t limite_1:4;
-//     uint8_t AVL:1;
-//     uint8_t L:1;
-//     uint8_t D_B:1;
-//     uint8_t G:1;
-//     uint8_t base_1;
-// }descriptor_segmento_t;
 
 typedef struct{
     uint16_t    limite_0;
@@ -284,9 +256,8 @@ extern uint8_t __TSS_BASICA_LINEAL[];
 
 extern registro_descriptor_segmento_t* _gdtr;
 
-extern descriptor_segmento_t *gdt_nulo, *cs_gdt, *ds_gdt;//, *ss_gdt;
+extern descriptor_segmento_t *gdt_nulo, *cs_gdt, *ds_gdt;
 extern int *ss_gdt;
-//#define ss_gdt  ((uint32_t *)0xFFFFF500)
 
 #define DTP_kernel &DTP[0]
 #define DTP_tarea1 &DTP[1]
@@ -294,62 +265,55 @@ extern int *ss_gdt;
 #define DTP_tarea3 &DTP[3]
 #define DTP_tarea4 &DTP[4]
 
-// directorio_tabla_paginas_t  DTP_kernel __attribute__ ((section (".tablas_paginacion"))), 
-//                             DTP_tarea1 __attribute__ ((section (".tablas_paginacion"))), 
-//                             DTP_tarea2 __attribute__ ((section (".tablas_paginacion"))), 
-//                             DTP_tarea3 __attribute__ ((section (".tablas_paginacion"))), 
-//                             DTP_tarea4 __attribute__ ((section (".tablas_paginacion")));
-
 #define TP_kernel_base     (tabla_paginas_t*)&DTP[5]
 #define TP0_kernel         (TP_kernel_base + 0)
-#define TP1_kernel         (TP_kernel_base + 1)//(tabla_paginas_t*)&DTP[6]
-#define TP2_kernel         (TP_kernel_base + 2)//(tabla_paginas_t*)&DTP[7]
-#define TP3_kernel         (TP_kernel_base + 3)//(tabla_paginas_t*)&DTP[8]
-#define TP4_kernel         (TP_kernel_base + 4)//(tabla_paginas_t*)&DTP[9]
-#define TP5_kernel         (TP_kernel_base + 5)//(tabla_paginas_t*)&DTP[10]
-//#define TP6_kernel         (TP_kernel_base + 6)
+#define TP1_kernel         (TP_kernel_base + 1)
+#define TP2_kernel         (TP_kernel_base + 2)
+#define TP3_kernel         (TP_kernel_base + 3)
+#define TP4_kernel         (TP_kernel_base + 4)
+#define TP5_kernel         (TP_kernel_base + 5)
 #define TP_kernel_final    TP5_kernel
 
 #define TP_tarea1_base     (TP_kernel_final + 1)
-#define TP0_tarea1         (TP_tarea1_base + 0)//(tabla_paginas_t*)&DTP[11]
-#define TP1_tarea1         (TP_tarea1_base + 1)//(tabla_paginas_t*)&DTP[12]
-#define TP2_tarea1         (TP_tarea1_base + 2)//(tabla_paginas_t*)&DTP[13]
-#define TP3_tarea1         (TP_tarea1_base + 3)//(tabla_paginas_t*)&DTP[14]
-#define TP4_tarea1         (TP_tarea1_base + 4)//(tabla_paginas_t*)&DTP[15]
-#define TP5_tarea1         (TP_tarea1_base + 5)//(tabla_paginas_t*)&DTP[16]
+#define TP0_tarea1         (TP_tarea1_base + 0)
+#define TP1_tarea1         (TP_tarea1_base + 1)
+#define TP2_tarea1         (TP_tarea1_base + 2)
+#define TP3_tarea1         (TP_tarea1_base + 3)
+#define TP4_tarea1         (TP_tarea1_base + 4)
+#define TP5_tarea1         (TP_tarea1_base + 5)
 #define TP6_tarea1         (TP_tarea1_base + 6)
 #define TP_tarea1_final    TP6_tarea1
 
 #define TP_tarea2_base     (TP_tarea1_final + 1)
-#define TP0_tarea2         (TP_tarea2_base + 0)//(tabla_paginas_t*)&DTP[17]
-#define TP1_tarea2         (TP_tarea2_base + 1)//(tabla_paginas_t*)&DTP[18]
-#define TP2_tarea2         (TP_tarea2_base + 2)//(tabla_paginas_t*)&DTP[19]
-#define TP3_tarea2         (TP_tarea2_base + 3)//(tabla_paginas_t*)&DTP[20]
-#define TP4_tarea2         (TP_tarea2_base + 4)//(tabla_paginas_t*)&DTP[21]
-#define TP5_tarea2         (TP_tarea2_base + 5)//(tabla_paginas_t*)&DTP[22]
-#define TP6_tarea2         (TP_tarea2_base + 6)//(tabla_paginas_t*)&DTP[23]
+#define TP0_tarea2         (TP_tarea2_base + 0)
+#define TP1_tarea2         (TP_tarea2_base + 1)
+#define TP2_tarea2         (TP_tarea2_base + 2)
+#define TP3_tarea2         (TP_tarea2_base + 3)
+#define TP4_tarea2         (TP_tarea2_base + 4)
+#define TP5_tarea2         (TP_tarea2_base + 5)
+#define TP6_tarea2         (TP_tarea2_base + 6)
 #define TP7_tarea2         (TP_tarea2_base + 7)
 #define TP_tarea2_final    TP7_tarea2
 
 #define TP_tarea3_base     (TP_tarea2_final + 1)
-#define TP0_tarea3         (TP_tarea3_base + 0)//(tabla_paginas_t*)&DTP[24]
-#define TP1_tarea3         (TP_tarea3_base + 1)//(tabla_paginas_t*)&DTP[25]
-#define TP2_tarea3         (TP_tarea3_base + 2)//(tabla_paginas_t*)&DTP[26]
-#define TP3_tarea3         (TP_tarea3_base + 3)//(tabla_paginas_t*)&DTP[27]
-#define TP4_tarea3         (TP_tarea3_base + 4)//(tabla_paginas_t*)&DTP[28]
-#define TP5_tarea3         (TP_tarea3_base + 5)//(tabla_paginas_t*)&DTP[29]
-#define TP6_tarea3         (TP_tarea3_base + 6)//(tabla_paginas_t*)&DTP[30]
+#define TP0_tarea3         (TP_tarea3_base + 0)
+#define TP1_tarea3         (TP_tarea3_base + 1)
+#define TP2_tarea3         (TP_tarea3_base + 2)
+#define TP3_tarea3         (TP_tarea3_base + 3)
+#define TP4_tarea3         (TP_tarea3_base + 4)
+#define TP5_tarea3         (TP_tarea3_base + 5)
+#define TP6_tarea3         (TP_tarea3_base + 6)
 #define TP7_tarea3         (TP_tarea3_base + 7)
 #define TP_tarea3_final    TP7_tarea3
 
 #define TP_tarea4_base     (TP_tarea3_final + 1)
-#define TP0_tarea4         (TP_tarea4_base + 0)//(tabla_paginas_t*)&DTP[31]
-#define TP1_tarea4         (TP_tarea4_base + 1)//(tabla_paginas_t*)&DTP[32]
-#define TP2_tarea4         (TP_tarea4_base + 2)//(tabla_paginas_t*)&DTP[33]
-#define TP3_tarea4         (TP_tarea4_base + 3)//(tabla_paginas_t*)&DTP[34]
-#define TP4_tarea4         (TP_tarea4_base + 4)//(tabla_paginas_t*)&DTP[35]
-#define TP5_tarea4         (TP_tarea4_base + 5)//(tabla_paginas_t*)&DTP[36]
-#define TP6_tarea4         (TP_tarea4_base + 6)//(tabla_paginas_t*)&DTP[37]
+#define TP0_tarea4         (TP_tarea4_base + 0)
+#define TP1_tarea4         (TP_tarea4_base + 1)
+#define TP2_tarea4         (TP_tarea4_base + 2)
+#define TP3_tarea4         (TP_tarea4_base + 3)
+#define TP4_tarea4         (TP_tarea4_base + 4)
+#define TP5_tarea4         (TP_tarea4_base + 5)
+#define TP6_tarea4         (TP_tarea4_base + 6)
 #define TP7_tarea4         (TP_tarea4_base + 7)
 #define TP_tarea4_final    TP7_tarea4
 
@@ -368,18 +332,9 @@ extern int *ss_gdt;
 #define contexto_tarea_4        (contexto_tarea_t*)__TAREA_4_CONTEXTO_GENERAL_VMA_LINEAL
 #define contexto_simd_tarea_4   (contexto_simd_t*)__TAREA_4_CONTEXTO_SIMD_VMA_LINEAL
 
-// tabla_paginas_t TP0 __attribute__ ((section (".tablas_paginacion"))), 
-//                 TP1 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP2 __attribute__ ((section (".tablas_paginacion"))), 
-//                 TP3 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP4 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP5 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP_tarea_2 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP_tarea_3 __attribute__ ((section (".tablas_paginacion"))),
-//                 TP_tarea_4 __attribute__ ((section (".tablas_paginacion")));
-
 void agregar_pagina_dinamicamente(uint8_t *direccion_lineal);
 
 bool es_memoria_escribible(void *memoria, uint32_t cant_bytes);
 bool es_memoria_leible(void *memoria, uint32_t cant_bytes);
+
 #endif  /*__TABLAS_SISTEMAS_H*/

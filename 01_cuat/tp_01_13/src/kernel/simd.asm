@@ -1,6 +1,5 @@
 USE32
 
-
 global sumatoria_uint16_saturada, sumatoria_uint64_saturada
 global guardar_registros_simd, restaurar_registros_simd
 global habilitar_NM
@@ -8,10 +7,11 @@ global habilitar_NM
 extern borrar_cr0_ts
 
 section .std
+
 ;uint64_t sumatoria_uint16_saturada(uint64_t datos[], uint32_t cantidad);
 sumatoria_uint16_saturada:
 ;realiza la suma aritmetica saturada en words
-;paddusw
+
     push ecx
 
     mov eax,[esp + 4 * 2]  ;datos[] 
@@ -30,14 +30,13 @@ ciclo_16:
     ; psrlq mm0,32
     ; movd  edx,mm0
 
-    ;pxor mm0,mm0
     pop ecx
     ret
 
 ;uint64_t sumatoria_uint64_saturada(uint64_t datos[], uint32_t cantidad);
 sumatoria_uint64_saturada:
-;realiza la suma aritmetica saturada en words
-;paddq
+;realiza la suma aritmetica saturada en qwords
+
     push ecx
 
     mov eax,[esp + 4 * 2]  ;datos[] 
@@ -61,6 +60,7 @@ ciclo_64:
     ret
 
 section .rutinas
+
 ;void guardar_registros_simd(contexto_simd_t *contexto);
 guardar_registros_simd:
     push    edi
@@ -77,6 +77,7 @@ restaurar_registros_simd:
     pop     edi
     ret
 
+;Habilita la interrupcion de NM
 habilitar_NM:
     push eax
 
