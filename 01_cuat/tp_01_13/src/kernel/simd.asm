@@ -27,8 +27,8 @@ ciclo_16:
     ;Si termine de sumar retorno el valor
     ;copio en edx_eax el contenido del registro mm0
     movd  eax,mm0
-    psrlq mm0,32
-    movd  edx,mm0
+    ; psrlq mm0,32
+    ; movd  edx,mm0
 
     ;pxor mm0,mm0
     pop ecx

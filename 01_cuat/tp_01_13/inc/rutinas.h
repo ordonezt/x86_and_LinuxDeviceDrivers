@@ -14,7 +14,7 @@ void td3_halt(void);
 uint32_t td3_print(uint8_t cadena[], uint8_t fila, uint8_t columna);
 uint32_t td3_read(void *origen, void *destino, uint32_t num_bytes);
 
-uint64_t sumatoria_uint16_saturada(uint64_t datos[], uint32_t cantidad);
+uint16_t sumatoria_uint16_saturada(uint64_t datos[], uint32_t cantidad);
 uint64_t sumatoria_uint64_saturada(uint64_t datos[], uint32_t cantidad);
 
 #endif /*__RUTINAS_H*/
