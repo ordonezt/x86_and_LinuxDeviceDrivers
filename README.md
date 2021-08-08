@@ -21,7 +21,7 @@
  **Comentarios:**
 	- La version mas completa es la v2
 
-- [ ] TP01.05  
+- [X] TP01.05  
  **Comentarios:**
 	- Casi listo, solo falta el teclado que lo voy a hacer mas adelante
 
