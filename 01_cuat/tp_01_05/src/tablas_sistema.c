@@ -10,6 +10,8 @@
 #define __SS_BASE        __CS_BASE
 #define __SS_LIMITE      __CS_LIMITE
 
+#define DS_SEL_32   0b10000
+
 typedef enum{
     TIPO_TAREA          = 0b101,
     TIPO_INTERRUPCION   = 0b110,
@@ -158,6 +160,26 @@ __attribute__(( section(".rutinas"))) void cargar_gdt(descriptor_segmento_t GDT[
     //asm("lgdt   %[_gdtr]"::[_gdtr] "m" (_gdtr));
 }
 
+__attribute__(( section(".rutinas"))) void forzar_SS(descriptor_segmento_t GDT[])
+{
+    //Descriptor de datos
+    cargar_descriptor_segmento(&GDT[2], __DS_BASE, __DS_LIMITE,
+                                                                1, //G
+                                                                1, //D/B
+                                                                0, //L
+                                                                0, //AVL
+                                                                0, //No presente
+                                                                00, //DPL
+                                                                1, //S
+                                                                0, //B11
+                                                                0, //ED/C
+                                                                1, //W/R
+                                                                1);//A
+
+    asm("mov $0b10000, %eax"); //DS_SEL_32
+    asm("mov %eax, %ss");
+}
+
 __attribute__(( section(".rutinas"))) void cargar_descriptor_segmento_int(  descriptor_segmento_int_t *descriptor,
                                                                             uint16_t selector, uint32_t offset, tipo_excepcion_t tipo,
                                                                             uint8_t D, uint8_t presente, uint8_t DPL)
@@ -185,14 +207,14 @@ __attribute__(( section(".rutinas"))) void cargar_idt(descriptor_segmento_int_t 
                                     0 //DPL
                                     );
     //Probando doble falta, comentar cuando quieras que ande bien
-    // cargar_descriptor_segmento_int( &IDT[0], 
-    //                                 0,
-    //                                 (uint32_t)Divide_Error_Handler,
-    //                                 TIPO_EXCEPCION, //Tipo
-    //                                 1, //D
-    //                                 1, //P
-    //                                 0 //DPL
-    //                                 );
+    cargar_descriptor_segmento_int( &IDT[0], 
+                                    0,
+                                    (uint32_t)Divide_Error_Handler,
+                                    TIPO_EXCEPCION, //Tipo
+                                    1, //D
+                                    1, //P
+                                    0 //DPL
+                                    );
 
     cargar_descriptor_segmento_int( &IDT[1], 
                                     selector,
