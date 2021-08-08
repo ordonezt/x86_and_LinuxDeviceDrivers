@@ -120,7 +120,10 @@ __attribute__(( section(".interrupciones"), interrupt)) void Page_Fault_Handler(
 {
     uint8_t *direccion = get_cr2();
     
-    
+    MAGIC_BREAKPOINT
+    //Ingresar direcciones tipo:
+    //0x54000
+    //0x56000
     if((codigo_error & 0b001) == 0)
         agregar_pagina_dinamicamente(direccion);
 
