@@ -8,6 +8,8 @@
 #include "../../inc/main.h"
 #include "../../inc/rutinas.h"
 
+#define forzar_UD() asm("ud2")
+
 uint8_t* get_cr2(void);
 
 extern ring_buffer_t ring_buffer;
@@ -243,7 +245,9 @@ void PIC1_IRQHandler(cuadro_interrupcion_t *cuadro)
         else if(caracter_es_numero(tecla))
             ring_buffer_insertar(&ring_buffer, tecla);
         else if(tecla == 'a')
-            flag_AC = true;
+            flag_AC = true; //Error de alineacion, lo genera la tarea 2
+        else if(tecla == 'u')
+            forzar_UD();    //Codigo de operacion erroneo
     }
 
     //Limpio la interrupcion del pic
