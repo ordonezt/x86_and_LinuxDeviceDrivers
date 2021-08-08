@@ -53,7 +53,8 @@ int main(void)
     teclado_inicializar();
     systick_inicializar();
     habilitar_interrupciones();
-
+    habilitar_proteccion_alineacion();
+    
     //Loop
     while(1)
     {
@@ -87,7 +88,7 @@ void inicializar_contexto(directorio_tabla_paginas_t *dtp, void *tarea, void *pi
     aux = (uint32_t*)((uint8_t*)pila_supervisor - 3);
     *(aux--) = DS3_SELECTOR;//SS3
     *(aux--) = (uint32_t)pila_usuario - 3;//ESP3
-    *(aux--) = 0x202;//EFLAGS
+    *(aux--) = 0x40202;//0x202;//EFLAGS
     *(aux--) = CS3_SELECTOR;//contexto->CS;
     *(aux) = (uint32_t)tarea; //EIP
 

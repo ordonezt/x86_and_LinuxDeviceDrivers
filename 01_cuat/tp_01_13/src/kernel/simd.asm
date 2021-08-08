@@ -2,7 +2,7 @@ USE32
 
 global sumatoria_uint16_saturada, sumatoria_uint64_saturada
 global guardar_registros_simd, restaurar_registros_simd
-global habilitar_NM
+global habilitar_NM, forzar_AC
 
 extern borrar_cr0_ts
 
@@ -94,5 +94,14 @@ habilitar_NM:
     or   eax, 0x200
     mov  cr4, eax
 
+    pop eax
+    ret
+
+section .std
+;Fuerza interrupcion de AC
+forzar_AC:
+    push eax
+    mov eax, 0x1430001
+    MOVQ mm0, qword[eax]
     pop eax
     ret

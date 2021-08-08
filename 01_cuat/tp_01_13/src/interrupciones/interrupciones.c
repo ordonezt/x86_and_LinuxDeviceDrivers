@@ -13,6 +13,8 @@ uint8_t* get_cr2(void);
 extern ring_buffer_t ring_buffer;
 extern contexto_simd_t*  contexto_simd_tabla[5];
 
+bool flag_AC __attribute__ ((section (".datos")));
+
 /* Lo ideal seria hacer handlers de assembler que llamen handlers de c, por ejemplo
 
 Divide_Error_Handler_asm:
@@ -240,6 +242,8 @@ void PIC1_IRQHandler(cuadro_interrupcion_t *cuadro)
         }
         else if(caracter_es_numero(tecla))
             ring_buffer_insertar(&ring_buffer, tecla);
+        else if(tecla == 'a')
+            flag_AC = true;
     }
 
     //Limpio la interrupcion del pic

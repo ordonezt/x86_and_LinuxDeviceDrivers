@@ -57,6 +57,7 @@ typedef struct{
 void* get_cr3(void);
 void borrar_cr0_ts(void);
 void prender_cr0_ts(void);
+void habilitar_proteccion_alineacion(void);
 uint8_t get_numero_tarea_actual(void);
 void guardar_registros_simd(contexto_simd_t *contexto);
 void restaurar_registros_simd(contexto_simd_t *contexto);

@@ -3,9 +3,11 @@ USE32
 section .kernel
 
 global kernel_init, cambiar_contexto, paginacion_apagar, paginacion_encender
-global get_cr3, borrar_cr0_ts, prender_cr0_ts, habilitar_TSS, syscall
+global get_cr3, borrar_cr0_ts, prender_cr0_ts, habilitar_TSS, syscall, habilitar_proteccion_alineacion
 
 extern main
+
+%include "inc/processor-flags.asm" 
 
 ;TODO borrar y reemplazar por main
 kernel_init:
@@ -85,6 +87,17 @@ habilitar_TSS:
     push eax
     mov eax, [esp + 8]
     ltr ax
+    pop eax
+    ret
+
+;void habilitar_proteccion_alineacion(void);
+habilitar_proteccion_alineacion:
+    push eax
+
+    mov eax,cr0
+    or  eax,X86_CR0_AM
+    mov cr0,eax
+
     pop eax
     ret
 
