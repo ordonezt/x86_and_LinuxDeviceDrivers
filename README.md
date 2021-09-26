@@ -4,6 +4,7 @@
 **->Legajo:** 159.565-9  
 
 ## TP 1
+**Correcciones de la pimera entrega: La suma saturada no esta siendo calculada correctamente**
 - [X] TP01.01
 
 - [X] TP01.02  
@@ -44,16 +45,17 @@
 - [X] TP01.12  
 
 - [X] TP01.13  
-<!-- ## TP Integrador
+
+## TP Integrador
 - [ ] Servidor  
- **Comentarios:**
+ <!-- **Comentarios:**
 	- Esto es un comentario
-	- Esto es otro <code>comentario</code>
+	- Esto es otro <code>comentario</code> -->
 - [ ] Cliente  
- **Comentarios:**
+ <!-- **Comentarios:**
 	- Esto es un comentario
-	- Esto es otro <code>comentario</code>
+	- Esto es otro <code>comentario</code> -->
 - [ ] Driver  
- **Comentarios:**
+ <!-- **Comentarios:**
 	- Esto es un comentario
 	- Esto es otro <code>comentario</code> -->

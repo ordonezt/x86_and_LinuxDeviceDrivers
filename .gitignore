@@ -22,3 +22,5 @@
 !*/
 # Unignore .gitignore
 !.gitignore
+# Unignore all config files
+!*.config
