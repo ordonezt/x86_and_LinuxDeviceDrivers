@@ -17,12 +17,12 @@ LIBFLAGS = -lpthread
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
 #en objs guardo todos mis objetos elf
-OBJS = 	$(BINPATH)servidor.o 	$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPATH)error.o	\
+OBJS = 	$(BINPATH)cliente.o 	$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPATH)error.o	\
 		$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
 		$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
 		$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
 
-SRC_NAME = servidor
+SRC_NAME = cliente
 
 #all: $(BINPATH)$(SRC_NAME).o
 all: $(OBJS)
@@ -31,7 +31,7 @@ all: $(OBJS)
 	@echo Ejecutando $(SRC_NAME)
 	./$(SRC_NAME)
 
-$(BINPATH)servidor.o: $(SRCPATH)servidor/servidor.c
+$(BINPATH)cliente.o: $(SRCPATH)cliente/cliente.c
 	@echo Generando $@
 	mkdir -p $(BINPATH)
 	$(CC) $(CFLAGS) $< -o $@

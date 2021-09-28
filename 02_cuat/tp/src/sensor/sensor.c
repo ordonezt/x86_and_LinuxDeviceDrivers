@@ -13,6 +13,11 @@
 
 volatile sig_atomic_t salir, flag_cambio_config;
 
+/**
+ * @brief Handler de la señal USR1
+ * 
+ * @param sig 
+ */
 void sigusr1_handler(int sig){
     flag_cambio_config = 1;
 }
@@ -75,14 +80,14 @@ int main(void)
         }
         else
         {
-            //Procesar
-            printf("Aceleracion x: %d LSB\n", sensor.datos.accel.x);
-            printf("Aceleracion y: %d LSB\n", sensor.datos.accel.y);
-            printf("Aceleracion z: %d LSB\n", sensor.datos.accel.z);
-            printf("Temp: %d\n", sensor.datos.temp);
-            printf("Gyro x: %d\n", sensor.datos.gyro.x);
-            printf("Gyro y: %d\n", sensor.datos.gyro.y);
-            printf("Gyro z: %d\n", sensor.datos.gyro.z);
+            // //Procesar
+            // printf("Aceleracion x: %d LSB\n", sensor.datos.accel.x);
+            // printf("Aceleracion y: %d LSB\n", sensor.datos.accel.y);
+            // printf("Aceleracion z: %d LSB\n", sensor.datos.accel.z);
+            // printf("Temp: %d\n", sensor.datos.temp);
+            // printf("Gyro x: %d\n", sensor.datos.gyro.x);
+            // printf("Gyro y: %d\n", sensor.datos.gyro.y);
+            // printf("Gyro z: %d\n", sensor.datos.gyro.z);
 
 
             sleep(1);
