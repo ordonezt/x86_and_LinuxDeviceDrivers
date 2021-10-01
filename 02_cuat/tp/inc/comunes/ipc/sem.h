@@ -3,6 +3,9 @@
 
 #include <sys/sem.h>
 
+#define SEM_TAKE -1						
+#define SEM_FREE 1
+
 /**
  * \fn int crear_semaforo (key_t *LLAVE, int nsems, int ATRIBUTOS, int _8bits)
  * \brief Funcion que crea e inicializa uno o varios semaforos.
@@ -18,7 +21,7 @@
  * \author	Luciano Ferreyro
 **/
 
-int crear_semaforo (key_t *LLAVE,int nsems, int ATRIBUTOS, int _8bits);
+int crear_semaforo (int nsems, key_t llave);
 
 /**
  * \fn int control_semaforo (int ID, int N_SEM)
@@ -29,9 +32,17 @@ int crear_semaforo (key_t *LLAVE,int nsems, int ATRIBUTOS, int _8bits);
  * \param ID es el identificador del semaforo o set de semaforos que se desea bloquear.
  * \param N_SEM es el numero de semaforo que se quiere bloquear, dentro de un set de semaforos.
  * \param ACCION puede ser SEM_TAKE o SEM_FREE, segun se desee.
- * \return int Retorna -1 si no hubo exito, y retorna 1 si lo hubo
+ * \return int Retorna -1 si no hubo exito, y retorna 0 si lo hubo
  * \author	Luciano Ferreyro
 **/
 int control_semaforo (int ID, int N_SEM, int ACCION);
+
+/**
+ * @brief Destruye un set de semaforos
+ * 
+ * @param sem_id Id del set de semaforo a destruir
+ * @return int 0 exito, -1 error
+ */
+int destruir_semaforo(int sem_id);
 
 #endif /*__SEM_H*/

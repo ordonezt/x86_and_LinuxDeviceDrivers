@@ -13,8 +13,9 @@
 #include <fcntl.h>
 #include "../../../inc/comunes/ipc/datos.h"
 
-char* crear_shmem(key_t*,int*,char*,int,int, int);
-void destruir_shmem(int,char*);
+int crear_shmem(void **memoria, key_t llave, int longitud);
+void destruir_shmem (int shm_id, void *mem);
+void* vincular_shmem(int shm_id);
 
 /**
  * \fn void crear_shmem (key_t *LLAVE, int *ID, int TAM, char *ATTACH, int _8bits, int PERMISOS)
@@ -32,33 +33,40 @@ void destruir_shmem(int,char*);
  * \author	Luciano Ferreyro
 **/	
 
-char* crear_shmem(key_t *LLAVE, int *ID, char* ftok_file, int TAM, int _8bits, int PERMISOS)
-	{
-	char *ATTACH;
-	//Se crea la llave del proceso, para identificar que procesos pueden usar o no ese espacio reservado	
-	if(((*LLAVE) = ftok(ftok_file,_8bits))==-1)
-		{
-		perror("ftok");
-		exit(1);	
-		}
+int crear_shmem(void **memoria, key_t llave, int longitud)
+{
+	int shm_id;
 	
 	/*Creo la shared memory para los procesos. Obtengo el identificador de la posicion de memoria compartida para cada proceso*/	
-	if(((*ID) = shmget((*LLAVE),TAM,PERMISOS))==-1)
-		{
+	if((shm_id = shmget(llave , longitud, 0644 | IPC_CREAT)) == -1)
+	{
 		perror("shmget");
-		exit(1);	
-		}
+		return -1;
+	}
 	
 	/*Ahora attacheamos ese espacio compartido a un dato*/
-	ATTACH = shmat((*ID),(void*)0,0);
-	if (ATTACH == (char*)(-1))
-		{
+	(*memoria) = shmat(shm_id, NULL, 0);
+	if ((*memoria) == (void*)(-1))
+	{
 		perror("shmat");
-		exit(1);
-		}	
+		return -1;
+	}	
 	
-	return((void*)ATTACH);
+	return shm_id;
+}
+
+void* vincular_shmem(int shm_id){
+	/*Ahora attacheamos ese espacio compartido a un dato*/
+	void *memoria;
+
+	memoria = shmat(shm_id, NULL, 0);
+	if (memoria == (void*)(-1))
+	{
+		perror("shmat");
+		return -1;
 	}
+	return memoria;
+}
 
 /**
  * \fn void destruir_shmem (int ID, char *ATTACH)
@@ -71,20 +79,20 @@ char* crear_shmem(key_t *LLAVE, int *ID, char* ftok_file, int TAM, int _8bits, i
  * \author	Luciano Ferreyro
 **/
 
-void destruir_shmem (int ID, char *ATTACH)
-	{
+void destruir_shmem (int shm_id, void *mem)
+{
 	/*Primero desligo ATTACH del segmento*/	
-	if(shmdt(ATTACH) == -1)
-		{
-		 if(errno!=EINVAL)
+	if(shmdt(mem) == -1)
+	{
+		if(errno!=EINVAL)
 		    perror("shmdt");
 	//	exit(1);
-		}
-	/*Elimino el segmento*/
-	if(shmctl(ID,IPC_RMID,NULL) == -1)
-		{
-		 if(errno!=EINVAL)
-		    perror("shmctl");
-	//	exit(1);
-		}
 	}
+	/*Elimino el segmento*/
+	if(shmctl(shm_id,IPC_RMID,NULL) == -1)
+	{
+		if(errno!=EINVAL)
+			perror("shmctl");
+	//	exit(1);
+	}
+}

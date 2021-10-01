@@ -31,7 +31,7 @@ int main(int argc, char argv[])
     {
         if(fork() == 0)
         {
-            socket = crear_socket(PF_INET, SOCK_STREAM, 0, 3490, &info_socket, "127.0.0.1", 0);
+            socket = crear_socket(PF_INET, SOCK_STREAM, 0, 5000, &info_socket, "127.0.0.1", 0);
             if(socket <= 0)
             {
                 printf("No me pude conectar!\n");

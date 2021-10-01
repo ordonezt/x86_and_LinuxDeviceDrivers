@@ -1,7 +1,8 @@
 #ifndef __SHARMEM_H
 #define __SHARMEM_H
 
-extern char* crear_shmem(key_t*,int*,char*,int,int, int);
-extern void destruir_shmem(int,char*);
+int crear_shmem(void **memoria, key_t llave, int longitud);
+void destruir_shmem (int shm_id, void *mem);
+void* vincular_shmem(int shm_id);
 
 #endif /*__SHARMEM_H*/

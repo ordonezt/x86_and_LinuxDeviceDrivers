@@ -10,6 +10,8 @@
 #include <fcntl.h>
 
 #include "../../inc/sensor/sensor.h"
+#include "../../inc/comunes/ipc/sem.h"
+#include "../../inc/servidor/servidor.h"
 
 volatile sig_atomic_t salir, flag_cambio_config;
 
@@ -45,28 +47,60 @@ void sigterm_handler(int sig){
  * 
  * @return int 
  */
-int main(void)
+int main(int argc, char* argv[])
 {
     struct sigaction sa_term;//, sa_usr1;
     sensor_t sensor;
     char *sensor_path = SENSOR_PATH;
+    int sem_id, shm_id;
+    sensor_datos_t *mem_compartida;
 
+    key_t llave;
+
+    if(argc < 2){
+        printf("Ingrese los argumentos necesarios\n");
+        exit(1);
+    }
+    //Leo el set de semaforo de los argumentos
+    sem_id = atoi(argv[1]);
+
+    //Creo la llave para los ipc
+    llave = ftok(CONFIG_PATH, 'T');
+    if(llave < 0){
+        perror("Creación de llave");
+        exit(1);
+    }
+    //Creo la memoria compartida
+    shm_id = crear_shmem(&mem_compartida, llave, sizeof(mem_compartida[0]));
+    if(shm_id <= 0){
+        perror("crear_shmem");
+        exit(1);
+    }
+
+    //Atrapo la señal sigterm
     salir = 0;
     sa_term.sa_handler = sigterm_handler;
     sa_term.sa_flags = 0; // or SA_RESTART
     sigemptyset(&sa_term.sa_mask);
-    if (sigaction(SIGINT, &sa_term, NULL) == -1)
+    if (sigaction(SIGINT, &sa_term, NULL) == -1) //TODO revisar
     {
         perror("sigaction\n");
         exit(1);
     }
 
-    flag_cambio_config = 0;
+    flag_cambio_config = 0; //TODO quee
 
     //Abro el sensor
     if(abrir_sensor(&sensor, sensor_path) == -1)
     {
         perror("No se pudo abrir el sensor\n");
+        exit(1);
+    }
+
+    //Libero el semaforo
+    if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_FREE))
+    {
+        perror("control_semaforo");
         exit(1);
     }
 
@@ -76,10 +110,26 @@ int main(void)
         if(leer_sensor(&sensor, &sensor.datos) <= 0)
         {
             perror("Error en la lectura del sensor\n");
-            salir = 1;
+            break;
         }
         else
         {
+            if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_TAKE))
+            {
+                perror("control_semaforo");
+                break;
+            }
+            printf("Tome el semaforo siendo productor\n");
+
+            memcpy(mem_compartida, &sensor.datos, sizeof(sensor.datos));
+
+            if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_FREE))
+            {
+                perror("control_semaforo");
+                break;
+            }
+            printf("Solte el semaforo siendo productor\n");
+
             // //Procesar
             // printf("Aceleracion x: %d LSB\n", sensor.datos.accel.x);
             // printf("Aceleracion y: %d LSB\n", sensor.datos.accel.y);

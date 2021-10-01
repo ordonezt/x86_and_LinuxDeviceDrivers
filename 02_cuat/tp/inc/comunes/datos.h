@@ -1,4 +1,5 @@
-
+#ifndef __DATOS_H
+#define __DATOS_H
 
 //Defines generales
 #define PUERTO_TCP_COMU 23400
@@ -26,8 +27,6 @@
 //Para la shared memory, control de los semaforos y control de peticiones
 #define ATRIB_SHDMEM 0666 //(rw-rw-rw-)		
 #define MAX_RETRIES 10
-#define SEM_TAKE -1						
-#define SEM_FREE 1
 #define PROC_1 "Proceso 1"
 #define PROC_2 "Proceso 2"
 
@@ -56,3 +55,4 @@ typedef struct
 	int id_sem_2;			
 	} arg_thread;
 	
+#endif	/*__DATOS_H*/
