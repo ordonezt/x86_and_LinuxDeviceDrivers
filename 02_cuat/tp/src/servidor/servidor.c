@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <sys/wait.h>
-#include <signal.h>
 #include <fcntl.h>
 #include <pthread.h>
 
@@ -17,24 +16,27 @@
 #include "../../inc/comunes/ipc/sockets.h"
 #include "../../inc/comunes/ipc/sharmem.h"
 #include "../../inc/comunes/ipc/sem.h"
+#include "../../inc/comunes/ipc/signal.h"
 #include "../../inc/comunes/collections/list.h"
 
 #define control_semaforo_datos(id, accion)  control_semaforo((id), 0, (accion))
 
 void destruir_cliente(void *cliente);
 void* atender_cliente(void *datos_cliente);
-void sigterm_handler(int sig);
+void sigint_handler(int sig);
+void sigusr2_handler(int sig);
+int levantar_configuracion(srv_config_t *srv_config, char path[]);
+int destruir_configuracion(srv_config_t srv_config);
 
-
-volatile sig_atomic_t salir;
+volatile sig_atomic_t salir, refrescar_config;
 
 int main(void)
 {
-    t_config *config; //Para manejar el archivo de configuracion
-    int backlog, cant_conex_maxima, ventana_filtro, puerto; //Variables de configuracion
+    srv_config_t config;
     int socket_recepcion, socket_cliente;
     struct sockaddr_in info_socket_recepcion, info_socket_cliente;
     struct sigaction sa_term;
+    signal_t sig_int, sig_usr2;
     pid_t pid_productor;
     t_list *lista_clientes;
     cliente_t *nuevo_cliente;
@@ -58,66 +60,32 @@ int main(void)
         perror("crear_shmem");
         exit(1);
     }
-    printf("SERVER: Memoria compartida id %d\n", shm_id); //TODO borrar
-    printf("SERVER: Memoria compartida %d\n", (int)mem_compartida); //TODO borrar
 
-
-//TODO Encapsular
-    //Manejo de la señal sigterm
+/* +++++++++++SEÑALES++++++++++++ */
+    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
     salir = 0;
-    sa_term.sa_handler = sigterm_handler;
-    sa_term.sa_flags = 0; // or SA_RESTART
-    sigemptyset(&sa_term.sa_mask);
-    if (sigaction(SIGINT, &sa_term, NULL) == -1){
-        perror("sigaction\n");
+    if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
+        perror("atrapar_signal");
+        exit(1);
+    }
+
+    //Manejo de la señal sigusr2 (Avisa que hay que refrescar las configuraciones)
+    refrescar_config = 0;
+    if(atrapar_signal(&sig_usr2, sigusr2_handler, SIGUSR2)){
+        perror("atrapar_signal");
         exit(1);
     }
 
     //Ignoro la señal SIGCHLD para evitar tener que esperar a los hijos y complicarla
     signal(SIGCHLD, SIG_IGN);
+/* +++++++++++FIN SEÑALES+++++++++++ */
 
-//TODO Encapsular
     //Leo el archivo de configuracion
-    config = config_create(CONFIG_PATH);
-    if(config != NULL)
-    {
-        //El archivo existe, lo leo.
-        if(config_has_property(config, "CANTIDAD_CONEXIONES") == true)
-            cant_conex_maxima = config_get_int_value(config, "CANTIDAD_CONEXIONES");
-        else
-            cant_conex_maxima = CANT_CONEX_MAX_DEFAULT;
-
-        if(config_has_property(config, "BACKLOG") == true)
-            backlog = config_get_int_value(config, "BACKLOG");
-        else
-            backlog = BACKLOG_DEFAULT;
-
-        if(config_has_property(config, "VENTANA_FILTRO") == true)
-            ventana_filtro = config_get_int_value(config, "VENTANA_FILTRO");
-        else
-            ventana_filtro = VENTANA_FILTRO_DEFAULT;
-        
-        if(config_has_property(config, "PUERTO") == true)
-            puerto = config_get_int_value(config, "PUERTO");
-        else
-            puerto = PUERTO_DEFAULT;
-    }
-    else 
-    {
-        //No existe el archivo de configuracion, utilizo valores por default
-        printf("No existe el archivo bro!\n");
-        backlog = BACKLOG_DEFAULT;
-        cant_conex_maxima = CANT_CONEX_MAX_DEFAULT;
-        ventana_filtro = VENTANA_FILTRO_DEFAULT;
-        puerto = PUERTO_DEFAULT;
-    }
-    printf("Cantidad maxima de conexiones: %d\n", cant_conex_maxima);
-    printf("Backlog: %d\n", backlog);
-    printf("Ventana del filtro: %d\n", ventana_filtro);
-
+    config.config = NULL;
+    levantar_configuracion(&config, CONFIG_PATH);
     
     //Creo el proceso del sensor
-    //Lo libero con la señal SIGUSR1
+    //Lo libero con la señal SIGUSR1 //TODO ??
     pid_productor = fork();
     if(pid_productor == -1)
     {
@@ -130,27 +98,31 @@ int main(void)
                                 , NULL);
 
     //Levanto el servidor
-    socket_recepcion = crear_servidor(puerto, &info_socket_recepcion, backlog);
+    socket_recepcion = crear_servidor(config.puerto, &info_socket_recepcion, config.backlog);
     if(socket_recepcion == -1)
     {
         perror("crear_servidor");
         //exit(1);
     }
-    printf("Servidor creado:\n");
-    printf("->\tSocket: [%d]\n->\tPuerto: [%d]\n", socket_recepcion, puerto);
 
+    //Preparo la lista de clientes
     lista_clientes = list_create();
     
+    printf("[PID %d]\tServidor creado con exito\n", getpid());
+    printf("[PID %d]\t\tCantidad maxima de conexiones: %d\n", config.cant_conex_maxima);
+    printf("[PID %d]\t\tBacklog: %d\n", config.backlog);
+    printf("[PID %d]\t\tVentana del filtro: %d\n", config.ventana_filtro);
+
     while(salir == 0)
     {
         //printf("Soy el hilo principal [PID %d]\n", getpid());
-        if(list_size(lista_clientes) < cant_conex_maxima)
+        if(list_size(lista_clientes) < config.cant_conex_maxima)
         {
             socket_cliente = atender_conexion(socket_recepcion, &info_socket_cliente);
             if(socket_cliente <= 0)
             {
                 perror("atender_cliente");
-                salir = 1;
+                //salir = 1;
             }
             else
             {
@@ -169,25 +141,32 @@ int main(void)
         }
         else
             printf("No atiendo mas clientes, espera!\n");
+        
+        if(refrescar_config)
+            levantar_configuracion(&config, CONFIG_PATH);
+
         sleep(1);
     }
 
 //TODO Encapsular
     fflush(stdout);
+    printf("Liberando configuraciones........");
+    destruir_configuracion(config);
+    printf("Listo\n");
 
-    printf("Cerrando todos los clientes...");
+    printf("Cerrando todos los clientes......");
     list_clean_and_destroy_elements(lista_clientes, destruir_cliente);
     printf("Listo\n");
 
-    printf("Deteniendo proceso productor...");
+    printf("Deteniendo proceso productor.....");
     waitpid(pid_productor, NULL, 0);
     printf("Listo\n");
 
-    printf("Cerrando el servidor...");
+    printf("Cerrando el servidor.............");
     cerrar_servidor(socket_recepcion);
     printf("Listo\n");
 
-    printf("Borrando el set de semaforos...");
+    printf("Borrando el set de semaforos.....");
     destruir_semaforo(sem_id);
     printf("Listo\n");
 
@@ -215,11 +194,9 @@ void* atender_cliente(void *datos_cliente)
     sensor      = ((cliente_t*)datos_cliente)->mem_compartida;
 
     printf("Se conecto un nuevo cliente [Socket: %d] [Semaforo: %d] [Memoria %d]\n", socket_id, sem_id, sensor);
-    printf("CLIENTE: Memoria compartida %d\n", (int)sensor); //TODO borrar
 
     while(salir == 0)
     {
-        printf("Atendiendo\n");
         if(control_semaforo_datos(sem_id, SEM_TAKE))
         {
             perror("control_semaforo_datos");
@@ -260,13 +237,70 @@ void destruir_cliente(void *cliente)
 }
 
 /**
- * @brief Handler de la señal SIGTERM.
+ * @brief Handler de la señal SIGINT.
  * 
  * Le avisa al programa principal que hay que cerrar todo.
  * 
  * @param sig 
  */
-void sigterm_handler(int sig)
+void sigint_handler(int sig)
 {
     salir = 1;
+}
+
+void sigusr2_handler(int sig){
+    refrescar_config = 1;
+}
+
+int levantar_configuracion(srv_config_t *srv_config, char path[]){
+    t_config *config;
+    int backlog, cant_conex_maxima, ventana_filtro, puerto;
+
+    config = srv_config->config;
+    if(config != NULL)
+        destruir_configuracion(*srv_config);
+
+    //Leo el archivo de configuracion
+    config = config_create(path);
+    if(config != NULL)
+    {
+        //El archivo existe, lo leo.
+        if(config_has_property(config, "CANTIDAD_CONEXIONES") == true)
+            cant_conex_maxima = config_get_int_value(config, "CANTIDAD_CONEXIONES");
+        else
+            cant_conex_maxima = CANT_CONEX_MAX_DEFAULT;
+
+        if(config_has_property(config, "BACKLOG") == true)
+            backlog = config_get_int_value(config, "BACKLOG");
+        else
+            backlog = BACKLOG_DEFAULT;
+
+        if(config_has_property(config, "VENTANA_FILTRO") == true)
+            ventana_filtro = config_get_int_value(config, "VENTANA_FILTRO");
+        else
+            ventana_filtro = VENTANA_FILTRO_DEFAULT;
+        
+        if(config_has_property(config, "PUERTO") == true)
+            puerto = config_get_int_value(config, "PUERTO");
+        else
+            puerto = PUERTO_DEFAULT;
+    }
+    else 
+    {
+        //No existe el archivo de configuracion, utilizo valores por default
+        printf("No existe el archivo bro!\n");
+        backlog = BACKLOG_DEFAULT;
+        cant_conex_maxima = CANT_CONEX_MAX_DEFAULT;
+        ventana_filtro = VENTANA_FILTRO_DEFAULT;
+        puerto = PUERTO_DEFAULT;
+    }
+    srv_config->backlog             = backlog;
+    srv_config->cant_conex_maxima   = cant_conex_maxima;
+    srv_config->ventana_filtro      = ventana_filtro;
+    srv_config->puerto              = puerto;
+    srv_config->config              = config;
+}
+
+int destruir_configuracion(srv_config_t srv_config){
+    config_destroy(srv_config.config);
 }

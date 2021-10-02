@@ -1,6 +1,7 @@
 #ifndef __SERVIDOR_H
 #define __SERVIDOR_H
 
+#include "../../inc/comunes/config.h"
 #include "../../inc/comunes/ipc/sockets.h"
 #include "../../inc/sensor/sensor.h"
 
@@ -14,6 +15,16 @@
 
 #define CANTIDAD_SEMAFOROS      10      //Cantidad de semaforos disponibles
 #define N_SEMAFORO_DATOS         0      //Numero de semaforo del manejo de datos
+
+typedef struct{
+    //Variables de configuracion
+    int backlog;
+    int cant_conex_maxima;
+    int ventana_filtro;
+    int puerto;
+    //Para manejar el archivo de configuracion
+    t_config *config;
+}srv_config_t;
 
 typedef struct{
     int socket;

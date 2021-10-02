@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf("\nCerrando el sensor...");
+    printf("\nCerrando el sensor...............");
     if(cerrar_sensor(&sensor) == -1)
     {
         perror("\nError cerrando el sensor\n");
