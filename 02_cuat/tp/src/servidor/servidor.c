@@ -42,7 +42,7 @@ int main(void)
     cliente_t *nuevo_cliente;
     int sem_id, shm_id;
     key_t llave;
-    sensor_datos_t *mem_compartida;
+    datos_compartidos_t *mem_compartida;
 
     //Creo la llave para los ipc
     llave = ftok(CONFIG_PATH, 'T');
@@ -53,13 +53,6 @@ int main(void)
 
     //Creo el set de semaforos
     sem_id = crear_semaforo(CANTIDAD_SEMAFOROS, llave);
-
-    //Creo la memoria compartida
-    shm_id = crear_shmem(&mem_compartida, llave, sizeof(mem_compartida[0]));
-    if(shm_id <= 0){
-        perror("crear_shmem");
-        exit(1);
-    }
 
 /* +++++++++++SEÑALES++++++++++++ */
     //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
@@ -84,6 +77,14 @@ int main(void)
     config.config = NULL;
     levantar_configuracion(&config, CONFIG_PATH);
     
+    //Creo la memoria compartida y la inicializo
+    shm_id = crear_shmem(&mem_compartida, llave, sizeof(mem_compartida[0]));
+    if(shm_id <= 0){
+        perror("crear_shmem");
+        exit(1);
+    }
+    mem_compartida->ventana_filtro = config.ventana_filtro;
+
     //Creo el proceso del sensor
     //Lo libero con la señal SIGUSR1 //TODO ??
     pid_productor = fork();
@@ -93,8 +94,9 @@ int main(void)
         exit(1);
     }
     else if(pid_productor == 0)
-        execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE     //argv[0]
-                                , string_itoa(sem_id)   //argv[1]
+        execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE                     //argv[0]
+                                , string_itoa(sem_id)                   //argv[1]
+                                , string_itoa(config.ventana_filtro)    //argv[2]
                                 , NULL);
 
     //Levanto el servidor
@@ -109,9 +111,9 @@ int main(void)
     lista_clientes = list_create();
     
     printf("[PID %d]\tServidor creado con exito\n", getpid());
-    printf("[PID %d]\t\tCantidad maxima de conexiones: %d\n", config.cant_conex_maxima);
-    printf("[PID %d]\t\tBacklog: %d\n", config.backlog);
-    printf("[PID %d]\t\tVentana del filtro: %d\n", config.ventana_filtro);
+    printf("\t\tCantidad maxima de conexiones: %d\n", config.cant_conex_maxima);
+    printf("\t\tBacklog: %d\n", config.backlog);
+    printf("\t\tVentana del filtro: %d\n", config.ventana_filtro);
 
     while(salir == 0)
     {
@@ -142,8 +144,18 @@ int main(void)
         else
             printf("No atiendo mas clientes, espera!\n");
         
-        if(refrescar_config)
+        if(refrescar_config){
+            int ventana_filtro_anterior = config.ventana_filtro;
+            
+            //Re-leo el archivo de configuracion
             levantar_configuracion(&config, CONFIG_PATH);
+            
+            //Si es necesario le aviso al productor el cambio
+            if(ventana_filtro_anterior != config.ventana_filtro){
+                mem_compartida->ventana_filtro = config.ventana_filtro;
+                kill(pid_productor, SIGUSR2);
+            }
+        }
 
         sleep(1);
     }
@@ -191,7 +203,7 @@ void* atender_cliente(void *datos_cliente)
     
     socket_id   = ((cliente_t*)datos_cliente)->socket;
     sem_id      = ((cliente_t*)datos_cliente)->semaforo;
-    sensor      = ((cliente_t*)datos_cliente)->mem_compartida;
+    sensor      = &((cliente_t*)datos_cliente)->mem_compartida->datos_filtrados;
 
     printf("Se conecto un nuevo cliente [Socket: %d] [Semaforo: %d] [Memoria %d]\n", socket_id, sem_id, sensor);
 

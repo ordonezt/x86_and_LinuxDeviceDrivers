@@ -27,9 +27,15 @@ typedef struct{
 }srv_config_t;
 
 typedef struct{
+    sensor_datos_t datos_crudos;
+    sensor_datos_t datos_filtrados;
+    int ventana_filtro;
+}datos_compartidos_t;
+
+typedef struct{
     int socket;
     int semaforo;
-    sensor_datos_t *mem_compartida;
+    datos_compartidos_t *mem_compartida;
     struct sockaddr_in info_socket;
     pthread_t thread;
 }cliente_t;

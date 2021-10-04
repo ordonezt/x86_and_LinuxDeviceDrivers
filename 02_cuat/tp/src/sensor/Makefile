@@ -1,5 +1,5 @@
 .PHONY: clean
-
+#TODO incorporar en un unico makefile para todo el proyecto
 BINPATH = ../../bin/
 DOCPATH = ../../doc/
 INCPATH = ../../inc/
@@ -21,6 +21,7 @@ OBJS =  $(BINPATH)sensor.o 		$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPAT
 		$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
 		$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
 		$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
+		$(BINPATH)signal.o
 
 SRC_NAME = sensor
 
@@ -107,6 +108,11 @@ $(BINPATH)sharmem.o: $(SRCPATH)comunes/ipc/sharmem.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BINPATH)sockets.o: $(SRCPATH)comunes/ipc/sockets.c
+	@echo Generando $@
+	mkdir -p $(BINPATH)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BINPATH)signal.o: $(SRCPATH)comunes/ipc/signal.c
 	@echo Generando $@
 	mkdir -p $(BINPATH)
 	$(CC) $(CFLAGS) $< -o $@
