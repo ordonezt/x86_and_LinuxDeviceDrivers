@@ -1,6 +1,8 @@
 #ifndef __SERVIDOR_H
 #define __SERVIDOR_H
 
+#include <stdbool.h>
+
 #include "../../inc/comunes/config.h"
 #include "../../inc/comunes/ipc/sockets.h"
 #include "../../inc/sensor/sensor.h"
@@ -33,6 +35,8 @@ typedef struct{
 }datos_compartidos_t;
 
 typedef struct{
+    pid_t pid_hilo_principal;
+    bool expiro;
     int socket;
     int semaforo;
     datos_compartidos_t *mem_compartida;

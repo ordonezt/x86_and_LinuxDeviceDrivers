@@ -24,6 +24,7 @@
 void destruir_cliente(void *cliente);
 void* atender_cliente(void *datos_cliente);
 void sigint_handler(int sig);
+void sigusr1_handler(int sig);
 void sigusr2_handler(int sig);
 int levantar_configuracion(srv_config_t *srv_config, char path[]);
 void destruir_configuracion(srv_config_t srv_config);
@@ -34,8 +35,9 @@ void liberar_recursos(    pid_t pid_productor   , srv_config_t config
 int crear_nuevo_cliente(  t_list *lista_clientes, int socket_cliente
                         , int sem_id            , void *mem_compartida
                         , struct sockaddr_in *info_socket_cliente);
+int eliminar_clientes_expirados(t_list *lista);
 
-volatile sig_atomic_t salir, refrescar_config;
+volatile sig_atomic_t salir, refrescar_config, cliente_expiro;
 
 int main(void)
 {
@@ -152,6 +154,11 @@ int main(void)
             }
         }
 
+        if(cliente_expiro){
+            cliente_expiro = 0;
+            eliminar_clientes_expirados(lista_clientes);
+        }
+
         sleep(1);
     }
 
@@ -180,6 +187,8 @@ int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, 
         perror("malloc");
         return -1;
     }
+    nuevo_cliente->pid_hilo_principal = getpid();
+    nuevo_cliente->expiro = false;
     nuevo_cliente->socket = socket_cliente;
     nuevo_cliente->semaforo = sem_id;
     nuevo_cliente->mem_compartida = mem_compartida;
@@ -192,6 +201,23 @@ int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, 
 
     //Agrego el cliente a la lista
     list_add(lista_clientes, nuevo_cliente);
+}
+
+/**
+ * @brief Elimina de la lista y libera los recursos de los clientes expirados.
+ * 
+ * @param lista Lista de clientes.
+ * @return int Cantidad de clientes destruidos.
+ */
+int eliminar_clientes_expirados(t_list *lista){
+    int cant_inicial;
+
+    bool is_cliente_expirado(cliente_t *cliente){
+        return cliente->expiro;
+    }
+    cant_inicial = list_count_satisfying(lista, is_cliente_expirado);
+    list_remove_and_destroy_all_by_condition(lista, is_cliente_expirado, destruir_cliente);
+    return cant_inicial - list_count_satisfying(lista, is_cliente_expirado);
 }
 
 /**
@@ -256,10 +282,11 @@ void* atender_cliente(void *datos_cliente)
 {
     int socket_id, sem_id;
     sensor_datos_t *sensor;
+    cliente_t *self = (cliente_t*)datos_cliente;
     
-    socket_id   = ((cliente_t*)datos_cliente)->socket;
-    sem_id      = ((cliente_t*)datos_cliente)->semaforo;
-    sensor      = &((cliente_t*)datos_cliente)->mem_compartida->datos_filtrados;
+    socket_id   = self->socket;
+    sem_id      = self->semaforo;
+    sensor      = &self->mem_compartida->datos_filtrados;
 
     printf("Se conecto un nuevo cliente [Socket: %d]\n", socket_id);
     /*
@@ -267,11 +294,15 @@ void* atender_cliente(void *datos_cliente)
 
     Se me ocurre agregar un flag en la estructura cliente que sea de "termine", entonces si esta seteado
     (se setea cuando termina) lo elimino. Puedo disparar una señal para avisar al proceso principal
+
+    SOLO FALTA PROBARLO!
     */
     while(salir == 0)
     {
         if(control_semaforo_datos(sem_id, SEM_TAKE))
         {
+            self->expiro = true;
+            kill(self->pid_hilo_principal, SIGUSR1);
             perror("control_semaforo_datos");
             pthread_exit((void*)1);
         }
@@ -287,6 +318,8 @@ void* atender_cliente(void *datos_cliente)
         //sleep(3);
         if(control_semaforo_datos(sem_id, SEM_FREE))
         {
+            self->expiro = true;
+            kill(self->pid_hilo_principal, SIGUSR1);
             perror("control_semaforo_datos");
             pthread_exit((void*)1);
         }
@@ -295,6 +328,8 @@ void* atender_cliente(void *datos_cliente)
         sleep(1);
     }
 
+    self->expiro = true;
+    kill(self->pid_hilo_principal, SIGUSR1);
     pthread_exit((void*)0);
 }
 
@@ -319,6 +354,16 @@ void destruir_cliente(void *cliente)
 void sigint_handler(int sig)
 {
     salir = 1;
+}
+
+/**
+ * @brief Handler de la señal SIGUSR1.
+ * 
+ * Le avisa al programa principal que un hilo acaba de terminar.
+ * @param sig 
+ */
+void sigusr1_handler(int sig){
+    cliente_expiro = 1;
 }
 
 /**

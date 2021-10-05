@@ -13,6 +13,7 @@ AFLAGS = -f elf32
 CFLAGS = -c -Wall
 IFLAGS = -mgeneral-regs-only #Flags para compilar los handler de interrupciones en C
 LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
+OFLAGS = -Ofast #Flags para optimizacion
 
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
@@ -21,7 +22,7 @@ OBJS =  $(BINPATH)sensor.o 		$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPAT
 		$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
 		$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
 		$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
-		$(BINPATH)signal.o
+		$(BINPATH)signal.o		$(BINPATH)dsp.o
 
 SRC_NAME = sensor
 
@@ -116,6 +117,12 @@ $(BINPATH)signal.o: $(SRCPATH)comunes/ipc/signal.c
 	@echo Generando $@
 	mkdir -p $(BINPATH)
 	$(CC) $(CFLAGS) $< -o $@
+
+$(BINPATH)dsp.o: $(SRCPATH)sensor/dsp.c
+	@echo Generando $@
+	mkdir -p $(BINPATH)
+	$(CC) $(CFLAGS) $(OFLAGS) $< -o $@ 
+	$(CC) -S $< -o $(DOCPATH)dsp.asm
 	
 clean:
 	@echo limpiando carpeta..
