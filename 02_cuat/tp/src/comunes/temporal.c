@@ -28,6 +28,7 @@ char *temporal_get_string_time(const char* format) {
 	struct timespec* log_timespec = malloc(sizeof(struct timespec));
 	struct tm* log_tm = malloc(sizeof(struct tm));
 	char* milisec;
+	char* p_aux;//Guarda con esto que lo cambie yo (tomas ordoñez) para evitar un warning, pero no lo probe
 
 	if(clock_gettime(CLOCK_REALTIME, log_timespec) == -1) {
 		return NULL;
@@ -39,7 +40,10 @@ char *temporal_get_string_time(const char* format) {
 	}
 
 	localtime_r(&log_timespec->tv_sec, log_tm);
-	strftime(str_time, strlen(format) + 1, str_time, log_tm);
+	//Guarda con esto que lo cambie yo (tomas ordoñez) para evitar un warning, pero no lo probe
+	p_aux = str_time;
+	strftime(str_time, strlen(format) + 1, p_aux, log_tm);
+	//strftime(str_time, strlen(format) + 1, str_time, log_tm); //Esta es la linea original
 
 	free(milisec);
 	free(log_tm);

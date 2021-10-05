@@ -110,8 +110,7 @@ int crear_semaforo (int nsems, key_t llave)
 **/
 int control_semaforo (int ID, int N_SEM, int ACCION)
 {
-	struct sembuf BUF;	
-	int ret;
+	struct sembuf BUF;
 		
 	BUF.sem_num = N_SEM;	
 	BUF.sem_op = ACCION;

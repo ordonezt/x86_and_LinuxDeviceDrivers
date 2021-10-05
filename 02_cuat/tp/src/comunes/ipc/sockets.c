@@ -42,7 +42,6 @@ void cargar_ip_cliente (struct sockaddr_in *, struct sockaddr_in *, struct socka
 int crear_socket(int dominio, int tipo, int protocolo, int puerto, struct sockaddr_in *info_socket, char* dir_ip, char rol)
 {
 	int socket_obtenido, yes = 1;
-	struct sockaddr_in AUX;
 
 	if ((socket_obtenido = socket(dominio,tipo,protocolo)) == -1) 	//Ubicamos un socket util
 	{
@@ -81,7 +80,7 @@ int crear_socket(int dominio, int tipo, int protocolo, int puerto, struct sockad
 		
 		if(tipo == SOCK_DGRAM)
 		{
-			bzero(&info_socket,sizeof(*info_socket));		//Inicializo en cero.
+			bzero(info_socket,sizeof(*info_socket));		//Inicializo en cero.
 			(*info_socket).sin_family = dominio;		//Asignamos el protocolo de comunicacion.
 			(*info_socket).sin_port = htons(puerto);  	//Asignamos el puerto.
 			(*info_socket).sin_addr.s_addr = inet_addr(dir_ip); 

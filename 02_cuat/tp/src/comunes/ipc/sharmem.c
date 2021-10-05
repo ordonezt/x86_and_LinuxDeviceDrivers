@@ -63,7 +63,7 @@ void* vincular_shmem(int shm_id){
 	if (memoria == (void*)(-1))
 	{
 		perror("shmat");
-		return -1;
+		return NULL;
 	}
 	return memoria;
 }

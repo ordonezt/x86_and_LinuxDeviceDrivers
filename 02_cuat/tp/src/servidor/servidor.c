@@ -26,7 +26,14 @@ void* atender_cliente(void *datos_cliente);
 void sigint_handler(int sig);
 void sigusr2_handler(int sig);
 int levantar_configuracion(srv_config_t *srv_config, char path[]);
-int destruir_configuracion(srv_config_t srv_config);
+void destruir_configuracion(srv_config_t srv_config);
+void liberar_recursos(    pid_t pid_productor   , srv_config_t config
+                        , t_list *lista_clientes, int socket_recepcion
+                        , int sem_id            , int shm_id
+                        , void *mem_cmp);
+int crear_nuevo_cliente(  t_list *lista_clientes, int socket_cliente
+                        , int sem_id            , void *mem_compartida
+                        , struct sockaddr_in *info_socket_cliente);
 
 volatile sig_atomic_t salir, refrescar_config;
 
@@ -35,14 +42,15 @@ int main(void)
     srv_config_t config;
     int socket_recepcion, socket_cliente;
     struct sockaddr_in info_socket_recepcion, info_socket_cliente;
-    struct sigaction sa_term;
-    signal_t sig_int, sig_usr2;
+    signal_t sig_int, sig_usr2, sig_term;
     pid_t pid_productor;
     t_list *lista_clientes;
     cliente_t *nuevo_cliente;
     int sem_id, shm_id;
     key_t llave;
     datos_compartidos_t *mem_compartida;
+
+//TODO encapsular inicializacion
 
     //Creo la llave para los ipc
     llave = ftok(CONFIG_PATH, 'T');
@@ -55,9 +63,15 @@ int main(void)
     sem_id = crear_semaforo(CANTIDAD_SEMAFOROS, llave);
 
 /* +++++++++++SEÑALES++++++++++++ */
-    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
     salir = 0;
     if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
+        perror("atrapar_signal");
+        exit(1);
+    }
+
+    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
         perror("atrapar_signal");
         exit(1);
     }
@@ -78,7 +92,7 @@ int main(void)
     levantar_configuracion(&config, CONFIG_PATH);
     
     //Creo la memoria compartida y la inicializo
-    shm_id = crear_shmem(&mem_compartida, llave, sizeof(mem_compartida[0]));
+    shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
     if(shm_id <= 0){
         perror("crear_shmem");
         exit(1);
@@ -86,14 +100,11 @@ int main(void)
     mem_compartida->ventana_filtro = config.ventana_filtro;
 
     //Creo el proceso del sensor
-    //Lo libero con la señal SIGUSR1 //TODO ??
     pid_productor = fork();
-    if(pid_productor == -1)
-    {
+    if(pid_productor == -1){
         perror("fork");
         exit(1);
-    }
-    else if(pid_productor == 0)
+    }else if(pid_productor == 0)
         execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE                     //argv[0]
                                 , string_itoa(sem_id)                   //argv[1]
                                 , string_itoa(config.ventana_filtro)    //argv[2]
@@ -101,8 +112,7 @@ int main(void)
 
     //Levanto el servidor
     socket_recepcion = crear_servidor(config.puerto, &info_socket_recepcion, config.backlog);
-    if(socket_recepcion == -1)
-    {
+    if(socket_recepcion == -1){
         perror("crear_servidor");
         //exit(1);
     }
@@ -115,30 +125,15 @@ int main(void)
     printf("\t\tBacklog: %d\n", config.backlog);
     printf("\t\tVentana del filtro: %d\n", config.ventana_filtro);
 
-    while(salir == 0)
-    {
+    while(salir == 0){
         //printf("Soy el hilo principal [PID %d]\n", getpid());
-        if(list_size(lista_clientes) < config.cant_conex_maxima)
-        {
+        if(list_size(lista_clientes) < config.cant_conex_maxima){
             socket_cliente = atender_conexion(socket_recepcion, &info_socket_cliente);
-            if(socket_cliente <= 0)
-            {
+            if(socket_cliente <= 0){
                 perror("atender_cliente");
                 //salir = 1;
-            }
-            else
-            {
-                //TODO Encapsular
-                //Hago hilo y lo atiendo
-                nuevo_cliente = (cliente_t*)malloc(sizeof(*nuevo_cliente));
-                nuevo_cliente->socket = socket_cliente;
-                nuevo_cliente->semaforo = sem_id;
-                nuevo_cliente->mem_compartida = mem_compartida;
-                memcpy(&nuevo_cliente->info_socket, &info_socket_cliente, sizeof(info_socket_cliente));
-                pthread_create(&nuevo_cliente->thread, NULL, atender_cliente, (void*)nuevo_cliente);
-
-                //Agrego el cliente a la lista
-                list_add(lista_clientes, nuevo_cliente);
+            }else{
+                crear_nuevo_cliente(lista_clientes, socket_cliente, sem_id, mem_compartida, &info_socket_cliente);
             }
         }
         else
@@ -160,35 +155,96 @@ int main(void)
         sleep(1);
     }
 
-//TODO Encapsular
-    fflush(stdout);
-    printf("Liberando configuraciones........");
-    destruir_configuracion(config);
-    printf("Listo\n");
-
-    printf("Cerrando todos los clientes......");
-    list_clean_and_destroy_elements(lista_clientes, destruir_cliente);
-    printf("Listo\n");
-
-    printf("Deteniendo proceso productor.....");
-    waitpid(pid_productor, NULL, 0);
-    printf("Listo\n");
-
-    printf("Cerrando el servidor.............");
-    cerrar_servidor(socket_recepcion);
-    printf("Listo\n");
-
-    printf("Borrando el set de semaforos.....");
-    destruir_semaforo(sem_id);
-    printf("Listo\n");
-
-    printf("Borrando la memoria compartida...");
-    destruir_shmem(shm_id, mem_compartida);
-    printf("Listo\n");
+    liberar_recursos(pid_productor, config, lista_clientes, socket_recepcion, sem_id, shm_id, mem_compartida);
 
     exit(0);
 }
 
+/**
+ * @brief Crea e inicializa un hilo para atender un cliente.
+ * Crea un hilo para atender al nuevo cliente y lo agrega a la lista de clientes.
+ * 
+ * @param lista_clientes Lista de los clientes.
+ * @param socket_cliente Socket abierto para comunicarse con el cliente
+ * @param sem_id ID del semaforo utilizado para sincronizar productor-consumidores
+ * @param mem_compartida Puntero a la memoria compartida
+ * @param info_socket_cliente Informacion de la conexion con el cliente
+ * @return int 
+ */
+int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, void *mem_compartida, struct sockaddr_in *info_socket_cliente){
+    cliente_t *nuevo_cliente;
+
+    //Hago hilo y lo atiendo
+    nuevo_cliente = (cliente_t*)malloc(sizeof(*nuevo_cliente));
+    if(nuevo_cliente == NULL){
+        perror("malloc");
+        return -1;
+    }
+    nuevo_cliente->socket = socket_cliente;
+    nuevo_cliente->semaforo = sem_id;
+    nuevo_cliente->mem_compartida = mem_compartida;
+    memcpy(&nuevo_cliente->info_socket, info_socket_cliente, sizeof(*info_socket_cliente));
+    if(pthread_create(&nuevo_cliente->thread, NULL, atender_cliente, (void*)nuevo_cliente) != 0){
+        perror("pthread_create");
+        free(nuevo_cliente);
+        return -1;
+    }
+
+    //Agrego el cliente a la lista
+    list_add(lista_clientes, nuevo_cliente);
+}
+
+/**
+ * @brief Libera todos los recursos del sistema.
+ * 
+ * @param pid_productor PID del proceso productor de datos.
+ * @param config Estructura de configuracion.
+ * @param lista_clientes Lista de los clientes abiertos.
+ * @param socket_recepcion Socket usado para escuchar pedidos de conexion.
+ * @param sem_id Numero del semaforo utilizado.
+ * @param shm_id Numero de la memoria compartida utilizada.
+ * @param mem_cmp Direccion de la memoria compartida.
+ */
+void liberar_recursos(pid_t pid_productor, srv_config_t config, t_list *lista_clientes, int socket_recepcion, int sem_id, int shm_id, void *mem_cmp){
+    fflush(stdout);
+
+    if(config.config != NULL){
+        printf("Liberando configuraciones........");
+        destruir_configuracion(config);
+        printf("Listo\n");
+    }
+
+    if(lista_clientes != NULL){
+        printf("Cerrando todos los clientes......");
+        list_clean_and_destroy_elements(lista_clientes, destruir_cliente);
+        printf("Listo\n");
+    }
+
+    if(pid_productor != 0){
+        printf("Deteniendo proceso productor.....");
+        kill(pid_productor, SIGTERM);     //Le aviso al proceso productor que termine
+        waitpid(pid_productor, NULL, 0);
+        printf("Listo\n");
+    }
+
+    if(socket_recepcion != 0){
+        printf("Cerrando el servidor.............");
+        cerrar_servidor(socket_recepcion);
+        printf("Listo\n");
+    }
+
+    if(sem_id != 0){
+        printf("Borrando el set de semaforos.....");
+        destruir_semaforo(sem_id);
+        printf("Listo\n");
+    }
+
+    if(shm_id != 0){
+        printf("Borrando la memoria compartida...");
+        destruir_shmem(shm_id, mem_cmp);
+        printf("Listo\n");
+    }
+}
 /**
  * @brief Atiende el cliente
  * 
@@ -205,8 +261,13 @@ void* atender_cliente(void *datos_cliente)
     sem_id      = ((cliente_t*)datos_cliente)->semaforo;
     sensor      = &((cliente_t*)datos_cliente)->mem_compartida->datos_filtrados;
 
-    printf("Se conecto un nuevo cliente [Socket: %d] [Semaforo: %d] [Memoria %d]\n", socket_id, sem_id, sensor);
+    printf("Se conecto un nuevo cliente [Socket: %d]\n", socket_id);
+    /*
+    TODO Tengo que reconocer si se desconecto el cliente y sacarlo de la lista (y eliminar el thread)
 
+    Se me ocurre agregar un flag en la estructura cliente que sea de "termine", entonces si esta seteado
+    (se setea cuando termina) lo elimino. Puedo disparar una señal para avisar al proceso principal
+    */
     while(salir == 0)
     {
         if(control_semaforo_datos(sem_id, SEM_TAKE))
@@ -260,13 +321,27 @@ void sigint_handler(int sig)
     salir = 1;
 }
 
+/**
+ * @brief Handler de la señal SIGUSR2
+ * 
+ * Le avisa al programa principal que revise el archivo de configuracion
+ * @param sig 
+ */
 void sigusr2_handler(int sig){
     refrescar_config = 1;
 }
 
+/**
+ * @brief Lee / define los parametros de configuracion del programa.
+ * 
+ * @param srv_config Estructura de configuracion.
+ * @param path Ruta al archivo de configuracion.
+ * @return int 0 existe archivo de configuracion, -1 se cargaron valores por default
+ */
 int levantar_configuracion(srv_config_t *srv_config, char path[]){
     t_config *config;
     int backlog, cant_conex_maxima, ventana_filtro, puerto;
+    int ret = 0;
 
     config = srv_config->config;
     if(config != NULL)
@@ -305,14 +380,22 @@ int levantar_configuracion(srv_config_t *srv_config, char path[]){
         cant_conex_maxima = CANT_CONEX_MAX_DEFAULT;
         ventana_filtro = VENTANA_FILTRO_DEFAULT;
         puerto = PUERTO_DEFAULT;
+        ret = -1;
     }
     srv_config->backlog             = backlog;
     srv_config->cant_conex_maxima   = cant_conex_maxima;
     srv_config->ventana_filtro      = ventana_filtro;
     srv_config->puerto              = puerto;
     srv_config->config              = config;
+
+    return ret;
 }
 
-int destruir_configuracion(srv_config_t srv_config){
+/**
+ * @brief Destruye los recursos utilizados por el manejo del archivo de configuracion.
+ * 
+ * @param srv_config Estructura de configuracion.
+ */
+void destruir_configuracion(srv_config_t srv_config){
     config_destroy(srv_config.config);
 }

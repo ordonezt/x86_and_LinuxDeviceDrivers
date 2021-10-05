@@ -11,6 +11,8 @@
 
 #include "../../inc/sensor/sensor.h"
 #include "../../inc/comunes/ipc/sem.h"
+#include "../../inc/comunes/ipc/sockets.h"
+#include "../../inc/comunes/ipc/sharmem.h"
 #include "../../inc/servidor/servidor.h"
 #include "../../inc/comunes/ipc/signal.h"
 #include "../../inc/comunes/collections/list.h"
@@ -31,7 +33,7 @@ volatile sig_atomic_t salir, flag_cambio_config;
  */
 int main(int argc, char* argv[])
 {
-    signal_t sig_int, sig_usr2;
+    signal_t sig_int, sig_usr2, sig_term;
     sensor_t sensor;
     char *sensor_path = SENSOR_PATH;
     int sem_id, shm_id;
@@ -40,6 +42,7 @@ int main(int argc, char* argv[])
     int ventana_filtro;
     key_t llave;
 
+    //TODO encapsular inicializacion
     if(argc < 3){
         printf("Ingrese los argumentos necesarios\n");
         exit(1);
@@ -57,15 +60,22 @@ int main(int argc, char* argv[])
         exit(1);
     }
     //Creo la memoria compartida
-    shm_id = crear_shmem(&mem_compartida, llave, sizeof(mem_compartida[0]));
+    shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
     if(shm_id <= 0){
         perror("crear_shmem");
         exit(1);
     }
 
-    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
     salir = 0;
     if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
+        perror("atrapar_signal");
+        exit(1);
+    }
+
+    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    salir = 0;
+    if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
         perror("atrapar_signal");
         exit(1);
     }
@@ -153,6 +163,7 @@ int main(int argc, char* argv[])
         }
     }
 
+//TODO encapsular cierre
     printf("\nCerrando el sensor...............");
     if(cerrar_sensor(&sensor) == -1)
     {
@@ -163,7 +174,7 @@ int main(int argc, char* argv[])
         printf("Listo\n");
 
     printf("Removiendo filtro................");
-    list_destroy_and_destroy_elements(lista_estados, list_destruir_estado);
+    list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
     printf("Listo\n");
 
     exit(0);
@@ -233,11 +244,11 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     printf("Largo de la lista %d\n", largo_lista);
 
     if(largo_lista == ventana_filtro){
-        list_remove_and_destroy_element(lista_estados, largo_lista - 1, list_destruir_estado); printf("Iguales, remuevo el ultimo\n");}
+        list_remove_and_destroy_element(lista_estados, largo_lista - 1, (void*)list_destruir_estado); printf("Iguales, remuevo el ultimo\n");}
     else if(largo_lista > ventana_filtro){
         diferencia_ventana = largo_lista - ventana_filtro + 1; //El +1 es para remover el ultimo dato, porque tiene que entrar el nuevo
         while(diferencia_ventana--){
-            list_remove_and_destroy_element(lista_estados, ventana_filtro - 1 + diferencia_ventana, list_destruir_estado); printf("Mayor, remuevo el %d\n", ventana_filtro - 1 + diferencia_ventana);}
+            list_remove_and_destroy_element(lista_estados, ventana_filtro - 1 + diferencia_ventana, (void*)list_destruir_estado); printf("Mayor, remuevo el %d\n", ventana_filtro - 1 + diferencia_ventana);}
     }
     printf("Agrego al inicio\n");
     dato_aux = (sensor_datos_t *)malloc(sizeof(dato_aux[0]));
@@ -256,25 +267,25 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     }
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 0); //Aceleracion x
-    media_q15(&dato_procesado->accel.x, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->accel.x, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 2); //Aceleracion y
-    media_q15(&dato_procesado->accel.y, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->accel.y, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 4); //Aceleracion z
-    media_q15(&dato_procesado->accel.z, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->accel.z, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 6); //Temp
     media_q15(&dato_procesado->temp, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 8); //Gyro x
-    media_q15(&dato_procesado->gyro.x, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->gyro.x, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 10); //Gyro y
-    media_q15(&dato_procesado->gyro.y, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->gyro.y, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 12); //Gyro z
-    media_q15(&dato_procesado->gyro.z, vector_aux, largo_lista);
+    media_q15((int16_t*)&dato_procesado->gyro.z, vector_aux, largo_lista);
     
     free(vector_aux);
     return 0;
