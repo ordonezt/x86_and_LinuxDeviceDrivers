@@ -7,8 +7,8 @@
 #include "../../inc/comunes/ipc/sockets.h"
 #include "../../inc/sensor/sensor.h"
 
-#define SENSOR_EJECUTABLE       "../sensor/sensor"  //Ruta al ejecutable del proceso productor
-#define CONFIG_PATH             "../../tp.config"   //Ruta al archivo de configuracion
+#define SENSOR_EJECUTABLE       "./sensor"  //Ruta al ejecutable del proceso productor
+#define CONFIG_PATH             "./tp.config"   //Ruta al archivo de configuracion
 
 #define BACKLOG_DEFAULT         20      //Cantidad de clientes en cola de espera
 #define CANT_CONEX_MAX_DEFAULT  100     //Cantidad maxima de clientes simultaneos

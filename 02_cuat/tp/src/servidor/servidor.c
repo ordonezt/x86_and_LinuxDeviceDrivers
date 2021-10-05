@@ -47,7 +47,6 @@ int main(void)
     signal_t sig_int, sig_usr2, sig_term;
     pid_t pid_productor;
     t_list *lista_clientes;
-    cliente_t *nuevo_cliente;
     int sem_id, shm_id;
     key_t llave;
     datos_compartidos_t *mem_compartida;
@@ -116,7 +115,7 @@ int main(void)
     socket_recepcion = crear_servidor(config.puerto, &info_socket_recepcion, config.backlog);
     if(socket_recepcion == -1){
         perror("crear_servidor");
-        //exit(1);
+        salir = 1;
     }
 
     //Preparo la lista de clientes
@@ -176,7 +175,7 @@ int main(void)
  * @param sem_id ID del semaforo utilizado para sincronizar productor-consumidores
  * @param mem_compartida Puntero a la memoria compartida
  * @param info_socket_cliente Informacion de la conexion con el cliente
- * @return int 
+ * @return int 0 exito, -1 error
  */
 int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, void *mem_compartida, struct sockaddr_in *info_socket_cliente){
     cliente_t *nuevo_cliente;
@@ -201,6 +200,7 @@ int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, 
 
     //Agrego el cliente a la lista
     list_add(lista_clientes, nuevo_cliente);
+    return 0;
 }
 
 /**
@@ -215,9 +215,9 @@ int eliminar_clientes_expirados(t_list *lista){
     bool is_cliente_expirado(cliente_t *cliente){
         return cliente->expiro;
     }
-    cant_inicial = list_count_satisfying(lista, is_cliente_expirado);
-    list_remove_and_destroy_all_by_condition(lista, is_cliente_expirado, destruir_cliente);
-    return cant_inicial - list_count_satisfying(lista, is_cliente_expirado);
+    cant_inicial = list_count_satisfying(lista, (void*)is_cliente_expirado);
+    list_remove_and_destroy_all_by_condition(lista, (void*)is_cliente_expirado, destruir_cliente);
+    return cant_inicial - list_count_satisfying(lista, (void*)is_cliente_expirado);
 }
 
 /**

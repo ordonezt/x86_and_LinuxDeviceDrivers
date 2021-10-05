@@ -1,37 +1,57 @@
 .PHONY: clean
-#TODO incorporar en un unico makefile para todo el proyecto
-BINPATH = ../../bin/
-DOCPATH = ../../doc/
-INCPATH = ../../inc/
-LIBPATH = ../../lib/
-SRCPATH = ../../src/
-SUPPATH = ../../sup/
+
+BINPATH = ./bin/
+DOCPATH = ./doc/
+INCPATH = ./inc/
+LIBPATH = ./lib/
+SRCPATH = ./src/
+SUPPATH = ./sup/
 
 AC = nasm
 CC = gcc
 AFLAGS = -f elf32
-CFLAGS = -c -Wall
+CFLAGS = -c -Wall -pthread
 IFLAGS = -mgeneral-regs-only #Flags para compilar los handler de interrupciones en C
 LDFLAGS = -z max-page-size=0x01000 --oformat=binary -m elf_i386
-OFLAGS = -Ofast #Flags para optimizacion
-
+LIBFLAGS = -lpthread
 LDSCRIPT = linker.ld
 ODFLAGS = -CprsSx --prefix-addresses
-#en objs guardo todos mis objetos elf
-OBJS =  $(BINPATH)sensor.o 		$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPATH)error.o	\
-		$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
-		$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
-		$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
-		$(BINPATH)signal.o		$(BINPATH)dsp.o
+OFLAGS = -Ofast #Flags para optimizacion
 
-SRC_NAME = sensor
+#en objs guardo todos mis objetos elf
+OBJS_G = 	$(BINPATH)dsp.o			$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPATH)error.o	\
+			$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
+			$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
+			$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
+			$(BINPATH)signal.o		
+
+OBJS_1 = 	$(BINPATH)servidor.o 	
+OBJS_2 = 	$(BINPATH)sensor.o 	
+
+SRC1_NAME = servidor
+SRC2_NAME = sensor
 
 #all: $(BINPATH)$(SRC_NAME).o
-all: $(OBJS)
-	@echo Generando $(SRC_NAME)
-	$(CC) $(OBJS) -o $(SRC_NAME)
-	@echo Ejecutando $(SRC_NAME)
-	./$(SRC_NAME)
+all: $(SRC1_NAME) $(SRC2_NAME)
+	@echo Ejecutando aplicacion
+	./$(SRC1_NAME)
+
+servidor: $(OBJS_G) $(OBJS_1)
+	@echo Generando $(SRC1_NAME)
+	$(CC) $(OBJS_G) $(OBJS_1) -o $(SRC1_NAME) $(LIBFLAGS)
+#	@echo Ejecutando $(SRC1_NAME)
+#	./$(SRC1_NAME)
+
+sensor: $(OBJS_G) $(OBJS_2)
+	@echo Generando $(SRC2_NAME)
+	$(CC) $(OBJS_G) $(OBJS_2) -o $(SRC2_NAME) $(LIBFLAGS)
+#	@echo Ejecutando $(SRC1_NAME)
+#	./$(SRC1_NAME)
+
+$(BINPATH)servidor.o: $(SRCPATH)servidor/servidor.c
+	@echo Generando $@
+	mkdir -p $(BINPATH)
+	$(CC) $(CFLAGS) $< -o $@
 
 $(BINPATH)sensor.o: $(SRCPATH)sensor/sensor.c
 	@echo Generando $@
@@ -123,7 +143,7 @@ $(BINPATH)dsp.o: $(SRCPATH)sensor/dsp.c
 	mkdir -p $(BINPATH)
 	$(CC) $(CFLAGS) $(OFLAGS) $< -o $@ 
 	$(CC) -S $< -o $(DOCPATH)dsp.asm
-	
+
 clean:
 	@echo limpiando carpeta..
-	rm $(BINPATH)*.bin $(BINPATH)*.o $(BINPATH)*.elf $(BINPATH)*.lst *.map $(SRC_NAME)
+	rm $(BINPATH)*.bin $(BINPATH)*.o $(BINPATH)*.elf $(BINPATH)*.lst *.map $(SRC1_NAME) $(SRC2_NAME)
