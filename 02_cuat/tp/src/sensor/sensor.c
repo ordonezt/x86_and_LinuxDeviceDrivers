@@ -130,8 +130,8 @@ int main(int argc, char* argv[])
         else
         {
             procesar_dato(lista_estados, &sensor.datos, &mem_compartida->datos_filtrados, ventana_filtro);
-            printf("Dato crudo %d\n", sensor.datos.accel.x);
-            printf("Dato filtrado %d\n", mem_compartida->datos_filtrados.accel.x);
+            // printf("Dato crudo %d\n", sensor.datos.accel.x);
+            // printf("Dato filtrado %d\n", mem_compartida->datos_filtrados.accel.x);
 
             if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_TAKE))
             {
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
                 perror("control_semaforo");
                 break;
             }
-            printf("Solte el semaforo siendo productor\n");
+            // printf("Solte el semaforo siendo productor\n");
 
 
             // //Procesar
@@ -242,16 +242,14 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     int diferencia_ventana;
     int largo_lista = list_size(lista_estados);
 
-    printf("Largo de la lista %d\n", largo_lista);
-
-    if(largo_lista == ventana_filtro){
-        list_remove_and_destroy_element(lista_estados, largo_lista - 1, (void*)list_destruir_estado); printf("Iguales, remuevo el ultimo\n");}
+    if(largo_lista == ventana_filtro)
+        list_remove_and_destroy_element(lista_estados, largo_lista - 1, (void*)list_destruir_estado);
     else if(largo_lista > ventana_filtro){
         diferencia_ventana = largo_lista - ventana_filtro + 1; //El +1 es para remover el ultimo dato, porque tiene que entrar el nuevo
-        while(diferencia_ventana--){
-            list_remove_and_destroy_element(lista_estados, ventana_filtro - 1 + diferencia_ventana, (void*)list_destruir_estado); printf("Mayor, remuevo el %d\n", ventana_filtro - 1 + diferencia_ventana);}
+        while(diferencia_ventana--)
+            list_remove_and_destroy_element(lista_estados, ventana_filtro - 1 + diferencia_ventana, (void*)list_destruir_estado);
     }
-    printf("Agrego al inicio\n");
+    
     dato_aux = (sensor_datos_t *)malloc(sizeof(dato_aux[0]));
     memcpy(dato_aux, dato_nuevo, sizeof(dato_aux[0]));
     list_add_in_index(lista_estados, 0, dato_aux);
