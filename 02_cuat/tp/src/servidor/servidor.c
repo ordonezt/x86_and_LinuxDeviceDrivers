@@ -44,7 +44,7 @@ int main(void)
     srv_config_t config;
     int socket_recepcion, socket_cliente;
     struct sockaddr_in info_socket_recepcion, info_socket_cliente;
-    signal_t sig_int, sig_usr2, sig_term;
+    signal_t sig_int, sig_usr1, sig_usr2, sig_term;
     pid_t pid_productor;
     t_list *lista_clientes;
     int sem_id, shm_id;
@@ -73,6 +73,13 @@ int main(void)
 
     //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
     if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
+        perror("atrapar_signal");
+        exit(1);
+    }
+
+    //Manejo de la señal sigusr1 (Avisa que un cliente cerro la conexion)
+    cliente_expiro = 0;
+    if(atrapar_signal(&sig_usr1, sigusr1_handler, SIGUSR1)){
         perror("atrapar_signal");
         exit(1);
     }
@@ -154,8 +161,10 @@ int main(void)
         }
 
         if(cliente_expiro){
+            printf("Se murio un wacho\n");
             cliente_expiro = 0;
-            eliminar_clientes_expirados(lista_clientes);
+            printf("Elimine %d clientes\n", eliminar_clientes_expirados(lista_clientes));
+            fflush(stdout);
         }
 
         sleep(1);
@@ -200,6 +209,7 @@ int crear_nuevo_cliente(t_list *lista_clientes, int socket_cliente, int sem_id, 
 
     //Agrego el cliente a la lista
     list_add(lista_clientes, nuevo_cliente);
+    printf("Nuevo cliente %d\n", (int)nuevo_cliente);
     return 0;
 }
 
@@ -216,7 +226,12 @@ int eliminar_clientes_expirados(t_list *lista){
         return cliente->expiro;
     }
     cant_inicial = list_count_satisfying(lista, (void*)is_cliente_expirado);
-    list_remove_and_destroy_all_by_condition(lista, (void*)is_cliente_expirado, destruir_cliente);
+    printf("Expiraron %d clientes\n", cant_inicial);
+    fflush(stdout);
+    //Por alguna razon esto me tira segmentation fault jeje, lo soluciono con una manera medio crota
+    //list_remove_and_destroy_all_by_condition(lista, (void*)is_cliente_expirado, destruir_cliente);
+    while(list_count_satisfying(lista, (void*)is_cliente_expirado))
+        list_remove_and_destroy_by_condition(lista, (void*)is_cliente_expirado, destruir_cliente);
     return cant_inicial - list_count_satisfying(lista, (void*)is_cliente_expirado);
 }
 
@@ -280,13 +295,34 @@ void liberar_recursos(pid_t pid_productor, srv_config_t config, t_list *lista_cl
  */
 void* atender_cliente(void *datos_cliente)
 {
+    static int terminar_cliente = 0;
     int socket_id, sem_id;
-    sensor_datos_t *sensor;
+    sensor_datos_t *sensor, datos;
     cliente_t *self = (cliente_t*)datos_cliente;
-    
+    char buffer_aux[BUFFER_TX_LEN] = {0};
+
     socket_id   = self->socket;
     sem_id      = self->semaforo;
     sensor      = &self->mem_compartida->datos_filtrados;
+
+    if(send(socket_id, MSG_INICIO_COMUNICACION, strlen(MSG_INICIO_COMUNICACION),0) == -1){
+        perror("send");
+        terminar_cliente = 1;
+    }
+
+    if(recv(socket_id, buffer_aux, BUFFER_TX_LEN, 0) <= 0){
+        perror("recv");
+        terminar_cliente = 1;
+    }
+
+    if(strcmp(buffer_aux, MSG_ACK) == 0){
+        printf("\n\nRecibi el ACK\n\n");
+        if(send(socket_id, MSG_INICIO_COMUNICACION, strlen(MSG_INICIO_COMUNICACION),0) == -1){
+            perror("send");
+            terminar_cliente = 1;
+        }
+    } else
+        terminar_cliente = 1;
 
     printf("Se conecto un nuevo cliente [Socket: %d]\n", socket_id);
     /*
@@ -297,8 +333,14 @@ void* atender_cliente(void *datos_cliente)
 
     SOLO FALTA PROBARLO!
     */
-    while(salir == 0)
+    while(salir == 0 && terminar_cliente == 0)
     {
+        if(recv(socket_id, buffer_aux, BUFFER_TX_LEN, 0) <= 0){
+            perror("recv");
+            terminar_cliente = 1;
+            break;
+        }
+
         if(control_semaforo_datos(sem_id, SEM_TAKE))
         {
             self->expiro = true;
@@ -306,15 +348,17 @@ void* atender_cliente(void *datos_cliente)
             perror("control_semaforo_datos");
             pthread_exit((void*)1);
         }
-        printf("Tome el semaforo atendiendo un cliente\n");
+        // printf("Tome el semaforo atendiendo un cliente\n");
         //Procesar
-        printf("Aceleracion x: %d LSB\n", sensor->accel.x);
-        printf("Aceleracion y: %d LSB\n", sensor->accel.y);
-        printf("Aceleracion z: %d LSB\n", sensor->accel.z);
-        printf("Temp: %d\n", sensor->temp);
-        printf("Gyro x: %d\n", sensor->gyro.x);
-        printf("Gyro y: %d\n", sensor->gyro.y);
-        printf("Gyro z: %d\n", sensor->gyro.z);
+        // printf("Aceleracion x: %d LSB\n", sensor->accel.x);
+        // printf("Aceleracion y: %d LSB\n", sensor->accel.y);
+        // printf("Aceleracion z: %d LSB\n", sensor->accel.z);
+        // printf("Temp: %d\n", sensor->temp);
+        // printf("Gyro x: %d\n", sensor->gyro.x);
+        // printf("Gyro y: %d\n", sensor->gyro.y);
+        // printf("Gyro z: %d\n", sensor->gyro.z);
+        memcpy(&datos, sensor, sizeof(datos));
+
         //sleep(3);
         if(control_semaforo_datos(sem_id, SEM_FREE))
         {
@@ -322,10 +366,22 @@ void* atender_cliente(void *datos_cliente)
             kill(self->pid_hilo_principal, SIGUSR1);
             perror("control_semaforo_datos");
             pthread_exit((void*)1);
+            break;
         }
-        printf("Solte el semaforo atendiendo un cliente\n");
+        // printf("Solte el semaforo atendiendo un cliente\n");
+        
+        sprintf(buffer_aux   , "%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n"
+                            , (double)datos.accel.x , (double)datos.accel.y , (double)datos.accel.z
+                            , (double)datos.gyro.x  , (double)datos.gyro.y  , (double)datos.gyro.z
+                            , (double)datos.temp);
+        
+        if(send(socket_id, buffer_aux, strlen(buffer_aux), 0) == -1){
+            perror("send");
+            terminar_cliente = 1;
+            break;
+        }
 
-        sleep(1);
+        //sleep(1);
     }
 
     self->expiro = true;
@@ -340,8 +396,12 @@ void* atender_cliente(void *datos_cliente)
  */
 void destruir_cliente(void *cliente)
 {
+    close(((cliente_t*)cliente)->socket);
     pthread_join(((cliente_t*)cliente)->thread, NULL);
     free(cliente);
+
+    printf("Cliente destuido!\n");
+    fflush(stdout);
 }
 
 /**

@@ -18,6 +18,12 @@
 #define CANTIDAD_SEMAFOROS      10      //Cantidad de semaforos disponibles
 #define N_SEMAFORO_DATOS         0      //Numero de semaforo del manejo de datos
 
+#define MSG_INICIO_COMUNICACION "OK"
+#define MSG_ACK                 "AKN"
+#define MSG_FIN_COMUNICACION    "END"
+
+#define BUFFER_TX_LEN           120
+
 typedef struct{
     //Variables de configuracion
     int backlog;
