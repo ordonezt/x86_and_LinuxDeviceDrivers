@@ -7,7 +7,7 @@
 #include "../../inc/comunes/ipc/sockets.h"
 #include "../../inc/sensor/sensor.h"
 
-#define SENSOR_EJECUTABLE       "./sensor"  //Ruta al ejecutable del proceso productor
+#define SENSOR_EJECUTABLE       "./sensor"      //Ruta al ejecutable del proceso productor
 #define CONFIG_PATH             "./tp.config"   //Ruta al archivo de configuracion
 
 #define BACKLOG_DEFAULT         20      //Cantidad de clientes en cola de espera
@@ -18,11 +18,15 @@
 #define CANTIDAD_SEMAFOROS      10      //Cantidad de semaforos disponibles
 #define N_SEMAFORO_DATOS         0      //Numero de semaforo del manejo de datos
 
-#define MSG_INICIO_COMUNICACION "OK"
-#define MSG_ACK                 "AKN"
-#define MSG_FIN_COMUNICACION    "END"
+#define MSG_INICIO_COMUNICACION "OK"    //Mensaje que da inicio a la comunicacion
+#define MSG_ACK                 "AKN"   //Mensaje del cliente al recibir el inicio de comunicacion
+#define MSG_FIN_COMUNICACION    "END"   //Mensaje con el cual el cliente informa que quiere desconectarse
+#define MSG_KA                  "KA"    //Mensaje del cliente indicando que sigue corriendo (keep alive)
 
-#define BUFFER_TX_LEN           120
+#define TIMEOUT_RX_CLIENTE_s    5       //Timeout para la recepcion de datos del cliente
+#define TIMEOUT_TX_CLIENTE_s    20       //Timeout para la transmision de datos del cliente
+#define BUFFER_TX_LEN           120     //Tamaño del buffer de comunicacion utilizado con el cliente
+#define BUFFER_RX_LEN           5       //Tamaño del buffer de comunicacion utilizado con el cliente
 
 typedef struct{
     //Variables de configuracion
@@ -43,6 +47,7 @@ typedef struct{
 typedef struct{
     pid_t pid_hilo_principal;
     bool expiro;
+    bool terminar;
     int socket;
     int semaforo;
     datos_compartidos_t *mem_compartida;
