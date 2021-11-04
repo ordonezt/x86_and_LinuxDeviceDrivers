@@ -24,3 +24,6 @@
 !.gitignore
 # Unignore all config files
 !*.config
+# Unignore all device tree sources
+!*.dts
+
