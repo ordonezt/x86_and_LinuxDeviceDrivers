@@ -17,6 +17,8 @@
 #include <linux/version.h>
 #include <linux/of_platform.h>
 #include <linux/wait.h>
+#include <linux/jiffies.h>
+#include <linux/timer.h>
 
 #include "../inc/TBO_td3_i2c_dev.h"
 #include "../inc/am335x.h"
@@ -30,6 +32,8 @@ irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG);
 
 static int i2c_probe(struct platform_device * i2c_pd);
 static int i2c_remove(struct platform_device * i2c_pd);
+
+int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout);
 
 /* Variables globales*/
 static void __iomem *I2C2_Base, *CM_PER_Base, *CTRL_MODULE_Base;    //Mapeo de registros
@@ -69,6 +73,10 @@ static struct platform_driver i2c_platform_driver = { //Handlers del platform dr
     },
 };
 
+static uint8_t *buffer_tx, *buffer_rx;
+
+volatile int wake_up = 0;
+wait_queue_head_t wake_up_queue = __WAIT_QUEUE_HEAD_INITIALIZER(wake_up_queue);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Tomás Bautista Ordóñez");
@@ -314,7 +322,42 @@ static int i2c_remove(struct platform_device * i2c_pd){
 }
 
 int sensor_open(struct inode *node, struct file *f){
-    printk(KERN_INFO "Pase por open\n");
+    uint8_t buff[2]; //TODO borrar
+    printk(KERN_INFO "Driver: Configurando periferico I2C2 400KHz Master\n");
+    /**
+     * La configuracion consta de los siguientes pasos:
+     *  -> Configuracion de los registros necesarios para manejar el I2C en el am335x
+     *  -> Configurar el clock de I2C
+     *  -> Configurar los pines
+     *  -> Configurar el prescaler
+     *  -> Sacar el periferico de reset
+     *  -> Configurar el modo
+     *  -> Habilitar interrupciones
+     *  -> Configurar direccion de esclavo
+     *  -> Configurar los contadores de datos
+     * */
+    //Reseteo el modulo I2C_SYSC.SRST = 1
+    iowrite32(0x2, I2C2_Base + I2C_SYSC);
+    //Espero que se complete el reset
+    while(!ioread32(I2C2_Base + I2C_SYSS))
+        msleep(1);
+
+    //Prescaler para tener clock de 400KHz
+    //PSC
+    iowrite32(PSC_DIV_400KHz - 1, I2C2_Base + I2C_PSC);
+    //SCLL y SCLH
+    iowrite32(SCLL_400KHz       , I2C2_Base + I2C_SCLL);
+    iowrite32(SCLH_400KHz       , I2C2_Base + I2C_SCLH);
+
+    //Sacar el I2C2 del reset I2C_CON.I2C_EN = 1 y pongo el modulo en modo master I2C_CON.MST = 1
+    iowrite32(0x8400, I2C2_Base + I2C_CON);
+
+    printk(KERN_INFO "Driver: Configurando sensor\n");
+
+    buff[0]=MPU6050_RA_SMPLRT_DIV;    // Use a 200 Hz sample rate
+    buff[1]=0x04;
+    i2c_write(MPU6050_ADDRESS, buff, 2, 10);
+
     return 0;
 }
 
@@ -338,6 +381,110 @@ long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values){
     return 0;
 }
 
+int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout){
+    uint32_t timeout_aux = 0;
+
+    //TODO, tengo que agregar el address en el vector ??
+
+    //Si el bus esta ocupado espero que se libere
+    while(ioread32(I2C2_Base + I2C_IRQSTATUS_RAW) & 0x1000){
+        msleep(1);
+        timeout_aux++;
+        if((timeout_aux > timeout) && (timeout != 0)){
+            pr_info("Driver: Bus ocupado\n");
+            return -1;
+        }
+    }
+
+    //Bus libre, comienzo la escritura
+    buffer_tx = data;
+
+    //Le indico al modulo cuantos datos vamos a transmitir
+    iowrite32(count, I2C2_Base + I2C_CNT);
+
+    //Escribimos la direccion del esclavo objetivo
+    iowrite32(address, I2C2_Base + I2C_SA);
+
+    //Escribo el primer dato en el registro de salida
+    iowrite32(buffer_tx[0], I2C2_Base + I2C_DATA);
+
+    //Habilito la interrupcion por transmision completa (salta cada vez que envia 1 byte)
+    //I2C_IRQENABLE_SET.XRDY_IE = 1
+    iowrite32(0x10, I2C2_Base + I2C_IRQENABLE_SET);
+
+    /*
+    Configuracion del registro I2C_CON
+    b15 I2C_EN --- b10 MST --- b9 TRX --- b1 STP --- b0 STT
+        1      ---    1    ---    1   ---   0    ---    1     = 0x8601
+
+    Modulo habilitado, master, transmision, sin stop, con start
+
+    En este punto se dispara la transmision
+    */
+    iowrite32(0x8601, I2C2_Base + I2C_CON);
+
+
+    //Espero que se complete la transmision
+    if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
+        wake_up = 0;
+        pr_err("Driver: Error en la espera de transmision\n");
+        return -1;
+    }
+    
+    wake_up = 0;
+
+    //Cuando transmiti todo enviar stop I2C_CON.STP = 1, I2C_CON.STT = 0
+
+    //Envio el bit de stop
+    /*
+    Configuracion del registro I2C_CON
+    b15 I2C_EN --- b10 MST --- b9 TRX --- b1 STP --- b0 STT
+        1      ---    1    ---    1   ---   1    ---    0     = 0x8602
+
+    Modulo habilitado, master, transmision, con stop, sin start
+
+    En este punto se dispara la transmision
+    */
+    iowrite32(0x8602, I2C2_Base + I2C_CON);
+    
+    pr_info("Driver: Transmision exitosa\n");
+
+    //Deshabilito interrupcion de transmision I2C_IRQENABLE_CLR
+    //I2C_IRQENABLE_CLR.XRDY_IE = 1
+    iowrite32(0x10, I2C2_Base + I2C_IRQENABLE_CLR);
+
+    return count;
+}
+
 irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG){
+    int aux;
+    pr_info("Driver: Llego una interrupcion\n");
+    //Si fue un evento de transmision revisar la cuenta actual. Si ya terminamos liberar wake_up, si no continuar.
+    //Averiguo por que motivo llego la interrupcion
+    aux = ioread32(I2C2_Base + I2C_IRQSTATUS);
+
+    if(aux & XRDY_MASK){     //Interrupcion por transferencia completada
+        pr_info("Driver: Era por escritura\n");
+        //Limpio la interrupcion
+        iowrite32(XRDY_MASK, I2C2_Base + I2C_IRQSTATUS);
+
+        //Leo la cantidad de datos restantes
+        aux = ioread32(I2C2_Base + I2C_CNT);
+
+        if(aux == 0){
+            wake_up = 1;
+            wake_up_interruptible(&wake_up_queue);
+            return IRQ_HANDLED;
+        }
+
+        //Si la cuenta es distinta de 0 hay que seguir enviando
+        buffer_tx++;
+        iowrite32(*buffer_tx, I2C2_Base + I2C_DATA);
+
+        //Limpio el bit de start
+        aux = ioread32(I2C2_Base + I2C_CON);
+        iowrite32(aux & ~STT_MASK, I2C2_Base + I2C_CON);
+    }
+
     return IRQ_HANDLED;
 }

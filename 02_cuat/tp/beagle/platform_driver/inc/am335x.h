@@ -46,4 +46,11 @@
 #define I2C_SBLOCK              0xD4            // I2C Clock Blocking Enable Register Section 21.4.1.31
 #define I2C_REG_LEN             I2C_SBLOCK + 4  // Longitud del bloque de registros
 
+#define STT_MASK                0x1
+#define XRDY_MASK               0x10
+
+#define PSC_DIV_400KHz          0x04            //Divisor de prescaler
+#define SCLL_400KHz             0x35
+#define SCLH_400KHz             0x37
+
 #endif /*_AM335X_H*/
