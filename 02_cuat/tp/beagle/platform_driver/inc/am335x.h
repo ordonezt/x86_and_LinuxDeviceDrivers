@@ -49,9 +49,10 @@
 #define STT_MASK                0x1
 #define XRDY_MASK               0x10
 #define RRDY_MASK               0x08
+#define ARDY_MASK               0x04
 
-#define PSC_DIV_400KHz          0x04            //Divisor de prescaler
-#define SCLL_400KHz             0x35
-#define SCLH_400KHz             0x37
+#define PSC_DIV_400KHz          2               //Divisor de prescaler Clock = Main Clock(48MHz) / PSC
+#define SCLL_400KHz             23              //SCLL low time tlow = (SCLL + 7) / Clock
+#define SCLH_400KHz             25              //SCLH high time thigh = (SCLH + 5) / Clock
 
 #endif /*_AM335X_H*/
