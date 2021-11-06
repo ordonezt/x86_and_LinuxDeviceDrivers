@@ -32,6 +32,8 @@
 #define MPU6050_RA_GYRO_ZOUT_H      0x047
 #define MPU6050_RA_GYRO_ZOUT_L      0x048
 
+#define MPU6050_RA_WHO_AM_I         0x75
+
 int sensor_open(struct inode *node, struct file *f);
 int sensor_release(struct inode *node, struct file *f);
 ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos);

@@ -48,6 +48,7 @@
 
 #define STT_MASK                0x1
 #define XRDY_MASK               0x10
+#define RRDY_MASK               0x08
 
 #define PSC_DIV_400KHz          0x04            //Divisor de prescaler
 #define SCLL_400KHz             0x35
