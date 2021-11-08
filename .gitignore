@@ -26,4 +26,5 @@
 !*.config
 # Unignore all device tree sources
 !*.dts
-
+# Unignore python source files
+!*.py
