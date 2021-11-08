@@ -43,8 +43,8 @@ info:
 dev:
 	ls -l /dev/ | grep $(MOD_NAME)
 
-# test: btest
-# 	./bin/test
+test: btest
+	./bin/test
 
-# btest:
-# 	gcc -o bin/test test_src/main.c
+btest:
+	gcc -o bin/test ../test/test.c

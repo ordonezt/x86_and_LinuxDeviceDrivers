@@ -15,6 +15,7 @@
 #define MPU6050_RA_FIFO_COUNTL      0x073
 #define MPU6050_RA_INT_PIN_CFG      0x037      
 #define MPU6050_RA_INT_ENABLE       0x038       
+#define MPU6050_RA_INT_STATUS       0x03A
 #define MPU6050_RA_FIFO_R_W         0x074
 
 #define MPU6050_RA_ACCEL_XOUT_H     0x03B
@@ -33,11 +34,19 @@
 #define MPU6050_RA_GYRO_ZOUT_L      0x048
 
 #define MPU6050_RA_WHO_AM_I         0x75
+#define MPU6050_RA_WHO_AM_I_VALUE   0x68
 
-int sensor_open(struct inode *node, struct file *f);
-int sensor_release(struct inode *node, struct file *f);
-ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos);
-ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos);
-long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values);
+#define T_MUESTREO_MS               2
 
+// static int sensor_open(struct inode *node, struct file *f);
+// static int sensor_release(struct inode *node, struct file *f);
+// static ssize_t sensor_read (struct file *, char __user *, size_t, loff_t *);
+// static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos);
+// static long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values);
+
+static int sensor_open(struct inode *node, struct file *f);
+static int sensor_release(struct inode *node, struct file *f);
+static ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos);
+static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos);
+static long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values);
 #endif /*_MPU6050_H*/
