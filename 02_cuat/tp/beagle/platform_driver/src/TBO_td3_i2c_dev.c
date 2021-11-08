@@ -381,16 +381,16 @@ static int sensor_release(struct inode *node, struct file *f){
 }
 
 static ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos){
-    // uint8_t *datos;
-    // int cant_leida, cant_no_copiada;
+    uint8_t *datos;
+    int cant_leida, cant_no_copiada;
 
     printk(KERN_INFO "Pase por read\n");
-    // datos = (uint8_t *)kmalloc(count,GFP_KERNEL);
-    // cant_leida = mpu6050_leer_fifo(datos, count);
-    // cant_no_copiada = copy_to_user(buf, datos, cant_leida);
-    // kfree(datos);
-    return 0;
-    // return cant_leida - cant_no_copiada;
+    datos = (uint8_t *)kmalloc(count,GFP_KERNEL);
+    cant_leida = mpu6050_leer_fifo(datos, count);
+    cant_no_copiada = copy_to_user(buf, datos, cant_leida);
+    kfree(datos);
+    // return 0;
+    return cant_leida - cant_no_copiada;
 }
 
 static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos){
