@@ -38,15 +38,4 @@
 
 #define T_MUESTREO_MS               2
 
-// static int sensor_open(struct inode *node, struct file *f);
-// static int sensor_release(struct inode *node, struct file *f);
-// static ssize_t sensor_read (struct file *, char __user *, size_t, loff_t *);
-// static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos);
-// static long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values);
-
-static int sensor_open(struct inode *node, struct file *f);
-static int sensor_release(struct inode *node, struct file *f);
-static ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos);
-static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos);
-static long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values);
 #endif /*_MPU6050_H*/

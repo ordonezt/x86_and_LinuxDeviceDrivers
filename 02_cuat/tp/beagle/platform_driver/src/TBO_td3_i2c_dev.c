@@ -213,6 +213,12 @@ static int cambiar_permisos_cdev(struct device *dev, struct kobj_uevent_env *env
     return 0;
 }
 
+/**
+ * @brief Instala el driver
+ * 
+ * @param i2c_pd 
+ * @return int 
+ */
 static int i2c_probe(struct platform_device * i2c_pd){
     uint32_t reg_value_aux;
 
@@ -313,6 +319,12 @@ static int i2c_probe(struct platform_device * i2c_pd){
     return 0;
 }
 
+/**
+ * @brief Desinstala el driver
+ * 
+ * @param i2c_pd 
+ * @return int 0
+ */
 static int i2c_remove(struct platform_device * i2c_pd){
     pr_info("Driver: Removiendo modulo\n");
 
@@ -333,22 +345,20 @@ static int i2c_remove(struct platform_device * i2c_pd){
     return 0;
 }
 
+/**
+ * @brief Handler de la señal open
+ * 
+ * @param node 
+ * @param f 
+ * @return int 0 exito, -1 error
+ */
 static int sensor_open(struct inode *node, struct file *f){
-    uint8_t buff[10]; //TODO borrar
-    int aux; //TODO Borrar
-
     printk(KERN_INFO "Driver: Configurando periferico I2C2 400KHz Master\n");
     /**
      * La configuracion consta de los siguientes pasos:
      *  -> Configuracion de los registros necesarios para manejar el I2C en el am335x
-     *  -> Configurar el clock de I2C
-     *  -> Configurar los pines
      *  -> Configurar el prescaler
      *  -> Sacar el periferico de reset
-     *  -> Configurar el modo
-     *  -> Habilitar interrupciones
-     *  -> Configurar direccion de esclavo
-     *  -> Configurar los contadores de datos
      * */
     printk(KERN_INFO "Driver: Reseteando el modulo\n");
 
@@ -356,15 +366,14 @@ static int sensor_open(struct inode *node, struct file *f){
     iowrite32(0x00, I2C2_Base + I2C_CON);
 
     //Prescaler para tener clock de 400KHz
-    //PSC
     iowrite32(PSC_DIV_400KHz - 1, I2C2_Base + I2C_PSC);
-    //SCLL y SCLH
     iowrite32(SCLL_400KHz       , I2C2_Base + I2C_SCLL);
     iowrite32(SCLH_400KHz       , I2C2_Base + I2C_SCLH);
 
     //Sacar el I2C2 del reset I2C_CON.I2C_EN = 1 y pongo el modulo en modo master I2C_CON.MST = 1
     iowrite32(0x8400, I2C2_Base + I2C_CON);
 
+    //Inicializamos el sensor
     printk(KERN_INFO "Driver: Configurando sensor\n");
     if(mpu6050_init()){
         pr_err("Driver: Error configurando el sensor\n");
@@ -375,29 +384,70 @@ static int sensor_open(struct inode *node, struct file *f){
     return 0;
 }
 
+/**
+ * @brief Handler de la syscall close
+ * 
+ * @param node 
+ * @param f 
+ * @return int 0
+ */
 static int sensor_release(struct inode *node, struct file *f){
     printk(KERN_INFO "Pase por close\n");
     return 0;
 }
 
+/**
+ * @brief Handler de la syscall read
+ * 
+ * @param flip 
+ * @param buf 
+ * @param count 
+ * @param pos 
+ * @return ssize_t Cantidad de bytes leidos
+ */
 static ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, loff_t *pos){
     uint8_t *datos;
     int cant_leida, cant_no_copiada;
 
     printk(KERN_INFO "Pase por read\n");
+
+    //Reservamos espacio de kernel para los datos
     datos = (uint8_t *)kmalloc(count,GFP_KERNEL);
+
+    //Leemos el sensor
     cant_leida = mpu6050_leer_fifo(datos, count);
+
+    //Copiamos los datos al usuario
     cant_no_copiada = copy_to_user(buf, datos, cant_leida);
+
+    //Liberamos la memoria pedida
     kfree(datos);
-    // return 0;
+
     return cant_leida - cant_no_copiada;
 }
 
+/**
+ * @brief Handler de la syscall write
+ * 
+ * @param flip 
+ * @param buf 
+ * @param count 
+ * @param pos 
+ * @return ssize_t 
+ */
 static ssize_t sensor_write (struct file *flip, const char __user *buf, size_t count, loff_t *pos){
         printk(KERN_INFO "Pase por write\n");
         return 0;
 }
 
+/**
+ * @brief Handler syscall ioctl
+ * 
+ * @param flip 
+ * @param cmd 
+ * @param values 
+ * @return long 
+ */
 static long sensor_ctrl(struct file *flip, unsigned int cmd, unsigned long values){
     printk(KERN_INFO "Pase por ioctl\n");
     return 0;
@@ -453,7 +503,6 @@ int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout)
     iowrite32(0x8603, I2C2_Base + I2C_CON);
 
     //Espero que se complete la transmision
-    //pr_info("Driver: Mandando %d bytes a %X. Esperando...\n", 1, address);
     if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
         wake_up = 0;
         pr_err("Driver: Error en la espera de transmision\n");
@@ -514,7 +563,6 @@ uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t cou
     iowrite32(0x8601, I2C2_Base + I2C_CON);
 
     //Espero que se complete la transmision
-    //pr_info("Driver: Mandando %d bytes a %X. Esperando...\n", 1, address);
     if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
         wake_up = 0;
         pr_err("Driver: Error en la espera de transmision\n");
@@ -535,7 +583,6 @@ uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t cou
     iowrite32(0x8403, I2C2_Base + I2C_CON);
 
     //Espero que se complete la recepcion
-    //pr_info("Driver: Recibiendo %d bytes a %X. Esperando...\n", 1, address);
     if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
         wake_up = 0;
         pr_err("Driver: Error en la espera de transmision\n");
@@ -543,7 +590,6 @@ uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t cou
     }
     wake_up = 0;
 
-    //pr_info("Driver: Recepcion exitosa\n");
     return count;
 }
 
@@ -557,14 +603,12 @@ uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t cou
  */
 irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG){
     int irq_status;
-    //pr_info("Driver: Llego una interrupcion\n");
 
     //Averiguo por que motivos llego la interrupcion
     irq_status = ioread32(I2C2_Base + I2C_IRQSTATUS);
 
-    if(irq_status & XRDY_MASK){     //Interrupcion por transferencia completada
-        //pr_info("Driver: Era por escritura\n");
-
+    //Interrupcion por transferencia de byte completada
+    if(irq_status & XRDY_MASK){
         //Si hay mas datos seguimos transmitiendo
         if(ioread32(I2C2_Base + I2C_CNT) > 1){
             buffer_tx++;
@@ -575,22 +619,16 @@ irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG){
         iowrite32(XRDY_MASK, I2C2_Base + I2C_IRQSTATUS);
     }
     
+    //Interrupcion por recepcion de byte completada
     if(irq_status & RRDY_MASK){
-        //pr_info("Driver: Era por lectura\n");
-
         //Leo el dato y aumento la posicion
         *buffer_rx++ = ioread32(I2C2_Base + I2C_DATA);
 
         //Limpio la interrupcion
         iowrite32(RRDY_MASK, I2C2_Base + I2C_IRQSTATUS);
-
-        //Leo la cantidad de datos restantes
-        //pr_info("Driver: Llego un byte. Bytes pendientes: %d\n", ioread32(I2C2_Base + I2C_CNT));
     }
 
     if(irq_status & ARDY_MASK){
-        //pr_info("Driver: Era por fin de transaccion\n");
-
         //Limpio la interrupcion
         iowrite32(ARDY_MASK, I2C2_Base + I2C_IRQSTATUS);
 
@@ -604,6 +642,11 @@ irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG){
     return IRQ_HANDLED;
 }
 
+/**
+ * @brief Inicializa el dispositivo
+ * Resetea, saca del modo sleep, setea la frecuencia de muestreo en 200Hz y configura la FIFO
+ * @return int 0 exito, -1 error
+ */
 int mpu6050_init(void){
     //Reset
     if(mpu6050_set_register(MPU6050_RA_PWR_MGMT_1, 1<<7))
@@ -614,8 +657,6 @@ int mpu6050_init(void){
         return -1;
     
     //Frecuencia de muestreo 200Hz
-    // if(mpu6050_set_register(MPU6050_RA_SMPLRT_DIV, 0xFF))
-    //     return -1;
     if(mpu6050_set_register(MPU6050_RA_CONFIG, 3))
         return -1;
     if(mpu6050_set_register(MPU6050_RA_SMPLRT_DIV, 4))
@@ -632,6 +673,13 @@ int mpu6050_init(void){
     return 0;
 }
 
+/**
+ * @brief Escribe un registro del dispositivo
+ * 
+ * @param registro Registro a escribir
+ * @param valor Valor del registro a escribir
+ * @return int 0 exito, -1 error
+ */
 int mpu6050_set_register(uint8_t registro, uint8_t valor){
     uint8_t buff[2];
 
@@ -642,6 +690,12 @@ int mpu6050_set_register(uint8_t registro, uint8_t valor){
     return 0;
 }
 
+/**
+ * @brief Lee un registro del dispositivo
+ * 
+ * @param registro Registro a leer
+ * @return int Valor del registro en exito, -1 en error
+ */
 int mpu6050_get_register(uint8_t registro){
     uint8_t valor;
 
@@ -651,6 +705,11 @@ int mpu6050_get_register(uint8_t registro){
         return valor;
 }
 
+/**
+ * @brief Devuelve la cantidad de datos alojados en la FIFO
+ * 
+ * @return int Cantidad de bytes almacenados
+ */
 int mpu6050_get_fifo_count(void){
     int aux;
     
@@ -660,6 +719,13 @@ int mpu6050_get_fifo_count(void){
     return aux;
 }
 
+/**
+ * @brief Hace una lectura en bloque de la FIFO y espera lo necesario hasta obtener todos los datos
+ * 
+ * @param datos Direccion para almacenar los datos a leer
+ * @param cantidad Cantidad de bytes a leer
+ * @return int Cantidad de bytes leidos
+ */
 int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad){
     int datos_restantes, cant_actual;
     //TODO falta contemplar si me piden mas de 1024 bytes
@@ -669,8 +735,6 @@ int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad){
         //Reiniciar muestreo
         mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x04);
         mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x40);
-
-        datos_restantes = cantidad;
     }
 
     cant_actual = mpu6050_get_fifo_count();
