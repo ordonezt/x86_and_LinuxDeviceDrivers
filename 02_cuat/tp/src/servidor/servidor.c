@@ -18,6 +18,7 @@
 #include "../../inc/comunes/ipc/sem.h"
 #include "../../inc/comunes/ipc/signal.h"
 #include "../../inc/comunes/collections/list.h"
+
 /*
  TODO FUNDAMENTAL: Implementar un identificador de muestra 
  (numero de muestra) para que los clientes sepan si la muestra
@@ -113,7 +114,7 @@ int main(void)
     
     //Creo la memoria compartida y la inicializo
     shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
-    if(shm_id <= 0){
+    if(shm_id < 0){
         perror("crear_shmem");
         exit(EXIT_FAILURE);
     }
@@ -360,7 +361,8 @@ void* atender_cliente(void *datos_cliente)
 {
     pthread_t hilo_keep_alive;
     int socket_id, sem_id;
-    sensor_datos_t *sensor, datos;
+    sensor_datos_t *sensor, datos, dato_crudo, *dato_crudo_compartido;
+    sensor_datos_fisicos_t datos_fisicos_crudos, datos_fisicos_filtrados;
     cliente_t *self = (cliente_t*)datos_cliente;
     char buffer_aux[BUFFER_TX_LEN] = {0};
     struct timeval tv;
@@ -368,6 +370,7 @@ void* atender_cliente(void *datos_cliente)
     socket_id   = self->socket;
     sem_id      = self->semaforo;
     sensor      = &self->mem_compartida->datos_filtrados;
+    dato_crudo_compartido = &self->mem_compartida->datos_crudos;
 
     //Mando inicio de comunicacion
     if(send(socket_id, MSG_INICIO_COMUNICACION, strlen(MSG_INICIO_COMUNICACION),0) == -1){
@@ -407,6 +410,7 @@ void* atender_cliente(void *datos_cliente)
         }
 
         memcpy(&datos, sensor, sizeof(datos));
+        memcpy(&dato_crudo, dato_crudo_compartido, sizeof(dato_crudo));
 
         if(control_semaforo_datos(sem_id, SEM_FREE))
         {
@@ -417,10 +421,31 @@ void* atender_cliente(void *datos_cliente)
             break;
         }
 
-        sprintf(buffer_aux  , "%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n"
-                            , datos.accel.x , datos.accel.y , datos.accel.z
-                            , datos.gyro.x  , datos.gyro.y  , datos.gyro.z
-                            , datos.temp);
+        // printf("Acel X %d\n", datos.accel.x);
+        // printf("Acel Y %d\n", datos.accel.y);
+        // printf("Acel Z %d\n", datos.accel.z);
+        // printf("Temp %d\n", datos.temp);
+        // printf("Gyro X %d\n", datos.gyro.x);
+        // printf("Gyro Y %d\n", datos.gyro.y);
+        // printf("Gyro Z %d\n", datos.gyro.z);
+
+        convertir_dato_fisico(&datos, &datos_fisicos_filtrados);
+        convertir_dato_fisico(&dato_crudo, &datos_fisicos_crudos);
+
+        //memcpy(&datos_fisicos_crudos, &datos_fisicos_filtrados, sizeof(datos_fisicos_crudos));
+
+        sprintf(buffer_aux  , "%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n"
+                            , datos_fisicos_crudos.accel.x, datos_fisicos_crudos.accel.y, datos_fisicos_crudos.accel.z
+                            , datos_fisicos_crudos.gyro.x, datos_fisicos_crudos.gyro.y, datos_fisicos_crudos.gyro.z
+                            , datos_fisicos_crudos.temp
+                            , datos_fisicos_filtrados.accel.x, datos_fisicos_filtrados.accel.y, datos_fisicos_filtrados.accel.z
+                            , datos_fisicos_filtrados.gyro.x, datos_fisicos_filtrados.gyro.y, datos_fisicos_filtrados.gyro.z
+                            , datos_fisicos_filtrados.temp);
+
+        // sprintf(buffer_aux  , "%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n"
+        //                     , datos.accel.x , datos.accel.y , datos.accel.z
+        //                     , datos.gyro.x  , datos.gyro.y  , datos.gyro.z
+        //                     , datos.temp);
         // sprintf(buffer_aux   , "%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n"
         //     , 0 , 111       , 32767
         //     , -1, -32000    , 2
@@ -441,7 +466,7 @@ void* atender_cliente(void *datos_cliente)
             self->terminar = 1;
             break;
         }
-        sleep(1);
+        usleep(100000);
     }
 
     pthread_join(hilo_keep_alive, NULL);

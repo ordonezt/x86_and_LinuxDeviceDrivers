@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
     t_list *lista_estados;
     int ventana_filtro;
     key_t llave;
+    sensor_datos_t dato_filtrado;
 
     //TODO encapsular inicializacion
     if(argc < 3){
@@ -62,7 +63,7 @@ int main(int argc, char* argv[])
     }
     //Creo la memoria compartida
     shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
-    if(shm_id <= 0){
+    if(shm_id < 0){
         perror("crear_shmem");
         exit(1);
     }
@@ -129,7 +130,8 @@ int main(int argc, char* argv[])
         }
         else
         {
-            procesar_dato(lista_estados, &sensor.datos, &mem_compartida->datos_filtrados, ventana_filtro);
+            // procesar_dato(lista_estados, &sensor.datos, &mem_compartida->datos_filtrados, ventana_filtro);
+            procesar_dato(lista_estados, &sensor.datos, &dato_filtrado, ventana_filtro);
             // printf("Dato crudo %d\n", sensor.datos.accel.x);
             // printf("Dato filtrado %d\n", mem_compartida->datos_filtrados.accel.x);
 
@@ -140,7 +142,9 @@ int main(int argc, char* argv[])
             }
             printf("Tome el semaforo siendo productor\n");
 
-            memcpy(&mem_compartida->datos_filtrados, &sensor.datos, sizeof(sensor.datos));
+            //memcpy(&mem_compartida->datos_filtrados, &sensor.datos, sizeof(sensor.datos));
+            memcpy(&mem_compartida->datos_filtrados, &dato_filtrado, sizeof(sensor.datos));
+            memcpy(&mem_compartida->datos_crudos, &sensor.datos, sizeof(sensor.datos));
 
             if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_FREE))
             {
@@ -160,7 +164,7 @@ int main(int argc, char* argv[])
             // printf("Gyro z: %d\n", sensor.datos.gyro.z);
 
 
-            sleep(1);
+            usleep(10000);
         }
     }
 
@@ -213,7 +217,23 @@ int cerrar_sensor(sensor_t *sensor)
  */
 int leer_sensor(sensor_t *sensor, sensor_datos_t *datos)
 {
-    return read(sensor->fd, datos, sizeof(datos[0]));
+    char buffer[sizeof(sensor_datos_t)];
+    int bytes_leidos;
+
+    bytes_leidos = read(sensor->fd, buffer, sizeof(sensor_datos_t));
+
+    if(bytes_leidos != sizeof(sensor_datos_t))
+        return -1;
+    
+    datos->accel.x  = (buffer[0] << 8)  | buffer[1];
+    datos->accel.y  = (buffer[2] << 8)  | buffer[3];
+    datos->accel.z  = (buffer[4] << 8)  | buffer[5];
+    datos->temp     = (buffer[6] << 8)  | buffer[7];
+    datos->gyro.x   = (buffer[8] << 8)  | buffer[9];
+    datos->gyro.y   = (buffer[10] << 8) | buffer[11];
+    datos->gyro.z   = (buffer[12] << 8) | buffer[13];
+
+    return bytes_leidos;
 }
 
 /**
@@ -266,25 +286,25 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     }
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 0); //Aceleracion x
-    media_q15((int16_t*)&dato_procesado->accel.x, vector_aux, largo_lista);
+    media_q15(&dato_procesado->accel.x, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 2); //Aceleracion y
-    media_q15((int16_t*)&dato_procesado->accel.y, vector_aux, largo_lista);
+    media_q15(&dato_procesado->accel.y, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 4); //Aceleracion z
-    media_q15((int16_t*)&dato_procesado->accel.z, vector_aux, largo_lista);
+    media_q15(&dato_procesado->accel.z, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 6); //Temp
     media_q15(&dato_procesado->temp, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 8); //Gyro x
-    media_q15((int16_t*)&dato_procesado->gyro.x, vector_aux, largo_lista);
+    media_q15(&dato_procesado->gyro.x, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 10); //Gyro y
-    media_q15((int16_t*)&dato_procesado->gyro.y, vector_aux, largo_lista);
+    media_q15(&dato_procesado->gyro.y, vector_aux, largo_lista);
 
     llenar_vector_datos_q15(lista_estados, vector_aux, largo_lista, 12); //Gyro z
-    media_q15((int16_t*)&dato_procesado->gyro.z, vector_aux, largo_lista);
+    media_q15(&dato_procesado->gyro.z, vector_aux, largo_lista);
     
     free(vector_aux);
     return 0;

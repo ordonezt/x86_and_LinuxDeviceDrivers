@@ -13,4 +13,26 @@
  */
 int media_q15(int16_t *resultado, int16_t datos[], int32_t longitud);
 
+/**
+ * @brief Amplifica y polariza una señal float
+ * 
+ * @param entrada Datos de entrada
+ * @param salida Destino
+ * @param ganancia Constante de amplificacion
+ * @param polarizacion Constante de polarizacion
+ * @param longitud Cantidad de datos
+ * @return int 0 exito, -1 error
+ */
+int bloque_ganancia_polarizacion_float(float entrada[], float salida[], float ganancia, float polarizacion, int longitud);
+
+/**
+ * @brief Convierte una señal q15 en float
+ * 
+ * @param entrada Datos q15
+ * @param salida Destino
+ * @param longitud Cantidad de datos
+ * @return int 0 exito, -1 error
+ */
+int q15_to_float(int16_t entrada[], float salida[], int longitud);
+
 #endif /*__DSP_H*/

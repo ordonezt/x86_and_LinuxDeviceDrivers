@@ -1,75 +1,208 @@
+	.arch armv7-a
+	.eabi_attribute 28, 1
+	.eabi_attribute 20, 1
+	.eabi_attribute 21, 1
+	.eabi_attribute 23, 3
+	.eabi_attribute 24, 1
+	.eabi_attribute 25, 1
+	.eabi_attribute 26, 2
+	.eabi_attribute 30, 6
+	.eabi_attribute 34, 1
+	.eabi_attribute 18, 4
 	.file	"dsp.c"
 	.text
-	.globl	media_q15
-	.type	media_q15, @function
+	.global	__aeabi_idiv
+	.align	1
+	.global	media_q15
+	.arch armv7-a
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu vfpv3-d16
+	.type	media_q15, %function
 media_q15:
-.LFB6:
-	.cfi_startproc
-	endbr64
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movq	%rdi, -24(%rbp)
-	movq	%rsi, -32(%rbp)
-	movl	%edx, -36(%rbp)
-	movl	$0, -8(%rbp)
-	cmpq	$0, -24(%rbp)
-	je	.L2
-	cmpq	$0, -32(%rbp)
-	je	.L2
-	cmpl	$0, -36(%rbp)
-	jne	.L3
+	@ args = 0, pretend = 0, frame = 24
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r7, lr}
+	sub	sp, sp, #24
+	add	r7, sp, #0
+	str	r0, [r7, #12]
+	str	r1, [r7, #8]
+	str	r2, [r7, #4]
+	movs	r3, #0
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #12]
+	cmp	r3, #0
+	beq	.L2
+	ldr	r3, [r7, #8]
+	cmp	r3, #0
+	beq	.L2
+	ldr	r3, [r7, #4]
+	cmp	r3, #0
+	bne	.L3
 .L2:
-	movl	$-1, %eax
-	jmp	.L4
+	mov	r3, #-1
+	b	.L4
 .L3:
-	movl	$0, -4(%rbp)
-	jmp	.L5
+	movs	r3, #0
+	str	r3, [r7, #16]
+	b	.L5
 .L6:
-	movl	-4(%rbp), %eax
-	cltq
-	leaq	(%rax,%rax), %rdx
-	movq	-32(%rbp), %rax
-	addq	%rdx, %rax
-	movzwl	(%rax), %eax
-	cwtl
-	addl	%eax, -8(%rbp)
-	addl	$1, -4(%rbp)
+	ldr	r3, [r7, #16]
+	lsls	r3, r3, #1
+	ldr	r2, [r7, #8]
+	add	r3, r3, r2
+	ldrsh	r3, [r3]
+	mov	r2, r3
+	ldr	r3, [r7, #20]
+	add	r3, r3, r2
+	str	r3, [r7, #20]
+	ldr	r3, [r7, #16]
+	adds	r3, r3, #1
+	str	r3, [r7, #16]
 .L5:
-	movl	-4(%rbp), %eax
-	cmpl	-36(%rbp), %eax
-	jl	.L6
-	movl	-8(%rbp), %eax
-	cltd
-	idivl	-36(%rbp)
-	movl	%eax, %edx
-	movq	-24(%rbp), %rax
-	movw	%dx, (%rax)
-	movl	$0, %eax
+	ldr	r2, [r7, #16]
+	ldr	r3, [r7, #4]
+	cmp	r2, r3
+	blt	.L6
+	ldr	r1, [r7, #4]
+	ldr	r0, [r7, #20]
+	bl	__aeabi_idiv(PLT)
+	mov	r3, r0
+	sxth	r2, r3
+	ldr	r3, [r7, #12]
+	strh	r2, [r3]	@ movhi
+	movs	r3, #0
 .L4:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
-	.cfi_endproc
-.LFE6:
+	mov	r0, r3
+	adds	r7, r7, #24
+	mov	sp, r7
+	@ sp needed
+	pop	{r7, pc}
 	.size	media_q15, .-media_q15
-	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
-	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 8
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 8
-4:
+	.align	1
+	.global	bloque_ganancia_polarizacion_float
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu vfpv3-d16
+	.type	bloque_ganancia_polarizacion_float, %function
+bloque_ganancia_polarizacion_float:
+	@ args = 0, pretend = 0, frame = 32
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	push	{r7}
+	sub	sp, sp, #36
+	add	r7, sp, #0
+	str	r0, [r7, #20]
+	str	r1, [r7, #16]
+	vstr.32	s0, [r7, #12]
+	vstr.32	s1, [r7, #8]
+	str	r2, [r7, #4]
+	ldr	r3, [r7, #20]
+	cmp	r3, #0
+	beq	.L8
+	ldr	r3, [r7, #16]
+	cmp	r3, #0
+	bne	.L9
+.L8:
+	mov	r3, #-1
+	b	.L10
+.L9:
+	movs	r3, #0
+	str	r3, [r7, #28]
+	b	.L11
+.L12:
+	ldr	r3, [r7, #28]
+	lsls	r3, r3, #2
+	ldr	r2, [r7, #20]
+	add	r3, r3, r2
+	vldr.32	s14, [r3]
+	vldr.32	s15, [r7, #12]
+	vmul.f32	s14, s14, s15
+	ldr	r3, [r7, #28]
+	lsls	r3, r3, #2
+	ldr	r2, [r7, #16]
+	add	r3, r3, r2
+	vldr.32	s15, [r7, #8]
+	vadd.f32	s15, s14, s15
+	vstr.32	s15, [r3]
+	ldr	r3, [r7, #28]
+	adds	r3, r3, #1
+	str	r3, [r7, #28]
+.L11:
+	ldr	r2, [r7, #28]
+	ldr	r3, [r7, #4]
+	cmp	r2, r3
+	blt	.L12
+	movs	r3, #0
+.L10:
+	mov	r0, r3
+	adds	r7, r7, #36
+	mov	sp, r7
+	@ sp needed
+	ldr	r7, [sp], #4
+	bx	lr
+	.size	bloque_ganancia_polarizacion_float, .-bloque_ganancia_polarizacion_float
+	.align	1
+	.global	q15_to_float
+	.syntax unified
+	.thumb
+	.thumb_func
+	.fpu vfpv3-d16
+	.type	q15_to_float, %function
+q15_to_float:
+	@ args = 0, pretend = 0, frame = 24
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	push	{r7}
+	sub	sp, sp, #28
+	add	r7, sp, #0
+	str	r0, [r7, #12]
+	str	r1, [r7, #8]
+	str	r2, [r7, #4]
+	ldr	r3, [r7, #12]
+	cmp	r3, #0
+	beq	.L14
+	ldr	r3, [r7, #8]
+	cmp	r3, #0
+	bne	.L15
+.L14:
+	mov	r3, #-1
+	b	.L16
+.L15:
+	movs	r3, #0
+	str	r3, [r7, #20]
+	b	.L17
+.L18:
+	ldr	r3, [r7, #20]
+	lsls	r3, r3, #1
+	ldr	r2, [r7, #12]
+	add	r3, r3, r2
+	ldrsh	r1, [r3]
+	ldr	r3, [r7, #20]
+	lsls	r3, r3, #2
+	ldr	r2, [r7, #8]
+	add	r3, r3, r2
+	vmov	s15, r1	@ int
+	vcvt.f32.s32	s15, s15
+	vstr.32	s15, [r3]
+	ldr	r3, [r7, #20]
+	adds	r3, r3, #1
+	str	r3, [r7, #20]
+.L17:
+	ldr	r2, [r7, #20]
+	ldr	r3, [r7, #4]
+	cmp	r2, r3
+	blt	.L18
+	movs	r3, #0
+.L16:
+	mov	r0, r3
+	adds	r7, r7, #28
+	mov	sp, r7
+	@ sp needed
+	ldr	r7, [sp], #4
+	bx	lr
+	.size	q15_to_float, .-q15_to_float
+	.ident	"GCC: (Debian 8.3.0-6) 8.3.0"
+	.section	.note.GNU-stack,"",%progbits

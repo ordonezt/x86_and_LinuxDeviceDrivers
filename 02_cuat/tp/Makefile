@@ -23,7 +23,7 @@ OBJS_G = 	$(BINPATH)dsp.o			$(BINPATH)bitarray.o 	$(BINPATH)config.o 		$(BINPATH
 			$(BINPATH)log.o 		$(BINPATH)memory.o 		$(BINPATH)process.o 	$(BINPATH)string.o	\
 			$(BINPATH)temporal.o 	$(BINPATH)txt.o 		$(BINPATH)dictionary.o 	$(BINPATH)list.o	\
 			$(BINPATH)queue.o		$(BINPATH)sem.o			$(BINPATH)sharmem.o		$(BINPATH)sockets.o	\
-			$(BINPATH)signal.o		
+			$(BINPATH)signal.o		$(BINPATH)mpu6050.o
 
 OBJS_1 = 	$(BINPATH)servidor.o 	
 OBJS_2 = 	$(BINPATH)sensor.o 	
@@ -143,6 +143,11 @@ $(BINPATH)dsp.o: $(SRCPATH)sensor/dsp.c
 	mkdir -p $(BINPATH)
 	$(CC) $(CFLAGS) $(OFLAGS) $< -o $@ 
 	$(CC) -S $< -o $(DOCPATH)dsp.asm
+
+$(BINPATH)mpu6050.o: $(SRCPATH)sensor/mpu6050.c
+	@echo Generando $@
+	mkdir -p $(BINPATH)
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	@echo limpiando carpeta..

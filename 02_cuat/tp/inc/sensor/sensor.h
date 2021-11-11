@@ -1,31 +1,9 @@
 #ifndef __SENSOR_H
 #define __SENSOR_H
 
-#include <stdint.h>
+#include "mpu6050.h"
 
-#define SENSOR_PATH "/dev/urandom"
-
-typedef struct{
-    struct aceleracion{
-        uint16_t x;
-        uint16_t y;
-        uint16_t z;
-    }accel;
-
-    int16_t temp;
-
-    struct gyro{
-        uint16_t x;
-        uint16_t y;
-        uint16_t z;
-    }gyro;
-}sensor_datos_t;
-
-typedef struct{
-    int fd;
-    sensor_datos_t datos;
-    char path[];
-}sensor_t;
+#define SENSOR_PATH "/dev/TBO_td3_i2c_dev"//"/dev/urandom"
 
 /**
  * @brief Abre el sensor con la configuracion especificada.

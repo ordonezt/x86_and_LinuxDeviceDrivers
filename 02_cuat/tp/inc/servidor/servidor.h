@@ -25,7 +25,7 @@
 
 #define TIMEOUT_RX_CLIENTE_s    5       //Timeout para la recepcion de datos del cliente
 #define TIMEOUT_TX_CLIENTE_s    20       //Timeout para la transmision de datos del cliente
-#define BUFFER_TX_LEN           120     //Tamaño del buffer de comunicacion utilizado con el cliente
+#define BUFFER_TX_LEN           200     //Tamaño del buffer de comunicacion utilizado con el cliente
 #define BUFFER_RX_LEN           5       //Tamaño del buffer de comunicacion utilizado con el cliente
 
 typedef struct{
