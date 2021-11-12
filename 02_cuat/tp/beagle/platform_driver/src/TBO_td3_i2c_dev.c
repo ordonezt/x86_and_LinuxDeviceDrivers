@@ -727,25 +727,46 @@ int mpu6050_get_fifo_count(void){
  * @return int Cantidad de bytes leidos
  */
 int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad){
-    int datos_restantes, cant_actual;
-    //TODO falta contemplar si me piden mas de 1024 bytes
-    //Me fijo si la FIFO se desbordo. En caso de que si reinicio el muestreo
-    if(mpu6050_get_register(MPU6050_RA_INT_STATUS) & 0x10){
-        pr_info("Driver: FIFO desbordada\n");
-        //Reiniciar muestreo
-        mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x04);
-        mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x40);
-    }
+    int muestras_restantes, muestras_leidas_acumulado, paginas_a_leer, muestras_a_leer, muestras_leidas, datos_restantes_fifo, cant_actual_fifo;
 
-    cant_actual = mpu6050_get_fifo_count();
-    pr_info("Driver: La FIFO tiene %d bytes", cant_actual);
-    datos_restantes = cantidad - cant_actual;
+    muestras_leidas_acumulado = 0;
+    muestras_restantes = cantidad;
+    do{
+        paginas_a_leer = muestras_restantes / LONGITUD_BLOQUE_MAXIMO;
+        muestras_a_leer = paginas_a_leer > 0 ? LONGITUD_BLOQUE_MAXIMO : muestras_restantes;
 
-    if(datos_restantes > 0){
-        pr_info("Driver: Faltan %d datos", datos_restantes);
-        msleep(T_MUESTREO_MS * datos_restantes / 7);
-    }
-    
-    //Ahora ya estoy seguro de que la fifo tiene la cantidad necesaria de datos
-    return i2c_read(MPU6050_ADDRESS, MPU6050_RA_FIFO_R_W, datos, cantidad, 10);
+        datos_restantes_fifo = 0;
+        do{
+            //Me fijo si la FIFO se desbordo. En caso de que si reinicio el muestreo para no perder la alineacion
+            if(mpu6050_get_register(MPU6050_RA_INT_STATUS) & 0x10){
+                pr_info("Driver: FIFO desbordada\n");
+                //Reiniciar muestreo
+                mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x04);
+                mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x40);
+                datos_restantes_fifo = muestras_a_leer;
+            }
+
+            //Si faltan datos en la fifo espero a que se adquieran
+            if(datos_restantes_fifo > 0){
+                pr_info("Driver: Faltan %d datos", datos_restantes_fifo);
+                msleep(T_MUESTREO_MS * datos_restantes_fifo / 7);
+            }
+
+            //Leo la cantidad de datos en la fifo
+            cant_actual_fifo = mpu6050_get_fifo_count();
+            pr_info("Driver: La FIFO tiene %d bytes", cant_actual_fifo);
+            datos_restantes_fifo = muestras_a_leer - cant_actual_fifo;
+
+        }while(datos_restantes_fifo > 0);
+
+        
+        //Ahora ya estoy seguro de que la fifo tiene la cantidad necesaria de datos
+        muestras_leidas = i2c_read(MPU6050_ADDRESS, MPU6050_RA_FIFO_R_W, &datos[muestras_leidas_acumulado], muestras_a_leer, 10);
+        pr_info("Driver: Lei %d bytes", muestras_leidas);
+        muestras_restantes -= muestras_leidas;
+        muestras_leidas_acumulado += muestras_leidas;
+
+    }while(muestras_restantes > 0);
+
+    return muestras_leidas_acumulado;
 }

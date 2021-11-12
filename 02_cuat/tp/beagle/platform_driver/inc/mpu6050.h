@@ -38,4 +38,6 @@
 
 #define T_MUESTREO_MS               2
 
+#define LONGITUD_BLOQUE_MAXIMO  840 //Margen de seguridad para leer sin que desborde la FIFO
+
 #endif /*_MPU6050_H*/
