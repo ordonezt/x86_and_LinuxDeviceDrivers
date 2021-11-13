@@ -24,6 +24,8 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
 int media_q15(int16_t *resultado, int16_t datos[], int32_t longitud);
 int llenar_vector_datos_q15(t_list *lista, int16_t vector[], int longitud, int offset);
 void list_destruir_estado(sensor_datos_t *dato);
+int inicializar_recursos( int argc, char* argv[], int *sem_id, int *ventana_filtro, pid_t *pid_servidor, int *shm_id
+                        , sensor_t *sensor, char sensor_path[], t_list **lista_estados, datos_compartidos_t **mem_compartida);
 void liberar_recursos(pid_t pid_servidor, sensor_t *sensor, t_list *lista_estados);
 
 volatile sig_atomic_t salir, flag_cambio_config;
@@ -35,91 +37,23 @@ volatile sig_atomic_t salir, flag_cambio_config;
  */
 int main(int argc, char* argv[])
 {
-    signal_t sig_int, sig_usr2, sig_term;
     sensor_t sensor;
-    char *sensor_path = SENSOR_PATH;
     int sem_id, shm_id;
     datos_compartidos_t *mem_compartida;
     t_list *lista_estados;
     int ventana_filtro;
-    key_t llave;
     sensor_datos_t dato_filtrado;
     pid_t pid_servidor;
 
-    //TODO encapsular inicializacion
-    if(argc < 3){
-        printf("Ingrese los argumentos necesarios\n");
-        exit(1);
-    }
 
-    //Leo el set de semaforo de los argumentos
-    sem_id = atoi(argv[1]);
-
-    ventana_filtro = atoi(argv[2]);
-
-    pid_servidor = atoi(argv[3]);
-
-    //Creo la llave para los ipc
-    llave = ftok(CONFIG_PATH, 'T');
-    if(llave < 0){
-        perror("Creación de llave");
-        exit(1);
-    }
-    //Creo la memoria compartida
-    shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
-    if(shm_id < 0){
-        perror("crear_shmem");
-        exit(1);
-    }
-
-    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
-    salir = 0;
-    if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
-        perror("atrapar_signal");
-        exit(1);
-    }
-
-    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
-    salir = 0;
-    if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
-        perror("atrapar_signal");
-        exit(1);
-    }
-    
-    //Manejo de la señal sigusr2 (Avisa que hay que refrescar las configuraciones)
-    flag_cambio_config = 0;
-    if(atrapar_signal(&sig_usr2, sigusr2_handler, SIGUSR2)){
-        perror("atrapar_signal");
-        exit(1);
-    }
-
-    //Abro el sensor
-    if(abrir_sensor(&sensor, sensor_path) == -1)
-    {
-        perror("No se pudo abrir el sensor\n");
-        exit(1);
-    }
-
-    
-    //Creo una lista para guardar los estados anteriores del sensor 
-    //(y poder aplicar un filtro FIR)
-    lista_estados = list_create();
-
-    //Libero el semaforo
-    if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_FREE))
-    {
-        perror("control_semaforo");
+    if(inicializar_recursos(argc, argv, &sem_id, &ventana_filtro, &pid_servidor, &shm_id, &sensor, SENSOR_PATH, &lista_estados, &mem_compartida) == -1){
+        perror("inicializar_recursos");
         exit(1);
     }
 
     while(salir == false)
     {
 
-        /*
-            Puedo esperar el estado de un flag, total me quedo
-            esperando en otro lado y una señal me puede sacar
-            de la espera,  ahi me doy cuenta si cambiaron el flag
-        */
         if(flag_cambio_config){
             flag_cambio_config = 0;
             ventana_filtro = mem_compartida->ventana_filtro;
@@ -134,56 +68,31 @@ int main(int argc, char* argv[])
         }
         else
         {
-            // procesar_dato(lista_estados, &sensor.datos, &mem_compartida->datos_filtrados, ventana_filtro);
+            //Filtro el dato nuevo
             procesar_dato(lista_estados, &sensor.datos, &dato_filtrado, ventana_filtro);
-            // printf("Dato crudo %d\n", sensor.datos.accel.x);
-            // printf("Dato filtrado %d\n", mem_compartida->datos_filtrados.accel.x);
 
+            //Pido el semaforo
             if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_TAKE))
             {
                 perror("control_semaforo");
                 break;
             }
 
-            //memcpy(&mem_compartida->datos_filtrados, &sensor.datos, sizeof(sensor.datos));
+            //Guardo los datos en la memoria compartida
             memcpy(&mem_compartida->datos_filtrados, &dato_filtrado, sizeof(sensor.datos));
             memcpy(&mem_compartida->datos_crudos, &sensor.datos, sizeof(sensor.datos));
-
+            
+            //Libero el semaforo
             if(control_semaforo(sem_id, N_SEMAFORO_DATOS, SEM_FREE))
             {
                 perror("control_semaforo");
                 break;
             }
-            // printf("Solte el semaforo siendo productor\n");
-
-
-            // //Procesar
-            // printf("Aceleracion x: %d LSB\n", sensor.datos.accel.x);
-            // printf("Aceleracion y: %d LSB\n", sensor.datos.accel.y);
-            // printf("Aceleracion z: %d LSB\n", sensor.datos.accel.z);
-            // printf("Temp: %d\n", sensor.datos.temp);
-            // printf("Gyro x: %d\n", sensor.datos.gyro.x);
-            // printf("Gyro y: %d\n", sensor.datos.gyro.y);
-            // printf("Gyro z: %d\n", sensor.datos.gyro.z);
-
 
             usleep(10000);
         }
     }
 
-//TODO encapsular cierre
-    // printf("\nCerrando el sensor...............");
-    // if(cerrar_sensor(&sensor) == -1)
-    // {
-    //     perror("\nError cerrando el sensor\n");
-    //     exit(1);
-    // }
-    // else
-    //     printf("Listo\n");
-
-    // printf("Removiendo filtro................");
-    // list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
-    // printf("Listo\n");
     liberar_recursos(pid_servidor, &sensor, lista_estados);
 
     exit(0);
@@ -314,6 +223,85 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     return 0;
 }
 
+int inicializar_recursos(int argc, char* argv[], int *sem_id, int *ventana_filtro, pid_t *pid_servidor, int *shm_id, sensor_t *sensor, char sensor_path[], t_list **lista_estados, datos_compartidos_t **mem_compartida){
+    key_t llave;
+    signal_t sig_int, sig_usr2, sig_term;
+
+    if(argc < 3){
+        printf("Ingrese los argumentos necesarios\n");
+        return -1;
+    }
+
+    //Leo el set de semaforo de los argumentos
+    *sem_id = atoi(argv[1]);
+
+    *ventana_filtro = atoi(argv[2]);
+
+    *pid_servidor = atoi(argv[3]);
+
+    //Creo la llave para los ipc
+    llave = ftok(CONFIG_PATH, 'T');
+    if(llave < 0){
+        perror("Creación de llave");
+        return -1;
+    }
+
+    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
+    salir = 0;
+    if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    salir = 0;
+    if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
+        perror("atrapar_signal");
+        return -1;
+    }
+    
+    //Manejo de la señal sigusr2 (Avisa que hay que refrescar las configuraciones)
+    flag_cambio_config = 0;
+    if(atrapar_signal(&sig_usr2, sigusr2_handler, SIGUSR2)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Abro el sensor
+    if(abrir_sensor(sensor, sensor_path) == -1)
+    {
+        perror("No se pudo abrir el sensor\n");
+        return -1;
+    }
+
+    //Creo la memoria compartida
+    *shm_id = crear_shmem((void**)mem_compartida, llave, sizeof((*mem_compartida)[0]));
+    if(shm_id < 0){
+        perror("crear_shmem");
+        liberar_recursos(*pid_servidor, sensor, NULL);
+        return -1;
+    }
+    
+    //Creo una lista para guardar los estados anteriores del sensor 
+    //(y poder aplicar un filtro FIR)
+    *lista_estados = list_create();
+    if(lista_estados == NULL){
+        perror("list_create");
+        liberar_recursos(*pid_servidor, sensor, NULL);
+        return -1;
+    }
+
+    //Libero el semaforo
+    if(control_semaforo(*sem_id, N_SEMAFORO_DATOS, SEM_FREE))
+    {
+        perror("control_semaforo");
+        liberar_recursos(*pid_servidor, sensor, *lista_estados);
+        return -1;
+    }
+
+    return 0;
+}
+
 /**
  * @brief Libera los recursos utilizados
  * 
@@ -333,9 +321,11 @@ void liberar_recursos(pid_t pid_servidor, sensor_t *sensor, t_list *lista_estado
     else
         printf("Listo\n");
 
-    printf("Removiendo filtro................");
-    list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
-    printf("Listo\n");
+    if(lista_estados != NULL){
+        printf("Removiendo filtro................");
+        list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
+        printf("Listo\n");
+    }
 }
 
 /**

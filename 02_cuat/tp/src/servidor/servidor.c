@@ -67,15 +67,15 @@ int main(void)
     }
 
     while(salir == 0){
-        //printf("Soy el hilo principal [PID %d]\n", getpid());
+
+        //Me fijo si se pueden aceptar mas clientes
         if(list_size(lista_clientes) < config.cant_conex_maxima){
             socket_cliente = atender_conexion(socket_recepcion, &info_socket_cliente);
-            if(socket_cliente <= 0){
+
+            if(socket_cliente <= 0)
                 perror("atender_cliente");
-                //salir = 1;
-            }else{
+            else
                 crear_nuevo_cliente(lista_clientes, socket_cliente, sem_id, mem_compartida, &info_socket_cliente);
-            }
         }
         else
             printf("No atiendo mas clientes, espera!\n");
@@ -93,10 +93,10 @@ int main(void)
             }
         }
 
+        //Si expiro un cliente lo elimino de la lista
         if(cliente_expiro){
             cliente_expiro = 0;
             printf("%d cliente eliminado\n", eliminar_clientes_expirados(lista_clientes));
-            fflush(stdout);
         }
 
         sleep(1);
