@@ -47,15 +47,15 @@
 - [X] TP01.13  
 
 ## TP Integrador
-- [ ] Servidor  
+- [X] Servidor  
  <!-- **Comentarios:**
 	- Esto es un comentario
 	- Esto es otro <code>comentario</code> -->
-- [ ] Cliente  
+- [X] Cliente  
  <!-- **Comentarios:**
 	- Esto es un comentario
 	- Esto es otro <code>comentario</code> -->
-- [ ] Driver  
+- [X] Driver  
  <!-- **Comentarios:**
 	- Esto es un comentario
 	- Esto es otro <code>comentario</code> -->
