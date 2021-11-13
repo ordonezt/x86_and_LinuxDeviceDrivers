@@ -26,21 +26,20 @@
  enviar data repetida
  */
 
-/*
- TODO Hay un re bardo con el tema de la cantidad de bytes que envio y recibe el cliente.
- Si envio muy rapido lleno el buffer del cliente y los datos quedan recortados, haciendo
- que se desfase todo.
- Usar longitudes de trama fijas o usar dato de inicio y de fin de trama, si no se re complica.
- */
 #define control_semaforo_datos(id, accion)  control_semaforo((id), 0, (accion))
 
 void destruir_cliente(void *cliente);
 void* atender_cliente(void *datos_cliente);
 void sigint_handler(int sig);
+void sigterm_handler(int sig);
 void sigusr1_handler(int sig);
 void sigusr2_handler(int sig);
 int levantar_configuracion(srv_config_t *srv_config, char path[]);
 void destruir_configuracion(srv_config_t srv_config);
+int inicializar_recursos( int *sem_id           , srv_config_t *config
+                        , int *shm_id           , datos_compartidos_t **mem_compartida
+                        , pid_t *pid_productor  , int *socket_recepcion
+                        , t_list **lista_clientes, struct sockaddr_in *info_socket_recepcion);
 void liberar_recursos(    pid_t pid_productor   , srv_config_t config
                         , t_list *lista_clientes, int socket_recepcion
                         , int sem_id            , int shm_id
@@ -50,101 +49,22 @@ int crear_nuevo_cliente(  t_list *lista_clientes, int socket_cliente
                         , struct sockaddr_in *info_socket_cliente);
 int eliminar_clientes_expirados(t_list *lista);
 
-volatile sig_atomic_t salir, refrescar_config, cliente_expiro;
+volatile sig_atomic_t salir, refrescar_config, cliente_expiro, productor_cerrado;
 
 int main(void)
 {
     srv_config_t config;
     int socket_recepcion, socket_cliente;
     struct sockaddr_in info_socket_recepcion, info_socket_cliente;
-    signal_t sig_int, sig_usr1, sig_usr2, sig_term;
     pid_t pid_productor;
     t_list *lista_clientes;
     int sem_id, shm_id;
-    key_t llave;
     datos_compartidos_t *mem_compartida;
 
-//TODO encapsular inicializacion
-
-    //Creo la llave para los ipc
-    llave = ftok(CONFIG_PATH, 'T');
-    if(llave < 0){
-        perror("Creación de llave");
+    if(inicializar_recursos(&sem_id, &config, &shm_id, &mem_compartida, &pid_productor, &socket_recepcion, &lista_clientes, &info_socket_recepcion) == -1){
+        perror("inicializar_recursos");
         exit(EXIT_FAILURE);
     }
-
-    //Creo el set de semaforos
-    sem_id = crear_semaforo(CANTIDAD_SEMAFOROS, llave);
-
-/* +++++++++++SEÑALES++++++++++++ */
-    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
-    salir = 0;
-    if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
-        perror("atrapar_signal");
-        exit(EXIT_FAILURE);
-    }
-
-    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
-    if(atrapar_signal(&sig_term, sigint_handler, SIGTERM)){
-        perror("atrapar_signal");
-        exit(EXIT_FAILURE);
-    }
-
-    //Manejo de la señal sigusr1 (Avisa que un cliente cerro la conexion)
-    cliente_expiro = 0;
-    if(atrapar_signal(&sig_usr1, sigusr1_handler, SIGUSR1)){
-        perror("atrapar_signal");
-        exit(EXIT_FAILURE);
-    }
-
-    //Manejo de la señal sigusr2 (Avisa que hay que refrescar las configuraciones)
-    refrescar_config = 0;
-    if(atrapar_signal(&sig_usr2, sigusr2_handler, SIGUSR2)){
-        perror("atrapar_signal");
-        exit(EXIT_FAILURE);
-    }
-
-    //Ignoro la señal SIGCHLD para evitar tener que esperar a los hijos y complicarla
-    signal(SIGCHLD, SIG_IGN);
-/* +++++++++++FIN SEÑALES+++++++++++ */
-
-    //Leo el archivo de configuracion
-    config.config = NULL;
-    levantar_configuracion(&config, CONFIG_PATH);
-    
-    //Creo la memoria compartida y la inicializo
-    shm_id = crear_shmem((void**)&mem_compartida, llave, sizeof(mem_compartida[0]));
-    if(shm_id < 0){
-        perror("crear_shmem");
-        exit(EXIT_FAILURE);
-    }
-    mem_compartida->ventana_filtro = config.ventana_filtro;
-
-    //Creo el proceso del sensor
-    pid_productor = fork();
-    if(pid_productor == -1){
-        perror("fork");
-        exit(EXIT_FAILURE);
-    }else if(pid_productor == 0)
-        execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE                     //argv[0]
-                                , string_itoa(sem_id)                   //argv[1]
-                                , string_itoa(config.ventana_filtro)    //argv[2]
-                                , NULL);
-
-    //Levanto el servidor
-    socket_recepcion = crear_servidor(config.puerto, &info_socket_recepcion, config.backlog);
-    if(socket_recepcion == -1){
-        perror("crear_servidor");
-        salir = 1;
-    }
-
-    //Preparo la lista de clientes
-    lista_clientes = list_create();
-    
-    printf("[PID %d]\tServidor creado con exito\n", getpid());
-    printf("\t\tCantidad maxima de conexiones: %d\n", config.cant_conex_maxima);
-    printf("\t\tBacklog: %d\n", config.backlog);
-    printf("\t\tVentana del filtro: %d\n", config.ventana_filtro);
 
     while(salir == 0){
         //printf("Soy el hilo principal [PID %d]\n", getpid());
@@ -249,6 +169,128 @@ int eliminar_clientes_expirados(t_list *lista){
 }
 
 /**
+ * @brief Inicializa todos los recursos del servidor
+ * 
+ * @param sem_id Id del semaforo creado
+ * @param config Estructura de configuracion a rellenar
+ * @param shm_id Id de la memoria compartida creada
+ * @param mem_compartida Memoria compartida creada
+ * @param pid_productor Pid del productor de datos creado
+ * @param socket_recepcion Id del socket creado
+ * @param lista_clientes Lista de clientes creada
+ * @param info_socket_recepcion Estructura de informacion del socket creado
+ * @return int 0 exito, -1 error
+ */
+int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_compartidos_t **mem_compartida, pid_t *pid_productor, int *socket_recepcion, t_list **lista_clientes, struct sockaddr_in *info_socket_recepcion){
+    key_t llave;
+    signal_t sig_int, sig_usr1, sig_usr2, sig_term;
+
+/* +++++++++++SEÑALES++++++++++++ */
+    //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
+    salir = 0;
+    if(atrapar_signal(&sig_int, sigint_handler, SIGINT)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
+    productor_cerrado = 0;
+    if(atrapar_signal(&sig_term, sigterm_handler, SIGTERM)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Manejo de la señal sigusr1 (Avisa que un cliente cerro la conexion)
+    cliente_expiro = 0;
+    if(atrapar_signal(&sig_usr1, sigusr1_handler, SIGUSR1)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Manejo de la señal sigusr2 (Avisa que hay que refrescar las configuraciones)
+    refrescar_config = 0;
+    if(atrapar_signal(&sig_usr2, sigusr2_handler, SIGUSR2)){
+        perror("atrapar_signal");
+        return -1;
+    }
+
+    //Ignoro la señal SIGCHLD para evitar tener que esperar a los hijos y complicarla
+    signal(SIGCHLD, SIG_IGN);
+
+    printf("Señales listas\n");
+/* +++++++++++FIN SEÑALES+++++++++++ */
+
+    //Creo la llave para los ipc
+    llave = ftok(CONFIG_PATH, 'T');
+    if(llave < 0){
+        perror("Creación de llave");
+        return -1;
+    }
+    printf("Llave lista\n");
+
+    //Leo el archivo de configuracion
+    config->config = NULL;
+    levantar_configuracion(config, CONFIG_PATH);
+    printf("Configuracion lista\n");
+
+    //Creo el set de semaforos
+    *sem_id = crear_semaforo(CANTIDAD_SEMAFOROS, llave);
+    if(*sem_id == -1){
+        perror("crear_semaforo");
+        liberar_recursos(0, *config, NULL, 0, *sem_id, 0, NULL);
+        return -1;
+    }
+    printf("Semaforos listos\n");
+    
+    //Creo la memoria compartida y la inicializo
+    *shm_id = crear_shmem((void**)mem_compartida, llave, sizeof((*mem_compartida)[0]));
+    if(*shm_id < 0){
+        perror("crear_shmem");
+        liberar_recursos(0, *config, NULL, 0, *sem_id, 0, NULL);
+        return -1;
+    }
+    (*mem_compartida)->ventana_filtro = config->ventana_filtro;
+    printf("Memoria compartida lista\n");
+
+    //Creo el proceso del sensor
+    *pid_productor = fork();
+    if(*pid_productor == -1){
+        perror("fork");
+        liberar_recursos(0, *config, NULL, 0, *sem_id, *shm_id, *mem_compartida);
+        return -1;
+    }else if(*pid_productor == 0)
+        execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE                     //argv[0]
+                                , string_itoa(*sem_id)                  //argv[1]
+                                , string_itoa(config->ventana_filtro)   //argv[2]
+                                , string_itoa(getppid())                //argv[3]
+                                , NULL);
+    printf("Productor listo [PID: %d]\n", *pid_productor);
+
+    //Levanto el servidor
+    *socket_recepcion = crear_servidor(config->puerto, info_socket_recepcion, config->backlog);
+    if(*socket_recepcion == -1){
+        perror("crear_servidor");
+        liberar_recursos(*pid_productor, *config, NULL, 0, *sem_id, *shm_id, *mem_compartida);
+        // salir = 1;
+        return -1;
+    }
+    printf("Socket listo\n");
+
+    //Preparo la lista de clientes
+    *lista_clientes = list_create();
+    if(*lista_clientes == NULL){
+        perror("list_create");
+        liberar_recursos(*pid_productor, *config, *lista_clientes, *socket_recepcion, *sem_id, *shm_id, *mem_compartida);
+        return -1;
+    }
+    printf("Lista de clientes lista\n");
+    
+    printf("[PID %d]\tServidor creado con exito\n", getpid());
+
+    return 0;
+}
+
+/**
  * @brief Libera todos los recursos del sistema.
  * 
  * @param pid_productor PID del proceso productor de datos.
@@ -276,7 +318,8 @@ void liberar_recursos(pid_t pid_productor, srv_config_t config, t_list *lista_cl
 
     if(pid_productor != 0){
         printf("Deteniendo proceso productor.....");
-        kill(pid_productor, SIGTERM);     //Le aviso al proceso productor que termine
+        if(productor_cerrado == 0)
+            kill(pid_productor, SIGTERM);     //Le aviso al proceso productor que termine
         waitpid(pid_productor, NULL, 0);
         printf("Listo\n");
     }
@@ -421,18 +464,8 @@ void* atender_cliente(void *datos_cliente)
             break;
         }
 
-        // printf("Acel X %d\n", datos.accel.x);
-        // printf("Acel Y %d\n", datos.accel.y);
-        // printf("Acel Z %d\n", datos.accel.z);
-        // printf("Temp %d\n", datos.temp);
-        // printf("Gyro X %d\n", datos.gyro.x);
-        // printf("Gyro Y %d\n", datos.gyro.y);
-        // printf("Gyro Z %d\n", datos.gyro.z);
-
         convertir_dato_fisico(&datos, &datos_fisicos_filtrados);
         convertir_dato_fisico(&dato_crudo, &datos_fisicos_crudos);
-
-        //memcpy(&datos_fisicos_crudos, &datos_fisicos_filtrados, sizeof(datos_fisicos_crudos));
 
         sprintf(buffer_aux  , "%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n%.5f\n"
                             , datos_fisicos_crudos.accel.x, datos_fisicos_crudos.accel.y, datos_fisicos_crudos.accel.z
@@ -441,16 +474,6 @@ void* atender_cliente(void *datos_cliente)
                             , datos_fisicos_filtrados.accel.x, datos_fisicos_filtrados.accel.y, datos_fisicos_filtrados.accel.z
                             , datos_fisicos_filtrados.gyro.x, datos_fisicos_filtrados.gyro.y, datos_fisicos_filtrados.gyro.z
                             , datos_fisicos_filtrados.temp);
-
-        // sprintf(buffer_aux  , "%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n"
-        //                     , datos.accel.x , datos.accel.y , datos.accel.z
-        //                     , datos.gyro.x  , datos.gyro.y  , datos.gyro.z
-        //                     , datos.temp);
-        // sprintf(buffer_aux   , "%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n%05d\n"
-        //     , 0 , 111       , 32767
-        //     , -1, -32000    , 2
-        //     , 3);
-        printf("Enviando %s", buffer_aux);
         
         //Timeout de TIMEOUT_CLIENTE_s segundos
         tv.tv_sec   = TIMEOUT_TX_CLIENTE_s;
@@ -460,7 +483,7 @@ void* atender_cliente(void *datos_cliente)
             self->terminar = 1;
             break;
         }
-        printf("enviando %d bytes\n", strlen(buffer_aux));
+
         if(send(socket_id, buffer_aux, strlen(buffer_aux), 0) == -1){
             perror("send");
             self->terminar = 1;
@@ -497,6 +520,19 @@ void destruir_cliente(void *cliente)
 void sigint_handler(int sig)
 {
     salir = 1;
+}
+
+/**
+ * @brief Handler de la señal SIGTERM.
+ * 
+ * Le avisa al programa principal que hay que cerrar todo debido a que el productor cerro.
+ * 
+ * @param sig 
+ */
+void sigterm_handler(int sig)
+{
+    salir = 1;
+    productor_cerrado = 1;
 }
 
 /**
@@ -575,6 +611,12 @@ int levantar_configuracion(srv_config_t *srv_config, char path[]){
     srv_config->ventana_filtro      = ventana_filtro;
     srv_config->puerto              = puerto;
     srv_config->config              = config;
+
+    printf("Configuracion:\n");
+    printf("\tBacklog: %d\n", backlog);
+    printf("\tCantidad maxima de clientes: %d\n", cant_conex_maxima);
+    printf("\tOrden del filtro: %d\n", ventana_filtro);
+    printf("\tPuerto: %d\n", puerto);
 
     return ret;
 }

@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <time.h>
 
-#define LARGO_DATOS     30
+#define LARGO_DATOS     10
 
 typedef struct{
     short int acc_x;
@@ -34,7 +34,10 @@ int main(void){
     // //write(file, datos, 1);
     // //ioctl(file, 40);
 
-    // read(file, raw_datos, LARGO_DATOS * sizeof(mpu_data));
+    printf("Lei %d datos\n", read(file, raw_datos, LARGO_DATOS * sizeof(mpu_data)));
+    for(int i = 0; i<LARGO_DATOS * sizeof(mpu_data); i++){
+        printf("%d,", raw_datos[i]);
+    }
 
     // printf("Termine de leer\n");
 
@@ -62,12 +65,14 @@ int main(void){
     //     printf("Giroscopio Z: %f º/s\n", (float)datos[i].gyro_z / 131);
     // }
 
-    for(int i = 0; i < 10000; i++){
-        read(file, raw_datos, sizeof(mpu_data));
-        formatear_datos(raw_datos, datos);
-        imprimir_datos(datos[0]);
-        sleep(0.2);
-    }
+    // for(int i = 0; i < 10000; i++){
+    //     read(file, raw_datos, sizeof(mpu_data));
+    //     formatear_datos(raw_datos, datos);
+    //     imprimir_datos(datos[0]);
+    //     sleep(0.2);
+    // }
+
+
 
     close(file);
     return 0;

@@ -24,6 +24,7 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
 int media_q15(int16_t *resultado, int16_t datos[], int32_t longitud);
 int llenar_vector_datos_q15(t_list *lista, int16_t vector[], int longitud, int offset);
 void list_destruir_estado(sensor_datos_t *dato);
+void liberar_recursos(pid_t pid_servidor, sensor_t *sensor, t_list *lista_estados);
 
 volatile sig_atomic_t salir, flag_cambio_config;
 
@@ -43,6 +44,7 @@ int main(int argc, char* argv[])
     int ventana_filtro;
     key_t llave;
     sensor_datos_t dato_filtrado;
+    pid_t pid_servidor;
 
     //TODO encapsular inicializacion
     if(argc < 3){
@@ -54,6 +56,8 @@ int main(int argc, char* argv[])
     sem_id = atoi(argv[1]);
 
     ventana_filtro = atoi(argv[2]);
+
+    pid_servidor = atoi(argv[3]);
 
     //Creo la llave para los ipc
     llave = ftok(CONFIG_PATH, 'T');
@@ -140,7 +144,6 @@ int main(int argc, char* argv[])
                 perror("control_semaforo");
                 break;
             }
-            printf("Tome el semaforo siendo productor\n");
 
             //memcpy(&mem_compartida->datos_filtrados, &sensor.datos, sizeof(sensor.datos));
             memcpy(&mem_compartida->datos_filtrados, &dato_filtrado, sizeof(sensor.datos));
@@ -169,18 +172,19 @@ int main(int argc, char* argv[])
     }
 
 //TODO encapsular cierre
-    printf("\nCerrando el sensor...............");
-    if(cerrar_sensor(&sensor) == -1)
-    {
-        perror("\nError cerrando el sensor\n");
-        exit(1);
-    }
-    else
-        printf("Listo\n");
+    // printf("\nCerrando el sensor...............");
+    // if(cerrar_sensor(&sensor) == -1)
+    // {
+    //     perror("\nError cerrando el sensor\n");
+    //     exit(1);
+    // }
+    // else
+    //     printf("Listo\n");
 
-    printf("Removiendo filtro................");
-    list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
-    printf("Listo\n");
+    // printf("Removiendo filtro................");
+    // list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
+    // printf("Listo\n");
+    liberar_recursos(pid_servidor, &sensor, lista_estados);
 
     exit(0);
 }
@@ -308,6 +312,30 @@ int procesar_dato(t_list *lista_estados, sensor_datos_t *dato_nuevo, sensor_dato
     
     free(vector_aux);
     return 0;
+}
+
+/**
+ * @brief Libera los recursos utilizados
+ * 
+ * @param sensor Puntero al sensor
+ * @param lista_estados Lista de estados del filtro
+ */
+void liberar_recursos(pid_t pid_servidor, sensor_t *sensor, t_list *lista_estados){
+
+    kill(pid_servidor, SIGTERM);     //Le aviso al proceso principal que termine
+
+    printf("\nCerrando el sensor...............");
+    if(cerrar_sensor(sensor) == -1)
+    {
+        perror("\nError cerrando el sensor\n");
+        exit(1);
+    }
+    else
+        printf("Listo\n");
+
+    printf("Removiendo filtro................");
+    list_destroy_and_destroy_elements(lista_estados, (void*)list_destruir_estado);
+    printf("Listo\n");
 }
 
 /**

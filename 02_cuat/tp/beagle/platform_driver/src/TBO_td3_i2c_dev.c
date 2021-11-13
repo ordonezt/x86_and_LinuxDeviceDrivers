@@ -179,7 +179,6 @@ static int __init i2c_init(void){
  * 
  */
 static void __exit i2c_exit(void){
-    //TODO El orden importa? los chicos lo hicieron distinto
     printk(KERN_INFO "Driver: Cerrando el char device\n");
 
     //Deslinkeo el platform driver
