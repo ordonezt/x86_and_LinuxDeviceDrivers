@@ -301,22 +301,75 @@ try:
 				# print('[ Cliente ]-$ [Filtered] Recibiendo gyro_zout: %s\t| %f' %(data_sensor[12],float(data_sensor[12])))
 				# print('[ Cliente ]-$ [Filtered] Recibiendo temp: %s\t| %f' %(data_sensor[13],float(data_sensor[13])))
 
+				try:
+					accel_x[-1] = float(data_sensor[0])
+				except:
+					accel_x[-1] = 0
 				
-				accel_x[-1] = float(data_sensor[0])
-				accel_y[-1] = float(data_sensor[1])
-				accel_z[-1] = float(data_sensor[2])
-				gyro_x[-1] = float(data_sensor[3])
-				gyro_y[-1] = float(data_sensor[4])
-				gyro_z[-1] = float(data_sensor[5])
-				temp[-1] = float(data_sensor[6])
+				try:
+					accel_y[-1] = float(data_sensor[1])
+				except:
+					accel_y[-1] = 0
+				
+				try:
+					accel_z[-1] = float(data_sensor[2])
+				except:
+					accel_z[-1] = 0
+				
+				try:
+					gyro_x[-1] = float(data_sensor[3])
+				except:
+					gyro_x[-1] = 0
+				
+				try:
+					gyro_y[-1] = float(data_sensor[4])
+				except:
+					gyro_y[-1] = 0
+				
+				try:
+					gyro_z[-1] = float(data_sensor[5])
+				except:
+					gyro_z[-1] = 0
+				
+				try:
+					temp[-1] = float(data_sensor[6])
+				except:
+					temp[-1] = 0
 
-				accel_xb[-1] = float(data_sensor[7])
-				accel_yb[-1] = float(data_sensor[8])
-				accel_zb[-1] = float(data_sensor[9])
-				gyro_xb[-1] = float(data_sensor[10])
-				gyro_yb[-1] = float(data_sensor[11])
-				gyro_zb[-1] = float(data_sensor[12])
-				tempb[-1] = float(data_sensor[13])
+				try:
+					accel_xb[-1] = float(data_sensor[7])
+				except:
+					accel_xb[-1] = 0
+				
+				try:
+					accel_yb[-1] = float(data_sensor[8])
+				except:
+					accel_yb[-1] = 0
+				
+				try:
+					accel_zb[-1] = float(data_sensor[9])
+				except:
+					accel_zb[-1] = 0
+				
+				try:
+					gyro_xb[-1] = float(data_sensor[10])
+				except:
+					gyro_xb[-1] = 0
+				
+				try:
+					gyro_yb[-1] = float(data_sensor[11])
+				except:
+					gyro_yb[-1] = 0
+				
+				try:
+					gyro_zb[-1] = float(data_sensor[12])
+				except:
+					gyro_zb[-1] = 0
+				
+				try:
+					tempb[-1] = float(data_sensor[13])
+				except:
+					tempb[-1] = 0
 
 				line1,line2,line3,line4,line5,line6,line7,line1b,line2b,line3b,line4b,line5b,line6b,line7b = real_time_plot(x_vec,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,temp,
 																															accel_xb,accel_yb,accel_zb,gyro_xb,gyro_yb,gyro_zb,tempb,
