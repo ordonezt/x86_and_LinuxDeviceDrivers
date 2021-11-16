@@ -237,7 +237,7 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
     *sem_id = crear_semaforo(CANTIDAD_SEMAFOROS, llave);
     if(*sem_id == -1){
         perror("crear_semaforo");
-        liberar_recursos(0, *config, NULL, 0, *sem_id, 0, NULL);
+        liberar_recursos(-1, *config, NULL, -1, *sem_id, -1, NULL);
         return -1;
     }
     printf("Semaforos listos\n");
@@ -246,7 +246,7 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
     *shm_id = crear_shmem((void**)mem_compartida, llave, sizeof((*mem_compartida)[0]));
     if(*shm_id < 0){
         perror("crear_shmem");
-        liberar_recursos(0, *config, NULL, 0, *sem_id, 0, NULL);
+        liberar_recursos(-1, *config, NULL, -1, *sem_id, -1, NULL);
         return -1;
     }
     (*mem_compartida)->ventana_filtro = config->ventana_filtro;
@@ -256,7 +256,7 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
     *pid_productor = fork();
     if(*pid_productor == -1){
         perror("fork");
-        liberar_recursos(0, *config, NULL, 0, *sem_id, *shm_id, *mem_compartida);
+        liberar_recursos(-1, *config, NULL, -1, *sem_id, *shm_id, *mem_compartida);
         return -1;
     }else if(*pid_productor == 0)
         execlp(SENSOR_EJECUTABLE, SENSOR_EJECUTABLE                     //argv[0]
@@ -270,7 +270,7 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
     *socket_recepcion = crear_servidor(config->puerto, info_socket_recepcion, config->backlog);
     if(*socket_recepcion == -1){
         perror("crear_servidor");
-        liberar_recursos(*pid_productor, *config, NULL, 0, *sem_id, *shm_id, *mem_compartida);
+        liberar_recursos(*pid_productor, *config, NULL, -1, *sem_id, *shm_id, *mem_compartida);
         // salir = 1;
         return -1;
     }
@@ -316,7 +316,7 @@ void liberar_recursos(pid_t pid_productor, srv_config_t config, t_list *lista_cl
         printf("Listo\n");
     }
 
-    if(pid_productor != 0){
+    if(pid_productor != -1){
         printf("Deteniendo proceso productor.....");
         if(productor_cerrado == 0)
             kill(pid_productor, SIGTERM);     //Le aviso al proceso productor que termine
@@ -324,19 +324,19 @@ void liberar_recursos(pid_t pid_productor, srv_config_t config, t_list *lista_cl
         printf("Listo\n");
     }
 
-    if(socket_recepcion != 0){
+    if(socket_recepcion != -1){
         printf("Cerrando el servidor.............");
         cerrar_servidor(socket_recepcion);
         printf("Listo\n");
     }
 
-    if(sem_id != 0){
+    if(sem_id != -1){
         printf("Borrando el set de semaforos.....");
         destruir_semaforo(sem_id);
         printf("Listo\n");
     }
 
-    if(shm_id != 0){
+    if(shm_id != -1){
         printf("Borrando la memoria compartida...");
         destruir_shmem(shm_id, mem_cmp);
         printf("Listo\n");
