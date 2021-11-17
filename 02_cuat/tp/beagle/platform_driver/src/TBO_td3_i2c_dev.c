@@ -34,7 +34,7 @@ static int i2c_probe(struct platform_device * i2c_pd);
 static int i2c_remove(struct platform_device * i2c_pd);
 
 int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout);
-uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, uint32_t timeout);
+int i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, uint32_t timeout);
 
 int mpu6050_init(void);
 int mpu6050_set_register(uint8_t registro, uint8_t valor);
@@ -520,9 +520,9 @@ int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout)
  * @param data Direccion para alojar la lectura
  * @param count Cantidad de datos a leer
  * @param timeout Tiempo maximo de espera en ms que se espera que se libere el bus.
- * @return uint16_t Cantidad de datos leidos
+ * @return int Cantidad de datos leidos
  */
-uint16_t i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, uint32_t timeout){
+int i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, uint32_t timeout){
     uint32_t timeout_aux = 0;
     /*
         I2C Read
@@ -697,7 +697,7 @@ int mpu6050_set_register(uint8_t registro, uint8_t valor){
  */
 int mpu6050_get_register(uint8_t registro){
     uint8_t valor;
-
+    
     if(i2c_read(MPU6050_ADDRESS, registro, &valor, 1, 10) != 1)
         return -1;
     else
@@ -707,15 +707,22 @@ int mpu6050_get_register(uint8_t registro){
 /**
  * @brief Devuelve la cantidad de datos alojados en la FIFO
  * 
- * @return int Cantidad de bytes almacenados
+ * @return int Cantidad de bytes almacenados, -1 error
  */
 int mpu6050_get_fifo_count(void){
-    int aux;
+    int aux1, aux2;
     
-    aux = mpu6050_get_register(MPU6050_RA_FIFO_COUNTH) << 8;
-    aux |= mpu6050_get_register(MPU6050_RA_FIFO_COUNTL);
+    aux1 = mpu6050_get_register(MPU6050_RA_FIFO_COUNTH);
+    if(aux1 == -1){
+        return -1;
+    }
 
-    return aux;
+    aux2 = mpu6050_get_register(MPU6050_RA_FIFO_COUNTL);
+    if(aux2 == -1){
+        return -1;
+    }
+
+    return (aux1 << 8) | aux2;
 }
 
 /**
@@ -726,46 +733,73 @@ int mpu6050_get_fifo_count(void){
  * @return int Cantidad de bytes leidos
  */
 int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad){
-    int muestras_restantes, muestras_leidas_acumulado, paginas_a_leer, muestras_a_leer, muestras_leidas, datos_restantes_fifo, cant_actual_fifo;
-
-    muestras_leidas_acumulado = 0;
+    sensor_read_estados estado = SRE_LEER;
+    int espera_muestras, cant_actual_fifo, datos_restantes_fifo, muestras_leidas_parcial, muestras_leidas_total, muestras_restantes, muestras_a_leer, aux;
+    
+    muestras_leidas_total = 0;
     muestras_restantes = cantidad;
-    do{
-        paginas_a_leer = muestras_restantes / LONGITUD_BLOQUE_MAXIMO;
-        muestras_a_leer = paginas_a_leer > 0 ? LONGITUD_BLOQUE_MAXIMO : muestras_restantes;
+    while(muestras_leidas_total < cantidad){
+        switch(estado){
+            case SRE_LEER:
+                muestras_a_leer = muestras_restantes > LONGITUD_BLOQUE_MAXIMO ? LONGITUD_BLOQUE_MAXIMO : muestras_restantes;
+                //Me fijo si la FIFO se desbordo. En caso de que si reinicio el muestreo para no perder la alineacion
+                aux = mpu6050_get_register(MPU6050_RA_INT_STATUS);
+                if(aux == -1){
+                    pr_err("Driver: Error escribiendo leyendo registro\n");
+                    return -1;
+                }
+                if(aux & 0x10){
+                    pr_info("Driver: FIFO desbordada\n");
+                    //Reiniciar muestreo
+                    if(mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x04)){
+                        pr_err("Driver: Error escribiendo registro\n");
+                        return 0;
+                    }
+                    if(mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x40)){
+                        pr_err("Driver: Error escribiendo registro\n");
+                        return 0;
+                    }
+                    espera_muestras = muestras_a_leer;
+                    estado = SRE_ESPERAR;
+                } else{
+                    //Leo la cantidad de datos en la fifo
+                    cant_actual_fifo = mpu6050_get_fifo_count();
+                    if(cant_actual_fifo == -1){
+                        pr_err("Driver: Error leyedo FIFO COUNT\n");
+                        return 0;
+                    }
+                    pr_info("Driver: La FIFO tiene %d bytes", cant_actual_fifo);
+                    datos_restantes_fifo = muestras_a_leer - cant_actual_fifo;
 
-        datos_restantes_fifo = 0;
-        do{
-            //Me fijo si la FIFO se desbordo. En caso de que si reinicio el muestreo para no perder la alineacion
-            if(mpu6050_get_register(MPU6050_RA_INT_STATUS) & 0x10){
-                pr_info("Driver: FIFO desbordada\n");
-                //Reiniciar muestreo
-                mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x04);
-                mpu6050_set_register(MPU6050_RA_USER_CTRL, 0x40);
-                datos_restantes_fifo = muestras_a_leer;
-            }
+                    if(datos_restantes_fifo > 0){
+                        espera_muestras = datos_restantes_fifo;
+                        estado = SRE_ESPERAR;
+                    }else{
+                        //Ahora ya estoy seguro de que la fifo tiene la cantidad necesaria de datos
+                        muestras_leidas_parcial = i2c_read(MPU6050_ADDRESS, MPU6050_RA_FIFO_R_W, &datos[muestras_leidas_total], muestras_a_leer, 10);
+                        if(muestras_leidas_parcial == -1){
+                            pr_err("Driver: Error leyendo la FIFO\n");
+                            return 0;
+                        }
+                        pr_info("Driver: Lei %d bytes", muestras_leidas_parcial);
+                        muestras_restantes -= muestras_leidas_parcial;
+                        muestras_leidas_total += muestras_leidas_parcial;
+                    }
+                }
+            break;
+            case SRE_ESPERAR:
+                //Si faltan datos en la fifo espero a que se adquieran
+                if(espera_muestras > 0){
+                    pr_info("Driver: Esperando %d datos", espera_muestras);
+                    msleep(T_MUESTREO_MS * espera_muestras / 7);
+                }
+                estado = SRE_LEER;
+            break;
+            default:
+                estado = SRE_LEER;
+            break;
+        }
+    }
 
-            //Si faltan datos en la fifo espero a que se adquieran
-            if(datos_restantes_fifo > 0){
-                pr_info("Driver: Faltan %d datos", datos_restantes_fifo);
-                msleep(T_MUESTREO_MS * datos_restantes_fifo / 7);
-            }
-
-            //Leo la cantidad de datos en la fifo
-            cant_actual_fifo = mpu6050_get_fifo_count();
-            pr_info("Driver: La FIFO tiene %d bytes", cant_actual_fifo);
-            datos_restantes_fifo = muestras_a_leer - cant_actual_fifo;
-
-        }while(datos_restantes_fifo > 0);
-
-        
-        //Ahora ya estoy seguro de que la fifo tiene la cantidad necesaria de datos
-        muestras_leidas = i2c_read(MPU6050_ADDRESS, MPU6050_RA_FIFO_R_W, &datos[muestras_leidas_acumulado], muestras_a_leer, 10);
-        pr_info("Driver: Lei %d bytes", muestras_leidas);
-        muestras_restantes -= muestras_leidas;
-        muestras_leidas_acumulado += muestras_leidas;
-
-    }while(muestras_restantes > 0);
-
-    return muestras_leidas_acumulado;
+    return muestras_leidas_total;
 }
