@@ -1,0 +1,7 @@
+Correcciones de la primera entrega:
+    -> Señal SIGCHLD:
+        Atrapar la señal sigchld en el servidor por si el productor se muere inesperadamente.
+    -> Agregar access_ok en read del sensor:
+        Falta la verificacion de si el puntero del usuario es una direccion valida.
+    -> Bajar consumo del proceso productor:
+        Poner un sleep mas grande en su lazo principal.

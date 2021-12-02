@@ -9,8 +9,22 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+import matplotlib
 
-dummy_os = os.system("clear")
+matplotlib.use("Qt5agg")
+
+def mypause(interval):
+    backend = plt.rcParams['backend']
+    if backend in matplotlib.rcsetup.interactive_bk:
+        figManager = matplotlib._pylab_helpers.Gcf.get_active()
+        if figManager is not None:
+            canvas = figManager.canvas
+            if canvas.figure.stale:
+                canvas.draw()
+            canvas.start_event_loop(interval)
+            return
+
+#dummy_os = os.system("clear")
 	
 
 client_socket_tcp = 0
@@ -190,7 +204,8 @@ def real_time_plot(x_vec,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,temp,
 	if np.min(tempb)<=line7b.axes.get_ylim()[0] or np.max(tempb)>=line7b.axes.get_ylim()[1]:
 		ax_7.set_ylim([np.min(tempb)-np.std(tempb),np.max(tempb)+np.std(tempb)])
 
-	plt.pause(pause_time)
+	#plt.pause(pause_time)
+	mypause(pause_time)
 
 
     # Vuelven los objetos para poder actualizarlos después
