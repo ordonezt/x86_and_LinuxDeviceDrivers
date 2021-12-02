@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            usleep(10000);
+            usleep(100000);
         }
     }
 
@@ -309,8 +309,6 @@ int inicializar_recursos(int argc, char* argv[], int *sem_id, int *ventana_filtr
  * @param lista_estados Lista de estados del filtro
  */
 void liberar_recursos(pid_t pid_servidor, sensor_t *sensor, t_list *lista_estados){
-
-    kill(pid_servidor, SIGTERM);     //Le aviso al proceso principal que termine
 
     printf("\nCerrando el sensor...............");
     if(cerrar_sensor(sensor) == -1)
