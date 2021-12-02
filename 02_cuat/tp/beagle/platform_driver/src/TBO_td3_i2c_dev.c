@@ -410,19 +410,22 @@ static ssize_t sensor_read(struct file *flip, char __user *buf, size_t count, lo
 
     printk(KERN_INFO "Pase por read\n");
 
-    //Reservamos espacio de kernel para los datos
-    datos = (uint8_t *)kmalloc(count,GFP_KERNEL);
+    if(access_ok( VERIFY_WRITE, buf, count)){
+        //Reservamos espacio de kernel para los datos
+        datos = (uint8_t *)kmalloc(count,GFP_KERNEL);
 
-    //Leemos el sensor
-    cant_leida = mpu6050_leer_fifo(datos, count);
+        //Leemos el sensor
+        cant_leida = mpu6050_leer_fifo(datos, count);
 
-    //Copiamos los datos al usuario
-    cant_no_copiada = copy_to_user(buf, datos, cant_leida);
+        //Copiamos los datos al usuario
+        cant_no_copiada = copy_to_user(buf, datos, cant_leida);
 
-    //Liberamos la memoria pedida
-    kfree(datos);
+        //Liberamos la memoria pedida
+        kfree(datos);
 
-    return cant_leida - cant_no_copiada;
+        return cant_leida - cant_no_copiada;
+    } else
+        return 0;
 }
 
 /**
@@ -502,11 +505,7 @@ int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout)
     iowrite32(0x8603, I2C2_Base + I2C_CON);
 
     //Espero que se complete la transmision
-    if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
-        wake_up = 0;
-        pr_err("Driver: Error en la espera de transmision\n");
-        return count - ioread32(I2C2_Base + I2C_CNT);
-    }
+    wait_event(wake_up_queue, wake_up > 0);
     wake_up = 0;
 
     return count;
@@ -562,11 +561,7 @@ int i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, u
     iowrite32(0x8601, I2C2_Base + I2C_CON);
 
     //Espero que se complete la transmision
-    if(wait_event_interruptible(wake_up_queue, wake_up > 0) < 0){
-        wake_up = 0;
-        pr_err("Driver: Error en la espera de transmision\n");
-        return -1;
-    }
+    wait_event(wake_up_queue, wake_up > 0);
     wake_up = 0;
 
     //Habilitamos la interrupcion por recepcion (para poder ir guardando los datos leidos)
@@ -633,7 +628,7 @@ irqreturn_t I2C_IRQ_Handler(int IRQ, void *ID, struct pt_regs *REG){
 
         //Despierto el programa
         wake_up = 1;
-        wake_up_interruptible(&wake_up_queue);
+        wake_up(&wake_up_queue);
 
         return IRQ_HANDLED;
     }
