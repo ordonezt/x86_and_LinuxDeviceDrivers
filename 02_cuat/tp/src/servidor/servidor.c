@@ -34,6 +34,7 @@ void sigint_handler(int sig);
 void sigterm_handler(int sig);
 void sigusr1_handler(int sig);
 void sigusr2_handler(int sig);
+void sigchld_handler(int sig);
 int levantar_configuracion(srv_config_t *srv_config, char path[]);
 void destruir_configuracion(srv_config_t srv_config);
 int inicializar_recursos( int *sem_id           , srv_config_t *config
@@ -183,7 +184,7 @@ int eliminar_clientes_expirados(t_list *lista){
  */
 int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_compartidos_t **mem_compartida, pid_t *pid_productor, int *socket_recepcion, t_list **lista_clientes, struct sockaddr_in *info_socket_recepcion){
     key_t llave;
-    signal_t sig_int, sig_usr1, sig_usr2, sig_term;
+    signal_t sig_int, sig_usr1, sig_usr2, sig_term, sig_chld;
 
 /* +++++++++++SEÑALES++++++++++++ */
     //Manejo de la señal sigint (Le avisa al programa principal que hay que cerrar todo)
@@ -194,7 +195,6 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
     }
 
     //Manejo de la señal sigterm (Le avisa al programa principal que hay que cerrar todo)
-    productor_cerrado = 0;
     if(atrapar_signal(&sig_term, sigterm_handler, SIGTERM)){
         perror("atrapar_signal");
         return -1;
@@ -214,8 +214,12 @@ int inicializar_recursos(int *sem_id, srv_config_t *config, int *shm_id, datos_c
         return -1;
     }
 
-    //Ignoro la señal SIGCHLD para evitar tener que esperar a los hijos y complicarla
-    signal(SIGCHLD, SIG_IGN);
+    //Manejo de la señal sigchld (Avisa que hay que murio el productor)
+    productor_cerrado = 0;
+    if(atrapar_signal(&sig_chld, sigchld_handler, SIGCHLD)){
+        perror("atrapar_signal");
+        return -1;
+    }
 
     printf("Señales listas\n");
 /* +++++++++++FIN SEÑALES+++++++++++ */
@@ -525,14 +529,13 @@ void sigint_handler(int sig)
 /**
  * @brief Handler de la señal SIGTERM.
  * 
- * Le avisa al programa principal que hay que cerrar todo debido a que el productor cerro.
+ * Le avisa al programa principal que hay que cerrar todo.
  * 
  * @param sig 
  */
 void sigterm_handler(int sig)
 {
     salir = 1;
-    productor_cerrado = 1;
 }
 
 /**
@@ -553,6 +556,18 @@ void sigusr1_handler(int sig){
  */
 void sigusr2_handler(int sig){
     refrescar_config = 1;
+}
+
+/**
+ * @brief Handler de la señal SIGCHLD
+ * 
+ * Le avisa al programa principal que cerraron el productor
+ * @param sig 
+ */
+void sigchld_handler(int sig){
+    salir = 1;
+    productor_cerrado = 1;
+    printf("\n\nSIGCHLD\n\n");
 }
 
 /**
