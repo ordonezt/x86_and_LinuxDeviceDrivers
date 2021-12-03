@@ -567,7 +567,6 @@ void sigusr2_handler(int sig){
 void sigchld_handler(int sig){
     salir = 1;
     productor_cerrado = 1;
-    printf("\n\nSIGCHLD\n\n");
 }
 
 /**

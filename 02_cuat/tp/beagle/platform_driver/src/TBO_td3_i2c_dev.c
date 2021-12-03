@@ -37,6 +37,7 @@ int i2c_write(uint8_t address, uint8_t data[], uint16_t count, uint32_t timeout)
 int i2c_read(uint8_t address, uint8_t comando, uint8_t data[], uint16_t count, uint32_t timeout);
 
 int mpu6050_init(void);
+int mpu6050_reset(void);
 int mpu6050_set_register(uint8_t registro, uint8_t valor);
 int mpu6050_get_register(uint8_t registro);
 int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad);
@@ -392,6 +393,7 @@ static int sensor_open(struct inode *node, struct file *f){
  */
 static int sensor_release(struct inode *node, struct file *f){
     printk(KERN_INFO "Pase por close\n");
+    mpu6050_reset();
     return 0;
 }
 
@@ -645,11 +647,15 @@ int mpu6050_init(void){
     //Reset
     if(mpu6050_set_register(MPU6050_RA_PWR_MGMT_1, 1<<7))
         return -1;
-    
+   
+    msleep(10);
+
     //Salimos del sleep
     if(mpu6050_set_register(MPU6050_RA_PWR_MGMT_1, 1))
         return -1;
     
+    msleep(10);
+ 
     //Frecuencia de muestreo 200Hz
     if(mpu6050_set_register(MPU6050_RA_CONFIG, 3))
         return -1;
@@ -797,4 +803,13 @@ int mpu6050_leer_fifo(uint8_t datos[], uint16_t cantidad){
     }
 
     return muestras_leidas_total;
+}
+
+/**
+ * @brief Resetea el sensor
+ * 
+ * @return int 0 exito, -1 error
+ */
+int mpu6050_reset(void){
+    return mpu6050_set_register(MPU6050_RA_PWR_MGMT_1, 1<<7);
 }
